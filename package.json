@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "lint:md": "markdownlint-cli2 \"**/*.md\"",
+    "fix:md": "markdownlint-cli2 --fix \"**/*.md\"",
+    "format:md": "prettier --write \"**/*.md\"",
+    "fix:md040": "find . -name '*.md' -not -path './node_modules/*' -exec sed -i '' 's/^```$/```text/' {} +"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.22.0",
+    "prettier": "^3.8.1"
+  }
+}
