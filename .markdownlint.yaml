@@ -1,2 +1,3 @@
 # markdownlint 규칙 설정
+MD013: false
 MD060: false
