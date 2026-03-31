@@ -18,7 +18,7 @@
 
 ## 🗺️ 전체 학습 로드맵
 
-```
+```text
 [1단계] 설치 & 기본 조작
     │
     ▼
@@ -32,7 +32,7 @@
     │
     ▼
 [5단계] 아키텍처 이해 & 나만의 에이전트 제작
-```
+```text
 
 ---
 
@@ -45,7 +45,7 @@ curl -fsSL https://opencode.ai/install | bash
 # 2. 프로젝트 디렉터리에서 실행
 cd your-project
 opencode
-```
+```text
 
 ---
 
