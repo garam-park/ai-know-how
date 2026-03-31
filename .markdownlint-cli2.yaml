@@ -1,0 +1,4 @@
+# markdownlint-cli2 설정
+ignores:
+  - node_modules/**
+  - .claude/**
