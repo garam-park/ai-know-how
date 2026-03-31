@@ -1,3 +1,4 @@
 # markdownlint 규칙 설정
 MD013: false
+MD051: false # 한글 heading anchor를 올바르게 매칭하지 못하는 문제
 MD060: false
