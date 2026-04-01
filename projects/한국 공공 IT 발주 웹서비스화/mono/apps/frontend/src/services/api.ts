@@ -13,21 +13,16 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private getToken(): string | null {
-    return localStorage.getItem('accessToken');
-  }
-
   private async request<T>(path: string, options: RequestInit = {}): Promise<APIResponse<T>> {
-    const token = this.getToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers as Record<string, string> ?? {}),
     };
 
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     const data = await response.json();
@@ -36,8 +31,11 @@ class ApiClient {
     if (response.status === 401 && data.code === 401001) {
       const refreshed = await this.refreshToken();
       if (refreshed) {
-        headers.Authorization = `Bearer ${this.getToken()}`;
-        const retryResponse = await fetch(`${this.baseUrl}${path}`, { ...options, headers });
+        const retryResponse = await fetch(`${this.baseUrl}${path}`, {
+          ...options,
+          headers,
+          credentials: 'include',
+        });
         return retryResponse.json();
       }
     }
@@ -50,26 +48,18 @@ class ApiClient {
   }
 
   private async refreshToken(): Promise<boolean> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) return false;
-
     try {
       const response = await fetch(`${this.baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         window.location.href = '/login';
         return false;
       }
 
-      const data = await response.json();
-      localStorage.setItem('accessToken', data.result.accessToken);
-      localStorage.setItem('refreshToken', data.result.refreshToken);
       return true;
     } catch {
       return false;

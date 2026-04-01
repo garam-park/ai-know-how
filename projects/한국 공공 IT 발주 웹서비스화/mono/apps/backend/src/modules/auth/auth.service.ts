@@ -1,13 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateUserDto, LoginDto, RefreshDto } from './dto';
+import { CreateUserDto, LoginDto } from './dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 
 @Injectable()
@@ -74,10 +70,10 @@ export class AuthService {
   }
 
   // ── 토큰 갱신 ──────────────────────────────────────────
-  async refresh(dto: RefreshDto) {
+  async refresh(refreshToken: string) {
     let payload: JwtPayload;
     try {
-      payload = this.jwtService.verify<JwtPayload>(dto.refreshToken, {
+      payload = this.jwtService.verify<JwtPayload>(refreshToken, {
         secret: this.configService.get<string>('JWT_SECRET', 'dev-secret-key'),
       });
     } catch {
