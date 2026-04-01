@@ -20,17 +20,21 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: CreateUserDto) {
+  async register(@Body() dto: CreateUserDto): Promise<unknown> {
     return this.authService.register(dto);
   }
 
   @Post('login')
   @HttpCode(200)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     const response = await this.authService.login(dto);
 
     res.cookie('accessToken', response.result.accessToken, this.getCookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', response.result.refreshToken, this.getCookieOptions(7 * 24 * 60 * 60 * 1000));
+    res.cookie(
+      'refreshToken',
+      response.result.refreshToken,
+      this.getCookieOptions(7 * 24 * 60 * 60 * 1000)
+    );
 
     return {
       code: response.code,
@@ -42,12 +46,16 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(200)
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<unknown> {
     const refreshToken = req.cookies?.refreshToken as string | undefined;
     const response = await this.authService.refresh(refreshToken ?? '');
 
     res.cookie('accessToken', response.result.accessToken, this.getCookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', response.result.refreshToken, this.getCookieOptions(7 * 24 * 60 * 60 * 1000));
+    res.cookie(
+      'refreshToken',
+      response.result.refreshToken,
+      this.getCookieOptions(7 * 24 * 60 * 60 * 1000)
+    );
 
     return {
       code: response.code,
@@ -60,7 +68,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Res({ passthrough: true }) res: Response): Promise<unknown> {
     res.clearCookie('accessToken', this.getCookieOptions(0));
     res.clearCookie('refreshToken', this.getCookieOptions(0));
     return this.authService.logout();
@@ -68,7 +76,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getMe(@CurrentUser() user: { id: number }) {
+  async getMe(@CurrentUser() user: { id: number }): Promise<unknown> {
     return this.authService.getMe(user.id);
   }
 }
