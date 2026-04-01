@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
+import EmptyState from '../components/EmptyState';
+import { useToast } from '../contexts/ToastContext';
 
 interface CompanyNode {
   id: number;
@@ -31,20 +33,38 @@ function CompanyTree({ node, depth = 0 }: { node: CompanyNode; depth?: number })
 
 export default function CompaniesTab() {
   const { projectId } = useParams();
-  const [companies, setCompanies] = useState<CompanyNode[]>([]);
+  const { addToast } = useToast();
 
-  useEffect(() => {
-    if (!projectId) return;
-    api.get<{ companies: CompanyNode[] }>(`/projects/${projectId}/companies`)
-      .then((res) => setCompanies(res.result.companies))
-      .catch(() => {});
-  }, [projectId]);
+  const { data, isLoading } = useQuery({
+    queryKey: ['projects', projectId, 'companies'],
+    queryFn: () => api.get<{ companies: CompanyNode[] }>(`/projects/${projectId}/companies`),
+    enabled: !!projectId,
+  });
+
+  const companies = data?.result.companies ?? [];
 
   return (
     <div>
-      <h2 style={{ fontSize: 20, marginBottom: 16 }}>컨소시엄 구조</h2>
-      {companies.length === 0 ? (
-        <p style={{ color: '#718096' }}>등록된 컨소시엄사가 없습니다.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: 20, margin: 0 }}>컨소시엄 구조</h2>
+      </div>
+      
+      {isLoading ? (
+        <div>로딩 중...</div>
+      ) : companies.length === 0 ? (
+        <EmptyState
+          icon="🏢"
+          title="등록된 참여사가 없습니다"
+          description="프로젝트에 참여할 회사를 추가하세요. 참여사를 추가해야 멤버를 초대할 수 있습니다."
+          action={
+            <button 
+              onClick={() => addToast('info', '컨소시엄사 추가 기능은 준비중입니다.')}
+              style={{ padding: '8px 16px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+            >
+              참여사 추가
+            </button>
+          }
+        />
       ) : (
         companies.map((c) => <CompanyTree key={c.id} node={c} />)
       )}

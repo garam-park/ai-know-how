@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
+import EmptyState from '../components/EmptyState';
+import { useToast } from '../contexts/ToastContext';
 
 interface Member {
   id: number;
@@ -12,14 +14,35 @@ interface Member {
 
 export default function MembersTab() {
   const { projectId } = useParams();
-  const [members, setMembers] = useState<Member[]>([]);
+  const { addToast } = useToast();
 
-  useEffect(() => {
-    if (!projectId) return;
-    api.get<{ members: Member[] }>(`/projects/${projectId}/members`)
-      .then((res) => setMembers(res.result.members))
-      .catch(() => {});
-  }, [projectId]);
+  const { data, isLoading } = useQuery({
+    queryKey: ['projects', projectId, 'members'],
+    queryFn: () => api.get<{ members: Member[] }>(`/projects/${projectId}/members`),
+    enabled: !!projectId,
+  });
+
+  const members = data?.result.members ?? [];
+
+  if (isLoading) return <div>로딩 중...</div>;
+
+  if (members.length === 0) {
+    return (
+      <EmptyState
+        icon="👥"
+        title="프로젝트 멤버가 없습니다"
+        description="이메일로 팀원을 초대하세요. 먼저 컨소시엄 탭에서 소속 회사를 등록해야 합니다."
+        action={
+          <button 
+            onClick={() => addToast('info', '멤버 초대 기능은 준비중입니다.')}
+            style={{ padding: '8px 16px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+          >
+            멤버 초대
+          </button>
+        }
+      />
+    );
+  }
 
   return (
     <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
@@ -40,16 +63,20 @@ export default function MembersTab() {
               <td style={{ padding: '10px 12px', color: '#718096' }}>{m.user.email}</td>
               <td style={{ padding: '10px 12px' }}>{m.projectCompany?.company?.name}</td>
               <td style={{ padding: '10px 12px' }}>{m.role?.name}</td>
-              <td style={{ padding: '10px 12px', textAlign: 'right', color: m.inputRate > 100 ? '#e53e3e' : 'inherit' }}>
+              <td style={{ 
+                padding: '10px 12px', 
+                textAlign: 'right', 
+                color: m.inputRate > 100 ? '#e53e3e' : 'inherit',
+                background: m.inputRate > 100 ? '#fff5f5' : 'transparent',
+                fontWeight: m.inputRate > 100 ? 600 : 400
+              }}>
+                {m.inputRate > 100 && <span title="다른 프로젝트 포함 총 투입률 과다">⚠️ </span>}
                 {m.inputRate}%
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {members.length === 0 && (
-        <div style={{ padding: 24, textAlign: 'center', color: '#718096' }}>멤버가 없습니다.</div>
-      )}
     </div>
   );
 }

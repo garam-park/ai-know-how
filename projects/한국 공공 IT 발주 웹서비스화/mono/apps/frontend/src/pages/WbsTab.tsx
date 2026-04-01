@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
+import EmptyState from '../components/EmptyState';
+import { useToast } from '../contexts/ToastContext';
 
 interface WbsNode {
   id: number;
@@ -45,18 +48,17 @@ function WbsTreeItem({ node }: { node: WbsNode }) {
 
 export default function WbsTab() {
   const { projectId } = useParams();
-  const [nodes, setNodes] = useState<WbsNode[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { addToast } = useToast();
 
-  useEffect(() => {
-    if (!projectId) return;
-    api.get<{ nodes: WbsNode[] }>(`/projects/${projectId}/wbs-nodes`)
-      .then((res) => setNodes(res.result.nodes))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [projectId]);
+  const { data, isLoading } = useQuery({
+    queryKey: ['projects', projectId, 'wbs-nodes'],
+    queryFn: () => api.get<{ nodes: WbsNode[] }>(`/projects/${projectId}/wbs-nodes`),
+    enabled: !!projectId,
+  });
 
-  if (loading) return <div>로딩 중...</div>;
+  const nodes = data?.result.nodes ?? [];
+
+  if (isLoading) return <div>로딩 중...</div>;
 
   return (
     <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
@@ -65,7 +67,19 @@ export default function WbsTab() {
         <span style={{ width: 120, textAlign: 'center' }}>진척률</span>
       </div>
       {nodes.length === 0 ? (
-        <div style={{ padding: 24, textAlign: 'center', color: '#718096' }}>WBS 항목이 없습니다.</div>
+        <EmptyState
+          icon="📊"
+          title="WBS가 비어 있습니다"
+          description="작업분류체계(WBS)를 구성하세요. 카테고리를 먼저 만들고 그 아래 세부 작업을 추가합니다."
+          action={
+            <button 
+              onClick={() => addToast('info', 'WBS 추가 기능은 준비중입니다.')}
+              style={{ padding: '8px 16px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+            >
+              루트 카테고리 추가
+            </button>
+          }
+        />
       ) : (
         nodes.map((node) => <WbsTreeItem key={node.id} node={node} />)
       )}
