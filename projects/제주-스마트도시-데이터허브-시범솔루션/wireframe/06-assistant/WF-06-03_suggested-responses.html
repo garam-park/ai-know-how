@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>추천 응답 선택 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .chat-container { display: flex; height: calc(100vh - 80px); flex-direction: column; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .message { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
+    .message.user { align-self: flex-end; }
+    .message.ai { align-self: flex-start; }
+    .message-bubble { padding: 12px 16px; border-radius: 12px; line-height: 1.5; }
+    .message.user .message-bubble { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+    .message.ai .message-bubble { background: #e5e7eb; color: #1f2937; border-bottom-left-radius: 4px; }
+    .message-avatar { width: 32px; height: 32px; border-radius: 50%; background: #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .message.ai .message-avatar { background: #9ca3af; color: white; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-panel { background: white; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15); }
+    .modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; }
+    .modal-title { font-size: 18px; font-weight: 600; color: #1f2937; }
+    .modal-subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; }
+    .modal-body { padding: 20px; }
+    .tabs-container { display: flex; gap: 0; border-bottom: 1px solid #e5e7eb; margin-bottom: 16px; }
+    .tab-btn { padding: 12px 16px; border: none; background: none; cursor: pointer; font-size: 14px; color: #6b7280; font-weight: 500; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .format-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .format-btn { padding: 8px 12px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .format-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .response-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+    .response-card:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .response-card.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .response-number { display: inline-block; width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; text-align: center; line-height: 24px; font-weight: 600; font-size: 12px; margin-bottom: 8px; }
+    .response-summary { font-size: 14px; font-weight: 500; color: #1f2937; margin-bottom: 8px; }
+    .response-preview { font-size: 13px; color: #6b7280; line-height: 1.4; margin-bottom: 8px; }
+    .response-expand { color: #3b82f6; font-size: 12px; font-weight: 500; cursor: pointer; }
+    .response-detail { display: none; font-size: 13px; color: #4b5563; line-height: 1.5; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+    .response-detail.expanded { display: block; }
+    .editor-area { display: none; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-top: 16px; }
+    .editor-area.active { display: block; }
+    .editor-toolbar { display: flex; gap: 4px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; flex-wrap: wrap; }
+    .editor-btn { width: 32px; height: 32px; border: 1px solid #d1d5db; background: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .editor-btn:hover { background: #f3f4f6; }
+    .editor-content { border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; min-height: 200px; font-size: 14px; background: white; line-height: 1.5; margin-bottom: 12px; }
+    .char-counter { font-size: 12px; color: #6b7280; text-align: right; margin-bottom: 12px; }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-btn { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .modal-btn.cancel { background: #f3f4f6; color: #1f2937; }
+    .modal-btn.cancel:hover { background: #e5e7eb; }
+    .modal-btn.apply { background: #3b82f6; color: white; }
+    .modal-btn.apply:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">AI 어시스턴트 - 응답 생성</h1>
+          <p class="page-subtitle">추천 응답 선택 및 편집</p>
+        </div>
+        <div class="chat-container">
+          <div class="chat-messages">
+            <div class="message ai">
+              <div class="message-avatar">AI</div>
+              <div class="message-bubble">
+                제주도 주차장 부족으로 인한 교통 혼잡 해결 방안은 무엇입니까?
+              </div>
+            </div>
+            <div class="message user">
+              <div class="message-bubble">어떻게 대응할 수 있을까요?</div>
+              <div class="message-avatar">사용자</div>
+            </div>
+            <div class="message ai">
+              <div class="message-avatar">AI</div>
+              <div class="message-bubble">
+                추천 응답안을 3가지 준비했습니다. 선택하신 후 편집하실 수 있습니다.
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Overlay -->
+          <div class="modal-overlay">
+            <div class="modal-panel">
+              <div class="modal-header">
+                <div class="modal-title">추천 응답 선택</div>
+                <div class="modal-subtitle">어떤 형식의 응답을 원하시나요?</div>
+              </div>
+
+              <div class="modal-body">
+                <!-- Type Tabs -->
+                <div class="tabs-container">
+                  <button class="tab-btn active" data-tab="민원답변">민원답변</button>
+                  <button class="tab-btn" data-tab="정책안내">정책안내</button>
+                  <button class="tab-btn" data-tab="공문">공문</button>
+                </div>
+
+                <!-- Format Toggle -->
+                <div class="format-toggle">
+                  <button class="format-btn active" data-format="요약형">
+                    <i data-lucide="minimize-2" style="width:14px;height:14px;margin-right:4px;display:inline;"></i>
+                    요약형
+                  </button>
+                  <button class="format-btn" data-format="상세형">
+                    <i data-lucide="maximize-2" style="width:14px;height:14px;margin-right:4px;display:inline;"></i>
+                    상세형
+                  </button>
+                  <button class="format-btn" data-format="음성스크립트">
+                    <i data-lucide="mic" style="width:14px;height:14px;margin-right:4px;display:inline;"></i>
+                    음성스크립트
+                  </button>
+                </div>
+
+                <!-- Response Candidates -->
+                <div class="tab-content active" data-content="민원답변">
+                  <div class="response-card" data-response="1">
+                    <div class="response-number">1</div>
+                    <div class="response-summary">스마트 주차 시스템 도입</div>
+                    <div class="response-preview">제주도는 IoT 기반 스마트 주차 시스템을 확대 도입하여 주차 효율을 높이고 있습니다. 실시간 주차 정보 제공으로 회전율을 개선하고 있습니다...</div>
+                    <div class="response-expand" data-expand="1">자세히 보기</div>
+                    <div class="response-detail" data-detail="1">
+                      <strong>스마트 주차 시스템의 주요 기능:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 실시간 주차장 점유율 안내 (모바일 앱 제공)</li>
+                        <li>• 예약 주차 시스템 구축</li>
+                        <li>• 동적 가격 책정으로 유휴 주차장 활용</li>
+                        <li>• 관광객 대상 주차 안내 강화</li>
+                      </ul>
+                      <strong style="display: block; margin-top: 12px;">기대 효과:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 주차 시간 30% 단축</li>
+                        <li>• 주차장 이용률 12% 향상</li>
+                        <li>• 교통 혼잡 지수 8% 감소</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="response-card" data-response="2">
+                    <div class="response-number">2</div>
+                    <div class="response-summary">노외 주차장 신규 조성</div>
+                    <div class="response-preview">향후 3년간 500면의 노외 주차장을 신규 조성할 계획입니다. 1차년도 150면, 2차년도 200면, 3차년도 150면을 목표로 추진 중입니다...</div>
+                    <div class="response-expand" data-expand="2">자세히 보기</div>
+                    <div class="response-detail" data-detail="2">
+                      <strong>신규 주차장 조성 계획:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 2026년: 중앙지역 150면 (예산 45억원)</li>
+                        <li>• 2027년: 서귀포 150면, 신제주 50면 (예산 60억원)</li>
+                        <li>• 2028년: 관광지 인근 150면 (예산 50억원)</li>
+                      </ul>
+                      <strong style="display: block; margin-top: 12px;">추진 절차:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 부지 선정 및 타당성 조사</li>
+                        <li>• 설계 및 인허가</li>
+                        <li>• 공사 및 개선</li>
+                        <li>• 관리 운영 계약</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="response-card" data-response="3">
+                    <div class="response-number">3</div>
+                    <div class="response-summary">주차료 현실화 및 인센티브</div>
+                    <div class="response-preview">시간제 주차료를 현실화하여 회전율을 개선하고, 친환경차량 할인 등 인센티브를 도입합니다. 이를 통해 합리적 가격 체계를 구축하는 중입니다...</div>
+                    <div class="response-expand" data-expand="3">자세히 보기</div>
+                    <div class="response-detail" data-detail="3">
+                      <strong>주차료 현실화안:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 중앙지역: 현재 500원/시간 → 1,000원/시간</li>
+                        <li>• 일반지역: 현재 300원/시간 → 500원/시간</li>
+                        <li>• 장기 할인: 월 정액제 20% 인상 가능</li>
+                      </ul>
+                      <strong style="display: block; margin-top: 12px;">인센티브 프로그램:</strong>
+                      <ul style="margin-top: 8px; margin-left: 16px;">
+                        <li>• 친환경차(전기차, 수소차) 50% 할인</li>
+                        <li>• 야간 주차(21시~06시) 40% 할인</li>
+                        <li>• 장기 거주자 30% 할인</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tab-content" data-content="정책안내">
+                  <div style="padding: 20px; text-align: center; color: #6b7280;">
+                    선택된 유형에 맞는 응답 예시입니다.
+                  </div>
+                </div>
+
+                <div class="tab-content" data-content="공문">
+                  <div style="padding: 20px; text-align: center; color: #6b7280;">
+                    선택된 유형에 맞는 응답 예시입니다.
+                  </div>
+                </div>
+
+                <!-- Rich Text Editor -->
+                <div class="editor-area active">
+                  <div style="font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 12px;">응답 내용 편집</div>
+                  <div class="editor-toolbar">
+                    <button class="editor-btn" title="Bold"><strong>B</strong></button>
+                    <button class="editor-btn" title="Italic"><em>I</em></button>
+                    <button class="editor-btn" title="Underline"><u>U</u></button>
+                    <button class="editor-btn" title="Link"><i data-lucide="link" style="width:14px;height:14px;"></i></button>
+                    <button class="editor-btn" title="List"><i data-lucide="list" style="width:14px;height:14px;"></i></button>
+                    <button class="editor-btn" title="Quote"><i data-lucide="quote" style="width:14px;height:14px;"></i></button>
+                    <button class="editor-btn" title="AI Regenerate" style="margin-left: auto; background: #eff6ff; border-color: #3b82f6; color: #3b82f6;">
+                      <i data-lucide="zap" style="width:14px;height:14px;"></i>
+                    </button>
+                  </div>
+                  <div class="editor-content" contenteditable="true">선택된 응답 내용이 여기에 표시됩니다. 필요한 부분을 수정할 수 있습니다.</div>
+                  <div class="char-counter"><span id="char-count">0</span> / 2,000 자</div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="modal-btn cancel">취소</button>
+                <button class="modal-btn apply">적용</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('assistant');
+
+      let selectedResponse = null;
+
+      // Tab switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tabName = this.dataset.tab;
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          document.querySelector(`[data-content="${tabName}"]`).classList.add('active');
+        });
+      });
+
+      // Format toggle
+      document.querySelectorAll('.format-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Response card selection
+      document.querySelectorAll('.response-card').forEach(card => {
+        card.addEventListener('click', function() {
+          document.querySelectorAll('.response-card').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          selectedResponse = this.dataset.response;
+
+          // Update editor
+          const summary = this.querySelector('.response-summary').textContent;
+          const preview = this.querySelector('.response-preview').textContent;
+          const detail = this.querySelector('.response-detail').textContent;
+          const content = `${summary}\n\n${preview}\n\n${detail}`;
+          document.querySelector('.editor-content').textContent = content;
+          updateCharCount();
+        });
+      });
+
+      // Expand response details
+      document.querySelectorAll('.response-expand').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const index = this.dataset.expand;
+          const detail = document.querySelector(`[data-detail="${index}"]`);
+          detail.classList.toggle('expanded');
+          this.textContent = detail.classList.contains('expanded') ? '간단히 보기' : '자세히 보기';
+        });
+      });
+
+      // Character counter
+      function updateCharCount() {
+        const content = document.querySelector('.editor-content').textContent;
+        document.getElementById('char-count').textContent = content.length;
+      }
+
+      document.querySelector('.editor-content').addEventListener('input', updateCharCount);
+
+      // Modal buttons
+      document.querySelector('.modal-btn.cancel').addEventListener('click', function() {
+        alert('취소되었습니다.');
+      });
+
+      document.querySelector('.modal-btn.apply').addEventListener('click', function() {
+        if (selectedResponse) {
+          alert(`선택된 응답안 ${selectedResponse}이(가) 적용되었습니다.`);
+        } else {
+          alert('응답안을 선택해주세요.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

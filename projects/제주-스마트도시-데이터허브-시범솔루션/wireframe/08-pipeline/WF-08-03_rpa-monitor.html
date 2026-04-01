@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPA수집모니터 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">Admin</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="사이드바 토글">
+          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+        </button>
+      </nav>
+
+      <div id="content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">데이터수집</span>
+          <span class="breadcrumb-item">RPA 수집</span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">RPA 수집 모니터</h1>
+          <p class="page-subtitle">자동화 봇 운영 상태 및 스케줄 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 봇 상태 카드 (4개) -->
+          <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🤖</div>
+                </div>
+                <div class="kpi-title">활성봇 수</div>
+                <div class="kpi-value">6</div>
+                <div class="text-sm text-gray-500 mt-2">대</div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon success" style="background-color: #16A34A;">⚙️</div>
+                </div>
+                <div class="kpi-title">실행중</div>
+                <div class="kpi-value" style="color: #16A34A;">3</div>
+                <div class="text-sm text-gray-500 mt-2">대</div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon warning" style="background-color: #EAB308;">⏸️</div>
+                </div>
+                <div class="kpi-title">대기</div>
+                <div class="kpi-value" style="color: #EAB308;">2</div>
+                <div class="text-sm text-gray-500 mt-2">대</div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon danger" style="background-color: #DC2626;">✕</div>
+                </div>
+                <div class="kpi-title">에러</div>
+                <div class="kpi-value" style="color: #DC2626;">1</div>
+                <div class="text-sm text-gray-500 mt-2">대</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 스케줄 캘린더 뷰 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold">봇 실행 일정 (월별)</h2>
+              <button class="btn btn-primary" onclick="showBotRunModal()">봇 실행</button>
+            </div>
+
+            <div class="grid grid-cols-7 gap-2 text-center">
+              <div class="font-semibold text-gray-600">일</div>
+              <div class="font-semibold text-gray-600">월</div>
+              <div class="font-semibold text-gray-600">화</div>
+              <div class="font-semibold text-gray-600">수</div>
+              <div class="font-semibold text-gray-600">목</div>
+              <div class="font-semibold text-gray-600">금</div>
+              <div class="font-semibold text-gray-600">토</div>
+
+              <div class="border border-gray-200 rounded p-2 text-gray-400">25</div>
+              <div class="border border-gray-200 rounded p-2 text-gray-400">26</div>
+              <div class="border border-gray-200 rounded p-2 text-gray-400">27</div>
+              <div class="border border-gray-200 rounded p-2 text-gray-400">28</div>
+              <div class="border border-gray-200 rounded p-2">1</div>
+              <div class="border border-gray-200 rounded p-2">2</div>
+              <div class="border border-gray-200 rounded p-2 bg-blue-50">
+                <div>3</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #2563EB; color: white; border-radius: 2px; margin-top: 4px;">BOT-001</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #7C3AED; color: white; border-radius: 2px;">BOT-002</div>
+              </div>
+              <div class="border border-gray-200 rounded p-2 bg-green-50">
+                <div>4</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #16A34A; color: white; border-radius: 2px;">BOT-003</div>
+              </div>
+              <div class="border border-gray-200 rounded p-2">5</div>
+              <div class="border border-gray-200 rounded p-2 bg-yellow-50">
+                <div>6</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #EAB308; color: black; border-radius: 2px;">BOT-004</div>
+              </div>
+              <div class="border border-gray-200 rounded p-2 bg-red-50">
+                <div>7</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #DC2626; color: white; border-radius: 2px;">BOT-005(실패)</div>
+              </div>
+              <div class="border border-gray-200 rounded p-2">8</div>
+              <div class="border border-gray-200 rounded p-2">9</div>
+
+              <!-- 계속 -->
+              <div class="border border-gray-200 rounded p-2">10</div>
+              <div class="border border-gray-200 rounded p-2">11</div>
+              <div class="border border-gray-200 rounded p-2 bg-blue-50">
+                <div>12</div>
+                <div style="font-size: 8px; margin-top: 2px; padding: 2px; background: #2563EB; color: white; border-radius: 2px;">BOT-001</div>
+              </div>
+              <div class="border border-gray-200 rounded p-2">13</div>
+              <div class="border border-gray-200 rounded p-2">14</div>
+              <div class="border border-gray-200 rounded p-2">15</div>
+              <div class="border border-gray-200 rounded p-2">16</div>
+            </div>
+          </div>
+
+          <!-- 실행 로그 테이블 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <h2 class="text-lg font-semibold mb-4">실행 로그</h2>
+            <div class="overflow-x-auto">
+              <table class="data-table" id="logTable">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>봇ID</th>
+                    <th>대상사이트</th>
+                    <th>시작시각</th>
+                    <th>종료시각</th>
+                    <th>수집건수</th>
+                    <th>상태</th>
+                    <th>소요시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td></td>
+                    <td>BOT-001</td>
+                    <td>민원포털</td>
+                    <td>2026-03-25 06:00</td>
+                    <td>2026-03-25 06:15</td>
+                    <td>234</td>
+                    <td><span class="badge success">성공</span></td>
+                    <td>00:15:32</td>
+                  </tr>
+                  <tr>
+                    <td>🔐</td>
+                    <td>BOT-002</td>
+                    <td>온라인민원</td>
+                    <td>2026-03-25 08:00</td>
+                    <td>2026-03-25 08:32</td>
+                    <td>567</td>
+                    <td><span class="badge warning">부분성공</span></td>
+                    <td>00:32:45</td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>BOT-003</td>
+                    <td>통합관제</td>
+                    <td>2026-03-25 09:00</td>
+                    <td>2026-03-25 09:08</td>
+                    <td>1,234</td>
+                    <td><span class="badge success">성공</span></td>
+                    <td>00:08:12</td>
+                  </tr>
+                  <tr style="background-color: #f8d7da;">
+                    <td></td>
+                    <td>BOT-005</td>
+                    <td>기타포털</td>
+                    <td>2026-03-25 10:00</td>
+                    <td>2026-03-25 10:25</td>
+                    <td>0</td>
+                    <td><span class="badge danger">실패</span></td>
+                    <td>00:25:00</td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>BOT-004</td>
+                    <td>오픈데이터</td>
+                    <td>2026-03-25 12:00</td>
+                    <td>2026-03-25 12:20</td>
+                    <td>890</td>
+                    <td><span class="badge success">성공</span></td>
+                    <td>00:20:15</td>
+                  </tr>
+                  <tr>
+                    <td>🔐</td>
+                    <td>BOT-001</td>
+                    <td>민원포털</td>
+                    <td>2026-03-25 14:00</td>
+                    <td>2026-03-25 14:12</td>
+                    <td>456</td>
+                    <td><span class="badge warning">부분성공</span></td>
+                    <td>00:12:30</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination mt-4" id="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('pipeline');
+      initTableSort('logTable');
+    });
+
+    function showBotRunModal() {
+      showModal(
+        '봇 실행',
+        `
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">실행할 봇 선택</label>
+            <select class="form-select" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px;">
+              <option value="">선택하세요</option>
+              <option value="BOT-001">BOT-001 (민원포털)</option>
+              <option value="BOT-002">BOT-002 (온라인민원)</option>
+              <option value="BOT-003">BOT-003 (통합관제)</option>
+              <option value="BOT-004">BOT-004 (오픈데이터)</option>
+              <option value="BOT-005">BOT-005 (기타포털)</option>
+              <option value="BOT-006">BOT-006 (예비봇)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">옵션</label>
+            <div>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" checked>
+                <span>스케줄 무시하고 즉시 실행</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 8px;">
+                <input type="checkbox">
+                <span>완료 후 이메일 알림</span>
+              </label>
+            </div>
+          </div>
+        `,
+        { confirmText: '실행', cancelText: '취소' }
+      );
+    }
+  </script>
+</body>
+</html>

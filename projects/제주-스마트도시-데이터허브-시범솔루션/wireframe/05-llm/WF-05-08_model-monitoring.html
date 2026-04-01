@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모델 성능 모니터링 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .model-selector {
+      padding: 10px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .kpi-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .kpi-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 8px;
+    }
+    .kpi-label {
+      font-size: 12px;
+      color: #6B7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .kpi-trend {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .kpi-trend.up {
+      background: #DCFCE7;
+      color: #166534;
+    }
+    .kpi-trend.down {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    .experiment-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .experiment-table th {
+      background: #F3F4F6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #374151;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .experiment-table td {
+      padding: 12px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 13px;
+      color: #4B5563;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-running {
+      background: #DBEAFE;
+      color: #0C4A6E;
+    }
+    .status-completed {
+      background: #DCFCE7;
+      color: #166534;
+    }
+    .status-planned {
+      background: #F3F4F6;
+      color: #374151;
+    }
+    .error-distribution {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .error-log-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .error-log-table th {
+      background: #F3F4F6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #374151;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .error-log-table td {
+      padding: 12px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 12px;
+      color: #4B5563;
+    }
+    .error-type {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .error-type.critical {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    .error-type.warning {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .error-type.info {
+      background: #DBEAFE;
+      color: #0C4A6E;
+    }
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">모델 성능 모니터링</div>
+          <div class="page-subtitle">LLM 및 분석 모델의 실시간 성능 지표 및 오류 추적</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 모델 선택 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">모델 선택</label>
+              <select class="model-selector" onchange="switchModel(this.value)">
+                <option value="gpt4">GPT-4 Turbo (Classification)</option>
+                <option value="claude">Claude 3 Sonnet</option>
+                <option value="llama">Llama 2 (Local)</option>
+                <option value="bert">BERT (Embedding)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- KPI 카드 -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div class="kpi-card">
+              <div class="kpi-label">정확도</div>
+              <div class="kpi-value">94.2%</div>
+              <div class="kpi-trend up">
+                <i data-lucide="trending-up" style="width: 12px; height: 12px; display: inline;"></i>
+                +1.3% (7D)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">F1 Score</div>
+              <div class="kpi-value">0.915</div>
+              <div class="kpi-trend up">
+                <i data-lucide="trending-up" style="width: 12px; height: 12px; display: inline;"></i>
+                +0.021 (7D)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">평균 지연시간</div>
+              <div class="kpi-value">2.3s</div>
+              <div class="kpi-trend down">
+                <i data-lucide="trending-down" style="width: 12px; height: 12px; display: inline;"></i>
+                +0.2s (7D)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">일 처리량</div>
+              <div class="kpi-value">4,287</div>
+              <div class="kpi-trend up">
+                <i data-lucide="trending-up" style="width: 12px; height: 12px; display: inline;"></i>
+                +342 (7D)
+              </div>
+            </div>
+          </div>
+
+          <!-- 성능 트렌드 -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">30일 성능 추이</div>
+              <div class="card-subtitle">정확도 및 F1 Score 추이</div>
+            </div>
+            <div class="card-body">
+              <canvas id="performanceChart" style="max-height: 300px;"></canvas>
+            </div>
+          </div>
+
+          <!-- A/B 실험 -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">A/B 실험 현황</div>
+              <div class="card-subtitle">모델 및 파라미터 비교 테스트</div>
+            </div>
+            <div class="card-body">
+              <table class="experiment-table">
+                <thead>
+                  <tr>
+                    <th>실험 ID</th>
+                    <th>모델 A</th>
+                    <th>모델 B</th>
+                    <th>A 정확도</th>
+                    <th>B 정확도</th>
+                    <th>승자</th>
+                    <th>상태</th>
+                    <th>기간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#EXP-001</td>
+                    <td>GPT-4 (Base)</td>
+                    <td>GPT-4 (Fine-tuned)</td>
+                    <td>92.8%</td>
+                    <td>94.2%</td>
+                    <td><strong style="color: #16A34A;">B 승리</strong></td>
+                    <td><span class="status-badge status-completed">완료</span></td>
+                    <td>2026-03-15 ~ 04-01</td>
+                  </tr>
+                  <tr>
+                    <td>#EXP-002</td>
+                    <td>Claude 3 (Haiku)</td>
+                    <td>Claude 3 (Sonnet)</td>
+                    <td>91.2%</td>
+                    <td>93.5%</td>
+                    <td><strong style="color: #16A34A;">B 승리</strong></td>
+                    <td><span class="status-badge status-completed">완료</span></td>
+                    <td>2026-03-10 ~ 03-28</td>
+                  </tr>
+                  <tr>
+                    <td>#EXP-003</td>
+                    <td>Temp: 0.5</td>
+                    <td>Temp: 0.7</td>
+                    <td>93.8%</td>
+                    <td>94.1%</td>
+                    <td><strong style="color: #0891B2;">진행중</strong></td>
+                    <td><span class="status-badge status-running">진행중</span></td>
+                    <td>2026-03-25 ~ 04-08</td>
+                  </tr>
+                  <tr>
+                    <td>#EXP-004</td>
+                    <td>Context: 2K</td>
+                    <td>Context: 4K</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="status-badge status-planned">예정</span></td>
+                    <td>2026-04-05 예정</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 오류 분석 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">오류 분포</div>
+                <div class="card-subtitle">오류 유형별 비율</div>
+              </div>
+              <div class="card-body">
+                <canvas id="errorDistributionChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">오류 추이</div>
+                <div class="card-subtitle">일일 오류 발생율</div>
+              </div>
+              <div class="card-body">
+                <canvas id="errorTrendChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 오류 로그 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">오류 로그</div>
+              <div class="card-subtitle">최근 발생 오류 상세</div>
+            </div>
+            <div class="card-body">
+              <div class="filter-row">
+                <select class="filter-select">
+                  <option selected>모든 유형</option>
+                  <option>Critical</option>
+                  <option>Warning</option>
+                  <option>Info</option>
+                </select>
+                <select class="filter-select">
+                  <option selected>최근 7일</option>
+                  <option>최근 30일</option>
+                  <option>지난달</option>
+                </select>
+              </div>
+
+              <table class="error-log-table">
+                <thead>
+                  <tr>
+                    <th>타입</th>
+                    <th>메시지</th>
+                    <th>발생 시간</th>
+                    <th>빈도</th>
+                    <th>해결</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="error-type critical">Critical</span></td>
+                    <td>분류 모델 응답 timeout</td>
+                    <td>2026-04-02 14:32:21</td>
+                    <td>3</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">조치</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="error-type warning">Warning</span></td>
+                    <td>메모리 사용률 80% 초과</td>
+                    <td>2026-04-02 13:15:45</td>
+                    <td>12</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">조치</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="error-type warning">Warning</span></td>
+                    <td>입력 텍스트 길이 초과 (Max 512)</td>
+                    <td>2026-04-02 11:08:32</td>
+                    <td>28</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">조치</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="error-type info">Info</span></td>
+                    <td>모델 캐시 초기화 완료</td>
+                    <td>2026-04-02 09:00:00</td>
+                    <td>1</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td><span class="error-type critical">Critical</span></td>
+                    <td>외부 API 연결 실패</td>
+                    <td>2026-04-01 23:45:12</td>
+                    <td>5</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">조치</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="error-type warning">Warning</span></td>
+                    <td>응답 품질 점수 낮음 (&lt; 0.6)</td>
+                    <td>2026-04-01 18:22:15</td>
+                    <td>7</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">조치</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+      initCharts();
+    });
+
+    function initCharts() {
+      // 성능 추이 라인차트
+      const perfCtx = document.getElementById('performanceChart').getContext('2d');
+      new Chart(perfCtx, {
+        type: 'line',
+        data: {
+          labels: ['3/3', '3/5', '3/7', '3/9', '3/11', '3/13', '3/15', '3/17', '3/19', '3/21',
+                   '3/23', '3/25', '3/27', '3/29', '3/31', '4/2'],
+          datasets: [
+            {
+              label: '정확도',
+              data: [91.2, 91.5, 91.8, 92.1, 92.4, 92.6, 92.8, 93.0, 93.2, 93.5, 93.7, 93.9, 94.0, 94.1, 94.2, 94.2],
+              borderColor: '#2563EB',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'F1 Score',
+              data: [0.891, 0.894, 0.897, 0.900, 0.903, 0.905, 0.907, 0.909, 0.911, 0.912, 0.913, 0.914, 0.914, 0.915, 0.915, 0.915],
+              borderColor: '#16A34A',
+              backgroundColor: 'rgba(22, 163, 74, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            y: { beginAtZero: true, max: 100 }
+          }
+        }
+      });
+
+      // 오류 분포 도넛 차트
+      const errorDistCtx = document.getElementById('errorDistributionChart').getContext('2d');
+      new Chart(errorDistCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Timeout (23%)', 'Memory (34%)', 'Invalid Input (28%)', 'API Error (15%)'],
+          datasets: [{
+            data: [23, 34, 28, 15],
+            backgroundColor: ['#DC2626', '#F59E0B', '#2563EB', '#7C3AED'],
+            borderColor: 'white',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+
+      // 오류 추이 바 차트
+      const errorTrendCtx = document.getElementById('errorTrendChart').getContext('2d');
+      new Chart(errorTrendCtx, {
+        type: 'line',
+        data: {
+          labels: ['3/27', '3/28', '3/29', '3/30', '3/31', '4/1', '4/2'],
+          datasets: [{
+            label: '일 오류율 (%)',
+            data: [2.3, 2.1, 2.5, 1.9, 2.2, 2.4, 1.8],
+            borderColor: '#DC2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+          scales: { y: { max: 5 } }
+        }
+      });
+    }
+
+    function switchModel(modelValue) {
+      showToast(modelValue + ' 모델로 전환되었습니다.', 'info');
+      // 차트 업데이트 로직
+    }
+  </script>
+</body>
+</html>

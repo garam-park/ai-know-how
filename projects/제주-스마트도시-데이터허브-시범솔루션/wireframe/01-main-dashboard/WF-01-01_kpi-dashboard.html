@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>종합 KPI 대시보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">사</div>
+          <div class="user-info">
+            <div class="user-name">사용자</div>
+            <div class="user-role">관리자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">종합 KPI 대시보드</div>
+          <div class="page-subtitle">주요 성과지표 및 실시간 현황을 한눈에 확인합니다</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 제어 영역 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <select class="filter-select" id="periodSelect">
+                <option value="today">금일</option>
+                <option value="week">주간</option>
+                <option value="month">월간</option>
+              </select>
+            </div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="refreshDashboard()">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                새로고침
+              </button>
+              <button class="btn btn-secondary" onclick="openSettings()">
+                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI 카드 영역 (2행 4열) -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- KPI 1 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #2563EB;">
+                  <i data-lucide="inbox" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">금일 민원 접수</div>
+              <div class="kpi-value">156</div>
+              <div class="kpi-change positive">
+                <i data-lucide="trending-up" class="kpi-change-icon"></i>
+                <span>전일 대비 +12%</span>
+              </div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #EAB308;">
+                  <i data-lucide="alert-circle" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">미처리 민원</div>
+              <div class="kpi-value">23</div>
+              <div style="font-size: 12px; color: #6B7280;">
+                <span style="color: #DC2626;">긴급 5</span> |
+                <span style="color: #F59E0B;">중요 8</span> |
+                <span style="color: #6B7280;">일반 10</span>
+              </div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #DC2626;">
+                  <i data-lucide="zap" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">이벤트 발생</div>
+              <div class="kpi-value">8</div>
+              <div style="font-size: 12px; color: #6B7280;">
+                <span style="color: #DC2626;">Critical 1</span> |
+                <span style="color: #F59E0B;">Warning 4</span> |
+                <span style="color: #3B82F6;">Info 3</span>
+              </div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #16A34A;">
+                  <i data-lucide="parking-circle" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">주차장 가동률</div>
+              <div class="kpi-value">87.3%</div>
+              <div class="progress-bar-container" style="margin: 8px 0;">
+                <div class="progress-bar" style="width: 87.3%;"></div>
+              </div>
+            </div>
+
+            <!-- KPI 5 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #7C3AED;">
+                  <i data-lucide="brain" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">AI 분석 완료율</div>
+              <div class="kpi-value">94.2%</div>
+              <div style="font-size: 12px; color: #6B7280;">최근 처리량: 1,243건</div>
+            </div>
+
+            <!-- KPI 6 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #F59E0B;">
+                  <i data-lucide="zap-off" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">LLM 처리량</div>
+              <div class="kpi-value">512</div>
+              <div style="font-size: 12px; color: #6B7280;">평균 처리 시간: 2.3초</div>
+            </div>
+
+            <!-- KPI 7 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #16A34A;">
+                  <i data-lucide="activity" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">평균 응답시간</div>
+              <div class="kpi-value">245ms</div>
+              <div class="kpi-change positive">
+                <span>목표치 300ms 대비 ✓</span>
+              </div>
+            </div>
+
+            <!-- KPI 8 -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div class="kpi-icon" style="background-color: #16A34A;">
+                  <i data-lucide="server" style="width: 20px; height: 20px; color: white;"></i>
+                </div>
+              </div>
+              <div class="kpi-title">시스템 가동률</div>
+              <div class="kpi-value">99.8%</div>
+              <div style="font-size: 12px; color: #6B7280;">최종 점검: 2026-04-01 10:30</div>
+            </div>
+          </div>
+
+          <!-- 트렌드 분석 영역 (2열) -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- 좌측: 일간 트렌드 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">일간 민원 접수 추이</div>
+                <div class="card-subtitle">지난 30일 데이터</div>
+              </div>
+              <div class="card-body">
+                <canvas id="dailyTrendChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <!-- 우측: 주간 AI 처리량 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">주간 AI 처리량 추이</div>
+                <div class="card-subtitle">최근 4주 데이터</div>
+              </div>
+              <div class="card-body">
+                <canvas id="weeklyAiChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 영역 (2열) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <!-- 좌측: 최근 알림 피드 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">최근 알림 피드</div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- 알림 1 -->
+                  <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; background-color: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <span style="font-size: 20px;">🔴</span>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">주차장 C-04 센서 오류</div>
+                      <div style="font-size: 12px; color: #6B7280;">센서 통신 두절 복구됨</div>
+                      <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">09:32</div>
+                    </div>
+                  </div>
+
+                  <!-- 알림 2 -->
+                  <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; background-color: #FEF3C7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <span style="font-size: 20px;">🟡</span>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">LLM 모델 응답 지연</div>
+                      <div style="font-size: 12px; color: #6B7280;">평균 3.2초로 증가, 모니터링 중</div>
+                      <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">08:15</div>
+                    </div>
+                  </div>
+
+                  <!-- 알림 3 -->
+                  <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; background-color: #DCFCE7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <span style="font-size: 20px;">🟢</span>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">일일 목표 달성</div>
+                      <div style="font-size: 12px; color: #6B7280;">금일 접수 민원 처리율 95% 도달</div>
+                      <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">07:45</div>
+                    </div>
+                  </div>
+
+                  <!-- 알림 4 -->
+                  <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; background-color: #DBEAFE; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <span style="font-size: 20px;">🔵</span>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">시스템 백업 완료</div>
+                      <div style="font-size: 12px; color: #6B7280;">전일 자정 일일 백업 완료</div>
+                      <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">02:30</div>
+                    </div>
+                  </div>
+
+                  <!-- 알림 5 -->
+                  <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="width: 40px; height: 40px; background-color: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <span style="font-size: 20px;">⚪</span>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">신규 이벤트 등록</div>
+                      <div style="font-size: 12px; color: #6B7280;">제주 상수도 파이프 손상 이슈 등록</div>
+                      <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">00:15</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측: 부서별 처리 현황 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">부서별 처리 현황</div>
+              </div>
+              <div class="card-body">
+                <canvas id="departmentChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('main');
+      initCharts();
+    });
+
+    // 차트 초기화
+    function initCharts() {
+      // 일간 트렌드 라인차트
+      const dailyTrendData = {
+        labels: ['3/3', '3/4', '3/5', '3/6', '3/7', '3/8', '3/9', '3/10', '3/11', '3/12',
+                 '3/13', '3/14', '3/15', '3/16', '3/17', '3/18', '3/19', '3/20', '3/21', '3/22',
+                 '3/23', '3/24', '3/25', '3/26', '3/27', '3/28', '3/29', '3/30', '3/31', '4/1'],
+        datasets: [
+          {
+            label: '접수',
+            data: [145, 168, 172, 155, 165, 148, 156, 162, 170, 158, 145, 160, 175, 168, 172, 165, 158, 170, 162, 155, 168, 160, 175, 162, 170, 165, 158, 172, 168, 156],
+            borderColor: '#2563EB'
+          },
+          {
+            label: '처리',
+            data: [142, 165, 170, 152, 162, 145, 153, 159, 167, 155, 142, 157, 172, 165, 169, 162, 155, 167, 159, 152, 165, 157, 172, 159, 167, 162, 155, 169, 165, 152],
+            borderColor: '#16A34A'
+          },
+          {
+            label: '미처리',
+            data: [3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4],
+            borderColor: '#DC2626'
+          }
+        ]
+      };
+      createLineChart('dailyTrendChart', dailyTrendData.labels, dailyTrendData.datasets);
+
+      // 주간 AI 처리량 차트
+      const weeklyAiData = {
+        labels: ['주1', '주2', '주3', '주4'],
+        datasets: [
+          {
+            label: 'OCR',
+            data: [380, 410, 425, 398],
+            borderColor: '#2563EB'
+          },
+          {
+            label: 'STT',
+            data: [290, 310, 335, 305],
+            borderColor: '#7C3AED'
+          },
+          {
+            label: 'LLM',
+            data: [445, 480, 512, 490],
+            borderColor: '#F59E0B'
+          }
+        ]
+      };
+      createLineChart('weeklyAiChart', weeklyAiData.labels, weeklyAiData.datasets);
+
+      // 부서별 처리 현황 바차트
+      const departmentData = {
+        labels: ['교통 관리과', '상수도 관리과', '환경 관리과', '시설 관리과', '기타'],
+        datasets: [
+          {
+            label: '처리율 (%)',
+            data: [82, 65, 91, 71, 48],
+            backgroundColor: '#3B82F6'
+          }
+        ]
+      };
+      createHorizontalBarChart('departmentChart', departmentData.labels, departmentData.datasets);
+    }
+
+    // 새로고침 버튼
+    function refreshDashboard() {
+      showToast('대시보드가 새로고침되었습니다.', 'info');
+    }
+
+    // 설정 버튼
+    function openSettings() {
+      showToast('설정 기능은 준비 중입니다.', 'info');
+    }
+  </script>
+</body>
+</html>

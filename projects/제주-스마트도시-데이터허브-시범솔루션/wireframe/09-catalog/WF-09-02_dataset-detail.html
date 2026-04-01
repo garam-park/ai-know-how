@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터셋 상세 - 실시간 도로 교통 정보</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <!-- Content -->
+      <main id="content">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h1 class="page-title">실시간 도로 교통 정보</h1>
+              <p class="page-subtitle">제주시청 교통과 · 최종갱신: 2026-03-25</p>
+            </div>
+            <div style="display: flex; gap: var(--spacing-md);">
+              <button class="btn btn-secondary" onclick="alert('다운로드 기능')">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                다운로드
+              </button>
+              <button class="btn btn-secondary" onclick="alert('즐겨찾기')">
+                <i data-lucide="star" style="width: 16px; height: 16px;"></i>
+                즐겨찾기
+              </button>
+              <button class="btn btn-secondary" onclick="alert('공유 기능')">
+                <i data-lucide="share-2" style="width: 16px; height: 16px;"></i>
+                공유
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-md);">
+            <span class="badge success">공개</span>
+            <span class="badge info">CC BY 4.0</span>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <!-- 탭 네비게이션 -->
+          <div class="tabs" id="datasetTabs">
+            <div class="tab-headers">
+              <button class="tab-header active" onclick="switchTab(0)">개요</button>
+              <button class="tab-header" onclick="switchTab(1)">스키마</button>
+              <button class="tab-header" onclick="switchTab(2)">미리보기</button>
+              <button class="tab-header" onclick="switchTab(3)">API</button>
+            </div>
+
+            <!-- 탭 1: 개요 -->
+            <div class="tab-content active">
+              <div style="max-width: 1000px;">
+                <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">설명</h3>
+                <p style="font-size: var(--font-body-md); line-height: 1.8; color: var(--text-color-secondary); margin-bottom: var(--spacing-lg);">
+                  제주시 전역 도로의 실시간 교통 상황 데이터입니다. 신호등 정보, 혼잡도, 사고 정보 등이 포함되어 있으며, 교통 관리 및 운전자 편의 향상을 위해 제공됩니다.
+                </p>
+
+                <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">키워드</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); margin-bottom: var(--spacing-2xl);">
+                  <span class="badge info" style="cursor: pointer;">교통</span>
+                  <span class="badge info" style="cursor: pointer;">실시간</span>
+                  <span class="badge info" style="cursor: pointer;">도로</span>
+                </div>
+
+                <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">분류</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+                  <div>
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">분야</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color);">교통</p>
+                  </div>
+                  <div>
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">주제</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color);">실시간</p>
+                  </div>
+                  <div>
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">조직</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color);">교통과</p>
+                  </div>
+                </div>
+
+                <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">활용사례</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                  <li style="padding: var(--spacing-md); border-bottom: 1px solid var(--border-color); color: var(--color-primary); cursor: pointer;">교통 혼잡도 분석</li>
+                  <li style="padding: var(--spacing-md); border-bottom: 1px solid var(--border-color); color: var(--color-primary); cursor: pointer;">버스 운행 모니터링</li>
+                  <li style="padding: var(--spacing-md); color: var(--color-primary); cursor: pointer;">실시간 경로 추천</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 탭 2: 스키마 -->
+            <div class="tab-content">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>필드명</th>
+                    <th>타입</th>
+                    <th>설명</th>
+                    <th>필수여부</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>id</td>
+                    <td><span class="badge default">String</span></td>
+                    <td>고유 식별자</td>
+                    <td><span class="badge success">Yes</span></td>
+                  </tr>
+                  <tr>
+                    <td>road_name</td>
+                    <td><span class="badge default">String</span></td>
+                    <td>도로명</td>
+                    <td><span class="badge success">Yes</span></td>
+                  </tr>
+                  <tr>
+                    <td>timestamp</td>
+                    <td><span class="badge default">DateTime</span></td>
+                    <td>수집 시간</td>
+                    <td><span class="badge success">Yes</span></td>
+                  </tr>
+                  <tr>
+                    <td>congestion_level</td>
+                    <td><span class="badge default">Number</span></td>
+                    <td>혼잡도 (0-100)</td>
+                    <td><span class="badge warning">No</span></td>
+                  </tr>
+                  <tr>
+                    <td>traffic_speed</td>
+                    <td><span class="badge default">Number</span></td>
+                    <td>평균 속도 (km/h)</td>
+                    <td><span class="badge warning">No</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 탭 3: 미리보기 -->
+            <div class="tab-content">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>id</th>
+                    <th>road_name</th>
+                    <th>timestamp</th>
+                    <th>congestion_level</th>
+                    <th>traffic_speed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>TR001</td>
+                    <td>제주로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>78</td>
+                    <td>42</td>
+                  </tr>
+                  <tr>
+                    <td>TR002</td>
+                    <td>첫번째로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>45</td>
+                    <td>68</td>
+                  </tr>
+                  <tr>
+                    <td>TR003</td>
+                    <td>중앙로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>52</td>
+                    <td>60</td>
+                  </tr>
+                  <tr>
+                    <td>TR004</td>
+                    <td>관덕로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>38</td>
+                    <td>72</td>
+                  </tr>
+                  <tr>
+                    <td>TR005</td>
+                    <td>삼거리로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>65</td>
+                    <td>50</td>
+                  </tr>
+                  <tr>
+                    <td>TR006</td>
+                    <td>노형로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>31</td>
+                    <td>80</td>
+                  </tr>
+                  <tr>
+                    <td>TR007</td>
+                    <td>일주로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>55</td>
+                    <td>58</td>
+                  </tr>
+                  <tr>
+                    <td>TR008</td>
+                    <td>신산로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>42</td>
+                    <td>65</td>
+                  </tr>
+                  <tr>
+                    <td>TR009</td>
+                    <td>서로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>68</td>
+                    <td>48</td>
+                  </tr>
+                  <tr>
+                    <td>TR010</td>
+                    <td>남부로</td>
+                    <td>2026-03-25 14:32:00</td>
+                    <td>40</td>
+                    <td>70</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 탭 4: API -->
+            <div class="tab-content">
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">엔드포인트</h3>
+              <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; margin-bottom: var(--spacing-lg);"><code>https://api.data-hub.jeju.go.kr/v1/datasets/traffic-info/data</code></pre>
+
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">인증방법</h3>
+              <p style="font-size: var(--font-body-md); margin-bottom: var(--spacing-lg); color: var(--text-color-secondary);">API Key 또는 OAuth 2.0을 통한 인증이 필요합니다.</p>
+
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">요청 예시</h3>
+              <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; margin-bottom: var(--spacing-lg);"><code class="language-json">{
+  "start_date": "2026-03-01",
+  "end_date": "2026-03-31",
+  "limit": 100
+}</code></pre>
+
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">응답 예시</h3>
+              <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; margin-bottom: var(--spacing-lg);"><code class="language-json">{
+  "data": [
+    {
+      "id": "TR001",
+      "road_name": "제주로",
+      "timestamp": "2026-03-25T14:32:00Z",
+      "congestion_level": 78,
+      "traffic_speed": 42
+    }
+  ],
+  "count": 1000,
+  "total_pages": 10
+}</code></pre>
+
+              <a href="#" style="color: var(--color-primary); text-decoration: none; font-weight: var(--font-weight-semibold);">API 문서 전체보기 →</a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function switchTab(index) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const headers = document.querySelectorAll('.tab-header');
+
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+
+      headers.forEach((header, i) => {
+        header.classList.toggle('active', i === index);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+      hljs.highlightAll();
+    });
+  </script>
+</body>
+</html>

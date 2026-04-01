@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>민원 상세 조회 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/map.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div class="page-title">민원 상세 조회</div>
+            <div class="page-subtitle">CMP-2025-0015 - 상업지구 앞 불법주차 집중</div>
+          </div>
+          <button onclick="window.history.back()" style="padding: 8px 16px; background: var(--color-gray-200); border: none; border-radius: 4px; cursor: pointer;">
+            <i data-lucide="arrow-left" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- 기본정보 카드 -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">기본정보</div>
+            </div>
+            <div class="card-body">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div>
+                  <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">접수번호</div>
+                  <div style="font-weight: 600;">CMP-2025-0015</div>
+                </div>
+                <div>
+                  <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">접수일시</div>
+                  <div style="font-weight: 600;">2025-01-15 14:32</div>
+                </div>
+                <div>
+                  <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">채널</div>
+                  <div style="font-weight: 600;">모바일앱</div>
+                </div>
+                <div>
+                  <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">상태</div>
+                  <div><span class="badge warning">처리중</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Left: Original Content & AI Analysis -->
+            <div>
+              <!-- 원문 내용 -->
+              <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                  <div class="card-title">민원 내용</div>
+                </div>
+                <div class="card-body">
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">제목</div>
+                    <div style="font-weight: 600; margin-bottom: 8px;">상업지구 앞 불법주차 집중</div>
+                  </div>
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">분류</div>
+                    <span class="badge info">불법주차</span>
+                  </div>
+                  <div style="background: var(--bg-color-secondary); padding: 12px; border-radius: 4px; line-height: 1.6; font-size: 14px;">
+                    제주시 건입동 상업지구 앞 주차공간에 불법주차 차량이 매일 오전 8시부터 오후 6시까지 집중되고 있습니다. 특히 고객들의 주차 흐름을 방해하고 있으며, 보행자의 안전도 위협하고 있습니다. 정기적인 단속이 필요합니다.
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI 분석 결과 -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">AI 분석 결과</div>
+                </div>
+                <div class="card-body">
+                  <div style="margin-bottom: 16px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">자동분류</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span class="badge info" style="font-weight: 600;">불법주차</span>
+                      <span style="color: var(--color-success); font-weight: 600;">96% 신뢰도</span>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 16px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 8px;">감성 분석</div>
+                    <div style="background: var(--bg-color-secondary); padding: 12px; border-radius: 4px;">
+                      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600;">부정</span>
+                        <span style="color: var(--color-danger); font-weight: 600;">7.5 / 10</span>
+                      </div>
+                      <div style="height: 6px; background: var(--color-gray-200); border-radius: 3px; overflow: hidden;">
+                        <div style="height: 100%; background: var(--color-danger); width: 75%;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 8px;">추출된 개체명</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                      <span style="background: var(--color-primary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">제주시</span>
+                      <span style="background: var(--color-primary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">상업지구</span>
+                      <span style="background: var(--color-secondary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">오전 8시~오후 6시</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Timeline & Officer Info -->
+            <div>
+              <!-- 처리 이력 -->
+              <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                  <div class="card-title">처리 이력</div>
+                </div>
+                <div class="card-body">
+                  <div style="position: relative; padding-left: 20px;">
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-primary);"></div>
+
+                    <div style="margin-bottom: 16px; position: relative;">
+                      <div style="position: absolute; left: -10px; top: 0; width: 12px; height: 12px; background: var(--color-primary); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--color-primary);"></div>
+                      <div style="font-weight: 600; font-size: 13px;">2025-01-15 14:32</div>
+                      <div style="color: var(--text-color-secondary); font-size: 12px;">접수 (홍길동)</div>
+                    </div>
+
+                    <div style="margin-bottom: 16px; position: relative;">
+                      <div style="position: absolute; left: -10px; top: 0; width: 12px; height: 12px; background: var(--color-primary); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--color-primary);"></div>
+                      <div style="font-weight: 600; font-size: 13px;">2025-01-15 15:00</div>
+                      <div style="color: var(--text-color-secondary); font-size: 12px;">담당자 배정: 김철수</div>
+                    </div>
+
+                    <div style="margin-bottom: 16px; position: relative;">
+                      <div style="position: absolute; left: -10px; top: 0; width: 12px; height: 12px; background: var(--color-primary); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--color-primary);"></div>
+                      <div style="font-weight: 600; font-size: 13px;">2025-01-15 16:30</div>
+                      <div style="color: var(--text-color-secondary); font-size: 12px;">현장 출동 (김철수)</div>
+                    </div>
+
+                    <div style="position: relative;">
+                      <div style="position: absolute; left: -10px; top: 0; width: 12px; height: 12px; background: var(--color-warning); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px var(--color-warning);"></div>
+                      <div style="font-weight: 600; font-size: 13px;">2025-01-16 10:00</div>
+                      <div style="color: var(--text-color-secondary); font-size: 12px;">처리중 상태 업데이트</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 담당자 정보 -->
+              <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                  <div class="card-title">담당자 정보</div>
+                </div>
+                <div class="card-body">
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">이름</div>
+                    <div style="font-weight: 600;">김철수</div>
+                  </div>
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">부서</div>
+                    <div style="font-weight: 600;">교통관리과</div>
+                  </div>
+                  <div style="margin-bottom: 12px;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px;">연락처</div>
+                    <div style="font-weight: 600;">010-1234-5678</div>
+                  </div>
+                  <button class="btn btn-secondary" style="width: 100%;">담당자 변경</button>
+                </div>
+              </div>
+
+              <!-- 관련 민원 -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">관련 민원 (3건)</div>
+                </div>
+                <div class="card-body">
+                  <div style="margin-bottom: 12px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 2px;">2025-01-10</div>
+                    <div style="font-size: 13px; color: var(--color-primary);">CMP-2025-0008 "같은 지역 불법주차"</div>
+                  </div>
+                  <div style="margin-bottom: 12px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 2px;">2025-01-08</div>
+                    <div style="font-size: 13px; color: var(--color-primary);">CMP-2025-0003 "상업지구 충전구역"</div>
+                  </div>
+                  <div style="padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer;">
+                    <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 2px;">2025-01-05</div>
+                    <div style="font-size: 13px; color: var(--color-primary);">CMP-2025-0001 "보행안전 신호"</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">발생 위치</div>
+            </div>
+            <div class="card-body" style="height: 300px; padding: 0;">
+              <div id="map" style="height: 100%; border-radius: 4px;"></div>
+            </div>
+            <div style="padding: 12px; border-top: 1px solid var(--border-color); color: var(--text-color-secondary); font-size: 13px;">
+              주소: 제주시 건입동 상업지구 | 좌표: 33.5085°N, 126.5240°E
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 지도 생성
+      const map = createJejuMap('map', { zoom: 14 });
+
+      // 민원 발생지점 마커
+      L.marker([33.5085, 126.5240]).addTo(map)
+        .bindPopup('상업지구 앞 불법주차 발생지')
+        .openPopup();
+    });
+  </script>
+</body>
+</html>

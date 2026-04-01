@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개체명추출결과 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">Admin</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="사이드바 토글">
+          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+        </button>
+      </nav>
+
+      <div id="content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">데이터수집</span>
+          <span class="breadcrumb-item">개체명 추출</span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">개체명 추출 결과</h1>
+          <p class="page-subtitle">자동 인식된 개체(지명, 기관명, 날짜 등) 추출 결과 검증</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 개체 유형별 추출 건수 카드 (6개) -->
+          <div class="mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">📍</div>
+                </div>
+                <div class="kpi-title text-sm">지명</div>
+                <div class="kpi-value text-2xl">1,234</div>
+              </div>
+
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🛣️</div>
+                </div>
+                <div class="kpi-title text-sm">도로명</div>
+                <div class="kpi-value text-2xl">567</div>
+              </div>
+
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🏢</div>
+                </div>
+                <div class="kpi-title text-sm">기관명</div>
+                <div class="kpi-value text-2xl">890</div>
+              </div>
+
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">📅</div>
+                </div>
+                <div class="kpi-title text-sm">날짜</div>
+                <div class="kpi-value text-2xl">456</div>
+              </div>
+
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🚗</div>
+                </div>
+                <div class="kpi-title text-sm">교통키워드</div>
+                <div class="kpi-value text-2xl">678</div>
+              </div>
+
+              <div class="kpi-card small">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🚨</div>
+                </div>
+                <div class="kpi-title text-sm">안전키워드</div>
+                <div class="kpi-value text-2xl">345</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 메인 추출 결과 테이블 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-4">추출 결과 목록</h2>
+            <div class="overflow-x-auto">
+              <table class="data-table" id="nerTable">
+                <thead>
+                  <tr>
+                    <th>문서ID</th>
+                    <th>원문 스니펫</th>
+                    <th>추출 개체들</th>
+                    <th>검증상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5678</td>
+                    <td>제주시 애월읍의 1100로에서...</td>
+                    <td>
+                      <span class="badge info">[지명]제주시</span>
+                      <span class="badge" style="background-color: #F59E0B; color: white;">[도로명]1100로</span>
+                      <span class="badge success">[기관명]경찰서</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5679</td>
+                    <td>2026년 3월 25일 오전 10시에...</td>
+                    <td>
+                      <span class="badge" style="background-color: #FACC15; color: black;">[날짜]2026년 3월 25일</span>
+                      <span class="badge danger">[교통키워드]교통정체</span>
+                    </td>
+                    <td><span class="badge default">미검증</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5680</td>
+                    <td>응급상황 발생으로 119 출동...</td>
+                    <td>
+                      <span class="badge" style="background-color: #A78BFA; color: white;">[안전키워드]응급상황</span>
+                      <span class="badge danger">[기관명]119</span>
+                    </td>
+                    <td><span class="badge danger">오류</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5681</td>
+                    <td>제주시청 도로교통과에서 발표...</td>
+                    <td>
+                      <span class="badge info">[지명]제주시</span>
+                      <span class="badge success">[기관명]제주시청</span>
+                      <span class="badge success">[기관명]도로교통과</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5682</td>
+                    <td>고속도로 대란으로 도민들...</td>
+                    <td>
+                      <span class="badge danger">[교통키워드]고속도로</span>
+                      <span class="badge danger">[교통키워드]대란</span>
+                    </td>
+                    <td><span class="badge default">미검증</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 개체별 통계 -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">개체 유형별 빈도</h2>
+              <canvas id="entityChart"></canvas>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">오추출률 통계</h2>
+              <table style="width: 100%; font-size: 14px;">
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0; font-weight: 600;">개체 유형</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: 600;">오추출률</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0;">지명</td>
+                  <td style="padding: 8px 0; text-align: right; color: #16A34A;">2.1%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0;">도로명</td>
+                  <td style="padding: 8px 0; text-align: right; color: #EAB308;">5.3%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0;">기관명</td>
+                  <td style="padding: 8px 0; text-align: right; color: #16A34A;">1.8%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0;">날짜</td>
+                  <td style="padding: 8px 0; text-align: right; color: #16A34A;">0.5%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 8px 0;">교통키워드</td>
+                  <td style="padding: 8px 0; text-align: right; color: #DC2626;">4.2%</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;">안전키워드</td>
+                  <td style="padding: 8px 0; text-align: right; color: #EAB308;">3.7%</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('pipeline');
+
+      // 개체 유형별 빈도 바차트
+      const entityCtx = document.getElementById('entityChart').getContext('2d');
+      new Chart(entityCtx, {
+        type: 'bar',
+        data: {
+          labels: ['지명', '도로명', '기관명', '날짜', '교통키워드', '안전키워드'],
+          datasets: [{
+            label: '추출 건수',
+            data: [1234, 567, 890, 456, 678, 345],
+            backgroundColor: '#2563EB'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+
+      // 테이블 정렬
+      initTableSort('nerTable');
+    });
+
+    function showHighlightView(row) {
+      const docId = row.cells[0].textContent;
+      showModal(
+        '원문 하이라이트 뷰',
+        `
+          <div style="font-size: 14px; line-height: 1.8; padding: 10px; background: #f9fafb; border-radius: 8px;">
+            <p>
+              <mark style="background-color: #dbeafe; padding: 2px 4px; border-radius: 2px; cursor: help;" title="지명">제주시</mark>
+              <mark style="background-color: #fef3c7; padding: 2px 4px; border-radius: 2px; cursor: help;" title="도로명">애월읍</mark>의
+              <mark style="background-color: #fed7aa; padding: 2px 4px; border-radius: 2px; cursor: help;" title="도로명">1100로</mark>에서
+              <mark style="background-color: #dcfce7; padding: 2px 4px; border-radius: 2px; cursor: help;" title="안전키워드">교통사고</mark>가 발생했습니다.
+            </p>
+            <p style="margin-top: 12px;">
+              <mark style="background-color: #c7d2fe; padding: 2px 4px; border-radius: 2px; cursor: help;" title="기관명">제주경찰청</mark>에서
+              <mark style="background-color: #fef3c7; padding: 2px 4px; border-radius: 2px; cursor: help;" title="날짜">2026년 3월 25일</mark>
+              <mark style="background-color: #fccf31; padding: 2px 4px; border-radius: 2px; cursor: help;" title="교통키워드">신호정지</mark> 단속을 실시했습니다.
+            </p>
+          </div>
+          <div style="margin-top: 12px; font-size: 12px; color: #6B7280;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #dbeafe; border-radius: 2px;"></div>
+                <span>지명</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #fed7aa; border-radius: 2px;"></div>
+                <span>도로명</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #dcfce7; border-radius: 2px;"></div>
+                <span>기관명</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #fef3c7; border-radius: 2px;"></div>
+                <span>날짜</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #fccf31; border-radius: 2px;"></div>
+                <span>교통키워드</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <div style="width: 12px; height: 12px; background-color: #e9d5ff; border-radius: 2px;"></div>
+                <span>안전키워드</span>
+              </div>
+            </div>
+          </div>
+        `,
+        { confirmText: '닫기', showCancel: false }
+      );
+    }
+  </script>
+</body>
+</html>

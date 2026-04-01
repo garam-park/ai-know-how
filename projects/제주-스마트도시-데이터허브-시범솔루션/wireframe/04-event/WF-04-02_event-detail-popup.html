@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이벤트 상세 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .detail-header { display: flex; gap: 16px; padding: 20px; border-bottom: 1px solid var(--border-color); }
+    .detail-icon { width: 48px; height: 48px; background-color: var(--color-danger); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
+    .detail-title { font-size: 20px; font-weight: 700; color: var(--text-color); margin-bottom: 4px; }
+    .detail-time { font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px; }
+    .detail-location { font-size: 14px; color: var(--text-color); }
+    .severity-badge { background-color: var(--color-danger); color: white; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
+    .tab-headers { display: flex; border-bottom: 1px solid var(--border-color); }
+    .tab-header { padding: 12px 16px; cursor: pointer; border: none; background: none; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; color: var(--text-color-secondary); }
+    .tab-header.active { border-bottom-color: var(--color-primary); color: var(--color-primary); font-weight: 600; }
+    .tab-content { padding: 20px; }
+    .tab-content.hidden { display: none; }
+    .waveform-placeholder { height: 120px; background: linear-gradient(90deg, transparent, var(--color-danger) 50%, transparent); border-radius: 4px; position: relative; }
+    .progress-bar { height: 8px; background-color: var(--color-gray-200); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background-color: var(--color-primary); width: 95%; }
+    .analysis-item { padding: 12px; background-color: var(--color-gray-50); border-radius: 4px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+    .button-group { display: flex; gap: 8px; }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    @media (max-width: 768px) { .detail-header { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">이벤트 상세 정보</h1>
+          <p class="page-subtitle">발생된 이벤트의 세부사항 및 분석 결과 조회</p>
+        </div>
+
+        <div class="page-content">
+          <div style="max-width: 800px; margin: 0 auto; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow-md);">
+            <!-- 상단 기본정보 -->
+            <div class="detail-header">
+              <div class="detail-icon">🔥</div>
+              <div style="flex: 1;">
+                <div class="detail-title">화재경보 신호 수신</div>
+                <div class="detail-time">발생시각: 2024-04-01 14:25:30</div>
+                <div class="detail-location">신도심 A 주차장</div>
+              </div>
+              <div class="severity-badge">긴급</div>
+            </div>
+
+            <!-- 위치 정보 -->
+            <div style="padding: 0 20px 20px;">
+              <div style="background-color: var(--color-gray-50); padding: 12px; border-radius: 4px; font-size: 13px;">
+                <p style="margin: 4px 0;"><strong>상세주소:</strong> 제주시 연동로 123, 2층</p>
+                <p style="margin: 4px 0;"><strong>좌표:</strong> 33.5123°N, 126.5234°E</p>
+                <p style="margin: 4px 0;"><a href="#" style="color: var(--color-primary); text-decoration: none;">📍 지도에서 보기</a></p>
+              </div>
+            </div>
+
+            <!-- 탭 -->
+            <div>
+              <div class="tab-headers">
+                <button class="tab-header active" onclick="switchTab('cctv')">CCTV 스냅샷</button>
+                <button class="tab-header" onclick="switchTab('audio')">음향 파형</button>
+                <button class="tab-header" onclick="switchTab('analysis')">AI 분석 결과</button>
+              </div>
+
+              <!-- CCTV 탭 -->
+              <div id="tab-cctv" class="tab-content">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 240px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 12px;">
+                  <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+                    <div style="font-size: 12px;">CCTV 스냅샷 (실시간 이미지)</div>
+                  </div>
+                </div>
+                <div style="background-color: var(--color-gray-50); padding: 12px; border-radius: 4px; font-size: 13px; margin-bottom: 12px;">
+                  <p style="margin: 4px 0;"><strong>촬영시각:</strong> 2024-04-01 14:25:30</p>
+                  <p style="margin: 4px 0;"><strong>카메라ID:</strong> CAM-001-02</p>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">
+                  <i data-lucide="play" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  영상 재생
+                </button>
+              </div>
+
+              <!-- 음향 파형 탭 -->
+              <div id="tab-audio" class="tab-content hidden">
+                <div style="margin-bottom: 16px;">
+                  <div style="margin-bottom: 8px; font-size: 12px; color: var(--text-color-secondary);">음향 데이터 (14:25:25~14:25:35)</div>
+                  <div class="waveform-placeholder"></div>
+                </div>
+                <div style="background-color: var(--color-gray-50); padding: 12px; border-radius: 4px; font-size: 13px; margin-bottom: 12px;">
+                  <p style="margin: 4px 0;"><strong>녹음기기ID:</strong> MIC-001-03</p>
+                  <p style="margin: 4px 0;"><strong>녹음시각:</strong> 2024-04-01 14:25:25~14:25:35</p>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">
+                  <i data-lucide="play" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  음향 재생
+                </button>
+              </div>
+
+              <!-- AI 분석 결과 탭 -->
+              <div id="tab-analysis" class="tab-content hidden">
+                <h4 style="font-weight: 600; margin-bottom: 12px;">탐지 신뢰도</h4>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                  <div style="flex: 1;">
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width: 95%;"></div>
+                    </div>
+                  </div>
+                  <div style="font-weight: 600; color: var(--color-primary);">95%</div>
+                </div>
+
+                <h4 style="font-weight: 600; margin-bottom: 8px;">분류 근거</h4>
+                <div class="analysis-item">
+                  <strong>음향 특성:</strong> 4-8kHz 범위에서 알람음 패턴 감지
+                </div>
+                <div class="analysis-item">
+                  <strong>MFCC 특성:</strong> 표준 화재경보음과 98% 일치
+                </div>
+                <div class="analysis-item">
+                  <strong>시각적 분석:</strong> 밝기 이상 감지 안 됨 (오탐 가능성 낮음)
+                </div>
+              </div>
+            </div>
+
+            <!-- 대응 버튼 -->
+            <div style="padding: 20px; border-top: 1px solid var(--border-color);">
+              <div class="btn-group">
+                <button class="btn btn-secondary" onclick="confirmEvent()">
+                  <i data-lucide="check" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  확인
+                </button>
+                <button class="btn btn-primary" onclick="startResponse()">
+                  <i data-lucide="alert-circle" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  대응시작
+                </button>
+                <button class="btn" style="background-color: var(--color-warning); color: white;" onclick="reportFalse()">
+                  <i data-lucide="x" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  오탐보고
+                </button>
+                <button class="btn" style="background-color: var(--color-danger); color: white;" onclick="escalate()">
+                  <i data-lucide="alert-triangle" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                  에스컬레이션
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-header').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+      event.target.classList.add('active');
+    }
+
+    function confirmEvent() {
+      showToast('이벤트가 확인되었습니다.', 'success');
+    }
+
+    function startResponse() {
+      showToast('대응 프로세스가 시작되었습니다.', 'info');
+    }
+
+    function reportFalse() {
+      showModal('오탐 보고', '이 이벤트를 오탐으로 보고하시겠습니까?', {
+        onConfirm: () => showToast('오탐이 보고되었습니다.', 'success'),
+        confirmText: '보고'
+      });
+    }
+
+    function escalate() {
+      showModal('에스컬레이션', '상위 기관(소방서)에 보고하시겠습니까?', {
+        onConfirm: () => showToast('상위기관에 보고되었습니다.', 'success'),
+        confirmText: '보고'
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경보 단계별 현황 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .level-card { padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; text-align: center; }
+    .level-label { font-size: 14px; color: var(--text-color-secondary); margin-bottom: 8px; }
+    .level-number { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+    .level-text { font-size: 12px; color: var(--text-color-secondary); }
+    .timeline-container { padding: 24px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; }
+    .timeline-track { height: 40px; background-color: var(--color-gray-200); border-radius: 4px; position: relative; margin-bottom: 16px; }
+    .timeline-marker { position: absolute; width: 16px; height: 16px; border-radius: 50%; transform: translateY(12px); cursor: pointer; border: 2px solid white; }
+    .timeline-time { font-size: 12px; color: var(--color-gray-600); text-align: center; margin-top: 4px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+    .stat-box { padding: 12px; background-color: var(--color-gray-50); border-radius: 4px; }
+    .stat-label { font-size: 12px; color: var(--text-color-secondary); margin-bottom: 4px; }
+    .stat-value { font-size: 18px; font-weight: 700; }
+    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">경보 단계별 현황</h1>
+          <p class="page-subtitle">심각도별 이벤트 발생 현황 및 타임라인 분석</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 카드 -->
+          <div class="kpi-grid">
+            <div class="level-card" style="border-left: 4px solid var(--color-warning);">
+              <div class="level-label">주의</div>
+              <div class="level-number" style="color: var(--color-warning);">5</div>
+              <div class="level-text">현재 활성 중</div>
+            </div>
+            <div class="level-card" style="border-left: 4px solid #FF9500;">
+              <div class="level-label">경고</div>
+              <div class="level-number" style="color: #FF9500;">3</div>
+              <div class="level-text">현재 활성 중</div>
+            </div>
+            <div class="level-card" style="border-left: 4px solid var(--color-danger);">
+              <div class="level-label">위험</div>
+              <div class="level-number" style="color: var(--color-danger);">1</div>
+              <div class="level-text">현재 활성 중</div>
+            </div>
+            <div class="level-card" style="border-left: 4px solid #8B0000;">
+              <div class="level-label">긴급</div>
+              <div class="level-number" style="color: #8B0000;">0</div>
+              <div class="level-text">현재 활성 중</div>
+            </div>
+          </div>
+
+          <!-- 타임라인 -->
+          <div class="timeline-container">
+            <h3 class="heading-sm" style="margin-bottom: 16px;">경보 타임라인 (최근 24시간)</h3>
+            <div class="timeline-track">
+              <div class="timeline-marker" style="left: 10%; background-color: var(--color-warning); border-color: white;" title="10:15 - 주의"></div>
+              <div class="timeline-marker" style="left: 20%; background-color: var(--color-warning); border-color: white;" title="10:45 - 주의"></div>
+              <div class="timeline-marker" style="left: 35%; background-color: #FF9500; border-color: white;" title="12:30 - 경고"></div>
+              <div class="timeline-marker" style="left: 60%; background-color: var(--color-danger); border-color: white;" title="14:25 - 위험"></div>
+              <div class="timeline-marker" style="left: 88%; background-color: var(--color-warning); border-color: white;" title="18:00 - 주의"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-color-secondary);">
+              <span>00:00</span>
+              <span>06:00</span>
+              <span>12:00</span>
+              <span>18:00</span>
+              <span>23:59</span>
+            </div>
+          </div>
+
+          <!-- 탭 -->
+          <div id="tabContainer" style="background-color: white; border: 1px solid var(--border-color); border-radius: 8px;">
+            <div style="display: flex; border-bottom: 1px solid var(--border-color);">
+              <button class="tab-header active" onclick="switchAlertTab('warning')">주의 (5)</button>
+              <button class="tab-header" onclick="switchAlertTab('alert')">경고 (3)</button>
+              <button class="tab-header" onclick="switchAlertTab('danger')">위험 (1)</button>
+              <button class="tab-header" onclick="switchAlertTab('critical')">긴급 (0)</button>
+            </div>
+
+            <!-- 주의 탭 -->
+            <div id="tab-warning" class="tab-content" style="padding: 20px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>시각</th>
+                    <th>이벤트명</th>
+                    <th>주차장명</th>
+                    <th>상태</th>
+                    <th>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>10:15</td>
+                    <td>장기점유 감지</td>
+                    <td>신도심 A</td>
+                    <td><span class="badge default">미확인</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>10:45</td>
+                    <td>비정상 음향</td>
+                    <td>이도 B</td>
+                    <td><span class="badge success">확인됨</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>13:20</td>
+                    <td>과속 진입</td>
+                    <td>노형 C</td>
+                    <td><span class="badge info">해결</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>15:30</td>
+                    <td>출차 지연</td>
+                    <td>동문 D</td>
+                    <td><span class="badge default">미확인</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>16:45</td>
+                    <td>사용자 불만</td>
+                    <td>공항 E</td>
+                    <td><span class="badge warning">대응중</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 경고 탭 -->
+            <div id="tab-alert" class="tab-content hidden" style="padding: 20px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>시각</th>
+                    <th>이벤트명</th>
+                    <th>주차장명</th>
+                    <th>상태</th>
+                    <th>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>12:30</td>
+                    <td>무단주차 다발</td>
+                    <td>동문 D</td>
+                    <td><span class="badge warning">대응중</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>13:45</td>
+                    <td>센서 오류</td>
+                    <td>이도 B</td>
+                    <td><span class="badge default">미확인</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                  <tr>
+                    <td>14:10</td>
+                    <td>통신 지연</td>
+                    <td>성산포</td>
+                    <td><span class="badge success">확인됨</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 위험 탭 -->
+            <div id="tab-danger" class="tab-content hidden" style="padding: 20px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>시각</th>
+                    <th>이벤트명</th>
+                    <th>주차장명</th>
+                    <th>상태</th>
+                    <th>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>14:25</td>
+                    <td>화재경보 신호</td>
+                    <td>신도심 A</td>
+                    <td><span class="badge warning">대응중</span></td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 긴급 탭 -->
+            <div id="tab-critical" class="tab-content hidden" style="padding: 20px;">
+              <div style="text-align: center; padding: 40px; color: var(--text-color-secondary);">
+                <div style="font-size: 48px; margin-bottom: 16px;">✓</div>
+                <p style="font-size: 14px;">현재 긴급 상황이 없습니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 통계 패널 -->
+          <div style="margin-top: 24px;">
+            <h3 class="heading-sm" style="margin-bottom: 16px;">통계</h3>
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-label">일평균 경보 횟수</div>
+                <div class="stat-value" style="color: var(--color-primary);">12.4건/일</div>
+                <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">↓ 0.8건 (전일 대비)</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">평균 대응시간</div>
+                <div class="stat-value" style="color: var(--color-primary);">8분 15초</div>
+                <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">↓ 1분 30초 (전일 대비)</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">오탐률</div>
+                <div class="stat-value" style="color: var(--color-primary);">12.3%</div>
+                <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">↓ 2.1% (전일 대비)</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">해결율</div>
+                <div class="stat-value" style="color: var(--color-success);">98.7%</div>
+                <div style="font-size: 11px; color: var(--color-success); margin-top: 4px;">↑ 0.3% (전일 대비)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function switchAlertTab(level) {
+      document.querySelectorAll('#tabContainer .tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#tabContainer .tab-header').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + level).classList.remove('hidden');
+      event.target.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+    });
+  </script>
+</body>
+</html>

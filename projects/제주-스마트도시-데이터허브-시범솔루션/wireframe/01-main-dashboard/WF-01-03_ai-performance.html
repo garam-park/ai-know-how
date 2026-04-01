@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 솔루션 성과 요약 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">사</div>
+          <div class="user-info">
+            <div class="user-name">사용자</div>
+            <div class="user-role">관리자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">AI 솔루션 성과 요약</div>
+          <div class="page-subtitle">AI 모델별 성능 지표 및 분석 결과</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 제어 영역 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <select class="filter-select" id="periodSelect">
+                <option value="today">금일</option>
+                <option value="week">주간</option>
+                <option value="month">월간</option>
+              </select>
+            </div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="refreshDashboard()">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                새로고침
+              </button>
+            </div>
+          </div>
+
+          <!-- AI 모델 성과 카드 (1행 5열) -->
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- OCR 모델 -->
+            <div class="card">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">OCR</div>
+                <div style="width: 100px; height: 100px; margin: 0 auto 12px; position: relative;">
+                  <canvas id="gaugeOCR"></canvas>
+                </div>
+                <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #2563EB;">96.8%</div>
+                  <div style="font-size: 12px;">정확도</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 12px 0;">
+                <div style="font-size: 12px; color: #6B7280;">
+                  <div>처리량: 2,543건</div>
+                  <div>응답: 1.2초</div>
+                  <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                    <span style="color: #16A34A;">정상</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STT 모델 -->
+            <div class="card">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">STT</div>
+                <div style="width: 100px; height: 100px; margin: 0 auto 12px; position: relative;">
+                  <canvas id="gaugeSTT"></canvas>
+                </div>
+                <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #2563EB;">94.3%</div>
+                  <div style="font-size: 12px;">정확도</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 12px 0;">
+                <div style="font-size: 12px; color: #6B7280;">
+                  <div>처리량: 1,856건</div>
+                  <div>응답: 2.8초</div>
+                  <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                    <span style="color: #16A34A;">정상</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LLM 분류 모델 -->
+            <div class="card">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">LLM 분류</div>
+                <div style="width: 100px; height: 100px; margin: 0 auto 12px; position: relative;">
+                  <canvas id="gaugeLLMClass"></canvas>
+                </div>
+                <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #2563EB;">92.5%</div>
+                  <div style="font-size: 12px;">정확도</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 12px 0;">
+                <div style="font-size: 12px; color: #6B7280;">
+                  <div>처리량: 4,721건</div>
+                  <div>응답: 0.8초</div>
+                  <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                    <span style="color: #16A34A;">정상</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LLM 요약 모델 -->
+            <div class="card">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">LLM 요약</div>
+                <div style="width: 100px; height: 100px; margin: 0 auto 12px; position: relative;">
+                  <canvas id="gaugeLLMSum"></canvas>
+                </div>
+                <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #2563EB;">88.9%</div>
+                  <div style="font-size: 12px;">정확도</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 12px 0;">
+                <div style="font-size: 12px; color: #6B7280;">
+                  <div>처리량: 2,105건</div>
+                  <div>응답: 1.5초</div>
+                  <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #EAB308; border-radius: 50%; margin-right: 4px;"></span>
+                    <span style="color: #EAB308;">주의</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 이상탐지 모델 -->
+            <div class="card">
+              <div style="text-align: center;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">이상탐지</div>
+                <div style="width: 100px; height: 100px; margin: 0 auto 12px; position: relative;">
+                  <canvas id="gaugeAnomaly"></canvas>
+                </div>
+                <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 600; color: #2563EB;">97.2%</div>
+                  <div style="font-size: 12px;">정확도</div>
+                </div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 12px 0;">
+                <div style="font-size: 12px; color: #6B7280;">
+                  <div>처리량: 8,934건</div>
+                  <div>응답: 0.3초</div>
+                  <div style="margin-top: 8px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                    <span style="color: #16A34A;">정상</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 성능 분석 영역 (2열) -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <!-- 좌측: 주간 성능 추이 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">주간 성능 추이</div>
+                <div class="card-subtitle">평균 정확도 (%) 추이</div>
+              </div>
+              <div class="card-body">
+                <canvas id="weeklyTrendChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <!-- 우측: 모델별 에러율 비교 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">모델별 에러율 비교</div>
+                <div class="card-subtitle">낮을수록 성능 우수</div>
+              </div>
+              <div class="card-body">
+                <canvas id="errorRateChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('main');
+      initGaugeCharts();
+      initTrendCharts();
+    });
+
+    // 게이지 차트 초기화
+    function initGaugeCharts() {
+      createGaugeChart('gaugeOCR', 96.8);
+      createGaugeChart('gaugeSTT', 94.3);
+      createGaugeChart('gaugeLLMClass', 92.5);
+      createGaugeChart('gaugeLLMSum', 88.9);
+      createGaugeChart('gaugeAnomaly', 97.2);
+    }
+
+    // 게이지 차트 생성 헬퍼
+    function createGaugeChart(canvasId, value) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [value, 100 - value],
+            backgroundColor: [value >= 90 ? '#16A34A' : value >= 85 ? '#EAB308' : '#DC2626', '#E5E7EB'],
+            borderColor: 'white',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          }
+        }
+      });
+    }
+
+    // 트렌드 차트 초기화
+    function initTrendCharts() {
+      // 주간 성능 추이
+      const weeklyData = {
+        labels: ['3/26', '3/27', '3/28', '3/29', '3/30', '3/31', '4/1'],
+        datasets: [
+          { label: 'OCR', data: [96.5, 96.7, 96.9, 96.8, 96.6, 96.7, 96.8], borderColor: '#2563EB' },
+          { label: 'STT', data: [93.8, 94.1, 94.2, 94.0, 93.9, 94.2, 94.3], borderColor: '#7C3AED' },
+          { label: 'LLM 분류', data: [92.1, 92.3, 92.4, 92.2, 92.0, 92.5, 92.5], borderColor: '#F59E0B' },
+          { label: 'LLM 요약', data: [87.5, 88.2, 89.1, 88.8, 88.5, 88.9, 88.9], borderColor: '#16A34A' },
+          { label: '이상탐지', data: [96.9, 97.0, 97.1, 97.2, 97.0, 97.2, 97.2], borderColor: '#DC2626' }
+        ]
+      };
+      createLineChart('weeklyTrendChart', weeklyData.labels, weeklyData.datasets);
+
+      // 에러율 비교
+      const errorData = {
+        labels: ['이상탐지', 'OCR', 'STT', 'LLM 분류', 'LLM 요약'],
+        datasets: [
+          { label: '에러율 (%)', data: [2.8, 3.2, 5.7, 7.5, 11.1], backgroundColor: '#3B82F6' }
+        ]
+      };
+      createHorizontalBarChart('errorRateChart', errorData.labels, errorData.datasets);
+    }
+
+    // 새로고침 버튼
+    function refreshDashboard() {
+      showToast('대시보드가 새로고침되었습니다.', 'info');
+    }
+  </script>
+</body>
+</html>

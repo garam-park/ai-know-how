@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STT처리현황 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">Admin</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="사이드바 토글">
+          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+        </button>
+      </nav>
+
+      <div id="content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">데이터수집</span>
+          <span class="breadcrumb-item">STT 처리</span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">STT 처리 현황</h1>
+          <p class="page-subtitle">음성 데이터 변환 및 인식 정확도 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 KPI 카드 (4개) -->
+          <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🎙️</div>
+                </div>
+                <div class="kpi-title">일간변환건수</div>
+                <div class="kpi-value">3,456</div>
+                <div class="kpi-change positive">
+                  <span>↑ 8.3%</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">📊</div>
+                </div>
+                <div class="kpi-title">평균WER</div>
+                <div class="kpi-value" style="color: #16A34A;">8.5%</div>
+                <div class="kpi-change positive">
+                  <span>↓ 0.8%</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">📋</div>
+                </div>
+                <div class="kpi-title">평균CER</div>
+                <div class="kpi-value" style="color: #16A34A;">5.2%</div>
+                <div class="kpi-change positive">
+                  <span>↓ 0.5%</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">🔒</div>
+                </div>
+                <div class="kpi-title">PII마스킹건수</div>
+                <div class="kpi-value">234</div>
+                <div class="kpi-change">
+                  <span style="color: #6B7280;">→ 동일</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 메인 변환 결과 테이블 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-4">변환 결과 목록</h2>
+            <div class="overflow-x-auto">
+              <table class="data-table" id="sttTable">
+                <thead>
+                  <tr>
+                    <th>음성ID</th>
+                    <th>통화일시</th>
+                    <th>길이</th>
+                    <th>화자수</th>
+                    <th>WER (%)</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showSpeechDetail(this)">
+                    <td>CALL-20260325-0001</td>
+                    <td>2026-03-25 14:32:45</td>
+                    <td>05:23</td>
+                    <td>2명</td>
+                    <td>8.5</td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showSpeechDetail(this)">
+                    <td>CALL-20260325-0002</td>
+                    <td>2026-03-25 14:28:20</td>
+                    <td>03:45</td>
+                    <td>2명</td>
+                    <td>9.2</td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showSpeechDetail(this)">
+                    <td>CALL-20260325-0003</td>
+                    <td>2026-03-25 14:15:10</td>
+                    <td>07:12</td>
+                    <td>3명</td>
+                    <td>6.8</td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" style="background-color: #dbeafe;">
+                    <td>CALL-20260325-0004</td>
+                    <td>2026-03-25 14:05:30</td>
+                    <td>04:56</td>
+                    <td>2명</td>
+                    <td>-</td>
+                    <td><span class="badge info">처리중</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showSpeechDetail(this)">
+                    <td>CALL-20260325-0005</td>
+                    <td>2026-03-25 13:55:45</td>
+                    <td>02:30</td>
+                    <td>2명</td>
+                    <td>7.1</td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" style="background-color: #f8d7da;">
+                    <td>CALL-20260325-0006</td>
+                    <td>2026-03-25 13:45:00</td>
+                    <td>06:15</td>
+                    <td>2명</td>
+                    <td>-</td>
+                    <td><span class="badge danger">실패</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 사투리 인식 정확도 통계 -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">지역별 인식 정확도</h2>
+              <canvas id="dialectChart"></canvas>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">처리 상태 분포</h2>
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('pipeline');
+
+      // 지역별 인식 정확도 바차트
+      const dialectCtx = document.getElementById('dialectChart').getContext('2d');
+      new Chart(dialectCtx, {
+        type: 'bar',
+        data: {
+          labels: ['경남 사투리', '강원 사투리', '경기 사투리', '전라 사투리', '제주 사투리', '표준어'],
+          datasets: [{
+            label: '인식 정확도 (%)',
+            data: [92, 88, 95, 86, 84, 96],
+            backgroundColor: '#2563EB'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+
+      // 처리 상태 분포 파이차트
+      const statusCtx = document.getElementById('statusChart').getContext('2d');
+      new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['완료', '처리중', '실패'],
+          datasets: [{
+            data: [3435, 15, 6],
+            backgroundColor: ['#16A34A', '#2563EB', '#DC2626'],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right'
+            }
+          }
+        }
+      });
+
+      // 테이블 정렬
+      initTableSort('sttTable');
+    });
+
+    function showSpeechDetail(row) {
+      const callId = row.cells[0].textContent;
+      showModal(
+        '음성 변환 결과 상세',
+        `
+          <div style="margin-top: 10px;">
+            <h3 style="font-weight: 600; margin-bottom: 10px;">음성 파형</h3>
+            <div style="background: #e5e7eb; border-radius: 8px; padding: 20px 10px; text-align: center; margin-bottom: 16px; height: 120px; display: flex; align-items: center; justify-content: center;">
+              <svg width="100%" height="60" viewBox="0 0 300 60" style="max-width: 100%;">
+                <line x1="10" y1="30" x2="10" y2="20" stroke="#2563EB" stroke-width="2"/>
+                <line x1="20" y1="30" x2="20" y2="10" stroke="#2563EB" stroke-width="2"/>
+                <line x1="30" y1="30" x2="30" y2="25" stroke="#2563EB" stroke-width="2"/>
+                <line x1="40" y1="30" x2="40" y2="5" stroke="#2563EB" stroke-width="2"/>
+                <line x1="50" y1="30" x2="50" y2="15" stroke="#2563EB" stroke-width="2"/>
+                <line x1="60" y1="30" x2="60" y2="8" stroke="#2563EB" stroke-width="2"/>
+                <line x1="70" y1="30" x2="70" y2="22" stroke="#2563EB" stroke-width="2"/>
+                <line x1="80" y1="30" x2="80" y2="12" stroke="#2563EB" stroke-width="2"/>
+                <line x1="90" y1="30" x2="90" y2="18" stroke="#2563EB" stroke-width="2"/>
+                <line x1="100" y1="30" x2="100" y2="28" stroke="#2563EB" stroke-width="2"/>
+                <line x1="110" y1="30" x2="110" y2="6" stroke="#2563EB" stroke-width="2"/>
+                <line x1="120" y1="30" x2="120" y2="20" stroke="#2563EB" stroke-width="2"/>
+              </svg>
+            </div>
+
+            <h3 style="font-weight: 600; margin-bottom: 10px;">변환 텍스트</h3>
+            <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; font-size: 14px; line-height: 1.8;">
+              <p style="margin-bottom: 8px;"><span style="background-color: #dbeafe; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #2563EB;">[화자 1]</span> 안녕하세요, 민원센터입니다.</p>
+              <p style="margin-bottom: 8px;"><span style="background-color: #dcfce7; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #16A34A;">[화자 2]</span> 안녕하세요, 민원을 접수하려고 합니다.</p>
+              <p style="margin-bottom: 8px;"><span style="background-color: #dbeafe; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #2563EB;">[화자 1]</span> 네, 성함과 주민번호 <mark style="background-color: #fef3c7;">***-****-****</mark> 를 말씀해주시겠어요?</p>
+              <p><span style="background-color: #dcfce7; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #16A34A;">[화자 2]</span> 네, 저는 김영희이고, 전화번호는 <mark style="background-color: #fef3c7;">010-****-****</mark> 입니다.</p>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background: #f0fdf4; border-left: 4px solid #16A34A; border-radius: 4px;">
+              <strong style="color: #16A34A;">사투리 인식:</strong> 경남 사투리 92% 정확도
+            </div>
+          </div>
+        `,
+        { confirmText: '닫기', showCancel: false }
+      );
+    }
+  </script>
+</body>
+</html>

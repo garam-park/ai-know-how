@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터 카탈로그 검색 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <!-- Content -->
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">데이터 카탈로그</h1>
+          <p class="page-subtitle">제주 데이터허브의 모든 데이터셋을 검색하고 탐색합니다</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 우측 버튼 -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="alert('데이터셋 등록 기능입니다')">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              데이터셋 등록
+            </button>
+          </div>
+
+          <!-- 중앙 검색 영역 -->
+          <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); padding: var(--spacing-3xl) var(--spacing-xl); box-shadow: var(--shadow-sm); margin-bottom: var(--spacing-2xl); text-align: center;">
+            <h2 style="font-size: var(--font-heading-md); margin-bottom: var(--spacing-lg); color: var(--text-color);">찾고 싶은 데이터를 검색하세요</h2>
+
+            <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+              <input type="text" class="form-input" placeholder="찾고 싶은 데이터를 자연어로 검색하세요" style="flex: 1;">
+              <button class="btn btn-primary">
+                <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                검색
+              </button>
+            </div>
+
+            <!-- 인기 태그 -->
+            <div>
+              <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">인기 검색어:</p>
+              <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); justify-content: center;">
+                <span class="badge info" style="cursor: pointer;">민원</span>
+                <span class="badge info" style="cursor: pointer;">교통</span>
+                <span class="badge info" style="cursor: pointer;">안전</span>
+                <span class="badge info" style="cursor: pointer;">기상</span>
+                <span class="badge info" style="cursor: pointer;">통계</span>
+                <span class="badge info" style="cursor: pointer;">실시간</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 3개 섹션 -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--spacing-lg);">
+            <!-- 1. 인기 데이터셋 -->
+            <div style="grid-column: 1 / -1;">
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">인기 데이터셋</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                <div class="card" style="cursor: pointer;" onclick="alert('데이터셋 상세 페이지로 이동')">
+                  <div class="card-header">
+                    <div class="card-title">실시간 도로 교통 정보</div>
+                    <div class="card-subtitle">제주시청 교통과</div>
+                  </div>
+                  <div class="card-body">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); line-height: 1.5;">
+                      제주시 전역 도로의 실시간 교통 상황 데이터입니다.
+                    </p>
+                    <div style="margin-top: var(--spacing-md); font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                      <i data-lucide="download" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                      조회수: 12,450
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="cursor: pointer;" onclick="alert('데이터셋 상세 페이지로 이동')">
+                  <div class="card-header">
+                    <div class="card-title">민원 통계 현황</div>
+                    <div class="card-subtitle">제주시청 민원과</div>
+                  </div>
+                  <div class="card-body">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); line-height: 1.5;">
+                      월별, 유형별 민원 처리 통계 데이터입니다.
+                    </p>
+                    <div style="margin-top: var(--spacing-md); font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                      <i data-lucide="download" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                      조회수: 8,230
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="cursor: pointer;" onclick="alert('데이터셋 상세 페이지로 이동')">
+                  <div class="card-header">
+                    <div class="card-title">기상 관측 데이터</div>
+                    <div class="card-subtitle">기상청</div>
+                  </div>
+                  <div class="card-body">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); line-height: 1.5;">
+                      제주도의 기온, 강수량, 풍속 등 기상 관측 데이터입니다.
+                    </p>
+                    <div style="margin-top: var(--spacing-md); font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                      <i data-lucide="download" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                      조회수: 6,890
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="cursor: pointer;" onclick="alert('데이터셋 상세 페이지로 이동')">
+                  <div class="card-header">
+                    <div class="card-title">전기차 충전소 정보</div>
+                    <div class="card-subtitle">제주시청 교통과</div>
+                  </div>
+                  <div class="card-body">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); line-height: 1.5;">
+                      제주지역 전기차 충전소 위치 및 이용정보입니다.
+                    </p>
+                    <div style="margin-top: var(--spacing-md); font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                      <i data-lucide="download" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i>
+                      조회수: 5,120
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 최근 등록 -->
+            <div>
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">최근 등록</h3>
+              <div class="card">
+                <div style="padding: var(--spacing-lg);">
+                  <div class="data-table" style="margin: 0; box-shadow: none; border: none;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-color); cursor: pointer;">
+                          <td style="padding: var(--spacing-md);">전기차 충전소 현황</td>
+                          <td style="padding: var(--spacing-md); text-align: right; font-size: var(--font-body-sm); color: var(--text-color-secondary);">2026-03-25</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color); cursor: pointer;">
+                          <td style="padding: var(--spacing-md);">지역 상점 개수</td>
+                          <td style="padding: var(--spacing-md); text-align: right; font-size: var(--font-body-sm); color: var(--text-color-secondary);">2026-03-23</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color); cursor: pointer;">
+                          <td style="padding: var(--spacing-md);">신고 민원 내역</td>
+                          <td style="padding: var(--spacing-md); text-align: right; font-size: var(--font-body-sm); color: var(--text-color-secondary);">2026-03-20</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color); cursor: pointer;">
+                          <td style="padding: var(--spacing-md);">버스 운행 현황</td>
+                          <td style="padding: var(--spacing-md); text-align: right; font-size: var(--font-body-sm); color: var(--text-color-secondary);">2026-03-18</td>
+                        </tr>
+                        <tr style="cursor: pointer;">
+                          <td style="padding: var(--spacing-md);">관광객 통계</td>
+                          <td style="padding: var(--spacing-md); text-align: right; font-size: var(--font-body-sm); color: var(--text-color-secondary);">2026-03-15</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. 카테고리별 탐색 -->
+            <div style="grid-column: span 1;">
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">카테고리별 탐색</h3>
+              <div id="categoryAccordion" class="accordion">
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="this.classList.toggle('active')">
+                    <div class="accordion-title">조직별</div>
+                    <i class="accordion-icon" data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+                  </div>
+                  <div class="accordion-content">
+                    <ul style="list-style: none; padding-left: 0;">
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">교통과</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">안전과</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">민원과</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">환경과</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="this.classList.toggle('active')">
+                    <div class="accordion-title">분야별</div>
+                    <i class="accordion-icon" data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+                  </div>
+                  <div class="accordion-content">
+                    <ul style="list-style: none; padding-left: 0;">
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">교통</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">안전</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">민원</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">기상</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">통계</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="this.classList.toggle('active')">
+                    <div class="accordion-title">주제별</div>
+                    <i class="accordion-icon" data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+                  </div>
+                  <div class="accordion-content">
+                    <ul style="list-style: none; padding-left: 0;">
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">실시간</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">통계</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">지형</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">날씨</li>
+                      <li style="padding: var(--spacing-sm) 0; cursor: pointer; color: var(--color-primary);">시설</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    // 페이지 초기화
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대량 민원 요약 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .config-form {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group.full {
+      grid-template-columns: 1fr;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .form-input, .form-select {
+      padding: 10px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .form-select {
+      cursor: pointer;
+    }
+    .multi-select-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px;
+      background: #F9FAFB;
+      border-radius: 6px;
+      border: 1px solid #E5E7EB;
+    }
+    .multi-select-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #DBEAFE;
+      color: #0369A1;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .multi-select-tag .remove {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .submit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .submit-button:hover {
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+    .submit-button.loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .accordion-item {
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 16px;
+      background: #F9FAFB;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: #1F2937;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover {
+      background: #F3F4F6;
+    }
+    .accordion-header.open {
+      background: #EFF6FF;
+      color: #2563EB;
+    }
+    .accordion-body {
+      padding: 0 16px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s, padding 0.3s;
+    }
+    .accordion-body.open {
+      max-height: 500px;
+      padding: 16px;
+      border-top: 1px solid #E5E7EB;
+    }
+    .accordion-body-content {
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.6;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #6B7280;
+    }
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .keyword-item {
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #DBEAFE 0%, #BAE6FD 100%);
+      color: #0369A1;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .keyword-item.high {
+      background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+      color: white;
+    }
+    .summary-history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .summary-history-table th {
+      background: #F3F4F6;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #374151;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .summary-history-table td {
+      padding: 12px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 13px;
+      color: #4B5563;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">대량 민원 요약</div>
+          <div class="page-subtitle">기간별, 유형별 대량 민원의 자동 요약 생성 및 분석</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 설정 폼 -->
+          <div class="config-form">
+            <div class="form-group">
+              <div>
+                <div class="form-label">시작 날짜</div>
+                <input type="date" class="form-input" value="2026-03-01">
+              </div>
+              <div>
+                <div class="form-label">종료 날짜</div>
+                <input type="date" class="form-input" value="2026-03-31">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div>
+                <div class="form-label">최소 건수</div>
+                <input type="number" class="form-input" value="5" min="1">
+              </div>
+              <div>
+                <div class="form-label">지역</div>
+                <select class="form-select">
+                  <option selected>제주시 전체</option>
+                  <option>제주시</option>
+                  <option>서귀포시</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <div>
+                <div class="form-label">민원 유형 (다중선택)</div>
+                <div class="multi-select-container">
+                  <div class="multi-select-tag">교통 <span class="remove" onclick="removeTag(this)">×</span></div>
+                  <div class="multi-select-tag">시설 <span class="remove" onclick="removeTag(this)">×</span></div>
+                  <div class="multi-select-tag">환경 <span class="remove" onclick="removeTag(this)">×</span></div>
+                  <select class="form-select" style="flex: 1; max-width: 200px;" onchange="addTag(this)">
+                    <option value="">+ 유형 추가</option>
+                    <option>상수도</option>
+                    <option>안전</option>
+                    <option>기타</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button class="submit-button" onclick="generateSummary()">
+              <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+              요약 생성
+            </button>
+          </div>
+
+          <!-- 결과 영역 (생성 후 표시) -->
+          <div id="resultArea" style="display: none;">
+            <!-- 통계 카드 -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+              <div class="stat-card">
+                <div class="stat-value">342</div>
+                <div class="stat-label">총 처리 건수</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">주요 카테고리</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">94%</div>
+                <div class="stat-label">평균 신뢰도</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">2m 34s</div>
+                <div class="stat-label">평균 처리시간</div>
+              </div>
+            </div>
+
+            <!-- 분포 차트 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">유형별 분포</div>
+                </div>
+                <div class="card-body">
+                  <canvas id="typeDistributionChart" style="max-height: 300px;"></canvas>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">주요 키워드</div>
+                </div>
+                <div class="card-body">
+                  <div class="keyword-cloud">
+                    <div class="keyword-item high">주차장</div>
+                    <div class="keyword-item high">부족</div>
+                    <div class="keyword-item high">도로</div>
+                    <div class="keyword-item">파손</div>
+                    <div class="keyword-item">교통</div>
+                    <div class="keyword-item">민원</div>
+                    <div class="keyword-item">혼잡</div>
+                    <div class="keyword-item">수리</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 아코디언 요약 -->
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <div class="card-title">카테고리별 3단계 요약</div>
+                <div class="card-subtitle">한줄 / 핵심 / 상세 요약</div>
+              </div>
+              <div class="card-body">
+                <!-- 아코디언 1 -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>교통 관리 (156건)</span>
+                    <i data-lucide="chevron-down" style="width: 18px; height: 18px;"></i>
+                  </div>
+                  <div class="accordion-body">
+                    <div class="accordion-body-content">
+                      <div style="margin-bottom: 12px;">
+                        <strong>한줄요약:</strong><br>
+                        신도심 주차장 부족으로 인한 불법주차 및 교통혼잡 민원 다수 발생
+                      </div>
+                      <div style="margin-bottom: 12px;">
+                        <strong>핵심요약:</strong><br>
+                        제주 신도심 지역의 주차장 부족 문제가 주요 민원 원인으로 지적되고 있습니다.
+                        특히 상업지구 및 관광지 주변 불법주차 증가로 교통흐름이 악화되고 있는 상황입니다.
+                        주차장 확충 및 스마트 주차시스템 도입이 시급한 것으로 나타났습니다.
+                      </div>
+                      <div>
+                        <strong>상세요약:</strong><br>
+                        <ul style="margin: 8px 0 0 20px; list-style: disc;">
+                          <li>주차장 부족: 128건 (82.1%)</li>
+                          <li>불법주차 단속 요청: 18건 (11.5%)</li>
+                          <li>도로 혼잡 민원: 10건 (6.4%)</li>
+                          <li>평균 만족도: 3.2/5.0</li>
+                          <li>주요 지역: 신도심 상업지구, 관광지</li>
+                          <li>권장 조치: 임시주차장 확충, 대중교통 강화</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 아코디언 2 -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>시설 관리 (98건)</span>
+                    <i data-lucide="chevron-down" style="width: 18px; height: 18px;"></i>
+                  </div>
+                  <div class="accordion-body">
+                    <div class="accordion-body-content">
+                      <div style="margin-bottom: 12px;">
+                        <strong>한줄요약:</strong><br>
+                        노후 도로 포트홀 및 보도 파손 민원 다수 접수
+                      </div>
+                      <div style="margin-bottom: 12px;">
+                        <strong>핵심요약:</strong><br>
+                        도시 곳곳의 도로 포트홀과 보도 파손이 안전 문제로 지적되고 있습니다.
+                        관광지 진입로와 주거지역 도로 상태 개선이 시급합니다.
+                      </div>
+                      <div>
+                        <strong>상세요약:</strong><br>
+                        <ul style="margin: 8px 0 0 20px; list-style: disc;">
+                          <li>도로 포트홀: 56건 (57.1%)</li>
+                          <li>보도 파손: 28건 (28.6%)</li>
+                          <li>우수관 파손: 14건 (14.3%)</li>
+                          <li>평균 만족도: 3.5/5.0</li>
+                          <li>응급도: 높음</li>
+                          <li>권장 조치: 순환적 도로 점검 및 응급 복구 강화</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 아코디언 3 -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>환경 (88건)</span>
+                    <i data-lucide="chevron-down" style="width: 18px; height: 18px;"></i>
+                  </div>
+                  <div class="accordion-body">
+                    <div class="accordion-body-content">
+                      <div style="margin-bottom: 12px;">
+                        <strong>한줄요약:</strong><br>
+                        수질 오염 및 대기 오염 민원 집중
+                      </div>
+                      <div style="margin-bottom: 12px;">
+                        <strong>핵심요약:</strong><br>
+                        제주 동부 지역 수질 오염 문제와 관광지 인근 대기질 악화가 주요 환경 민원입니다.
+                      </div>
+                      <div>
+                        <strong>상세요약:</strong><br>
+                        <ul style="margin: 8px 0 0 20px; list-style: disc;">
+                          <li>수질 오염: 52건 (59.1%)</li>
+                          <li>대기 오염: 28건 (31.8%)</li>
+                          <li>폐기물 관리: 8건 (9.1%)</li>
+                          <li>평균 만족도: 3.1/5.0</li>
+                          <li>권장 조치: 수질 검사 강화, 배출 시설 단속</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 이력 테이블 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">요약 생성 이력</div>
+                <div class="card-subtitle">최근 10개 항목</div>
+              </div>
+              <div class="card-body">
+                <table class="summary-history-table">
+                  <thead>
+                    <tr>
+                      <th>기간</th>
+                      <th>유형</th>
+                      <th>건수</th>
+                      <th>생성일시</th>
+                      <th>상태</th>
+                      <th>작업</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>2026-03-01 ~ 03-31</td>
+                      <td>교통, 시설, 환경</td>
+                      <td>342</td>
+                      <td>2026-04-02 16:45</td>
+                      <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
+                      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
+                    </tr>
+                    <tr>
+                      <td>2026-02-01 ~ 02-28</td>
+                      <td>전체</td>
+                      <td>285</td>
+                      <td>2026-03-02 15:20</td>
+                      <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
+                      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
+                    </tr>
+                    <tr>
+                      <td>2026-01-01 ~ 01-31</td>
+                      <td>교통, 시설</td>
+                      <td>298</td>
+                      <td>2026-02-01 14:10</td>
+                      <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
+                      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+    });
+
+    function generateSummary() {
+      const btn = event.target.closest('.submit-button');
+      btn.classList.add('loading');
+      btn.innerHTML = '<div class="loading-spinner"></div>요약 생성 중...';
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i data-lucide="zap" style="width: 18px; height: 18px;"></i>요약 생성';
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+
+        initTypeChart();
+        showToast('342건의 민원 요약이 생성되었습니다.', 'success');
+      }, 2000);
+    }
+
+    function initTypeChart() {
+      const ctx = document.getElementById('typeDistributionChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['교통 (156건)', '시설 (98건)', '환경 (88건)'],
+          datasets: [{
+            data: [156, 98, 88],
+            backgroundColor: ['#2563EB', '#7C3AED', '#DC2626'],
+            borderColor: 'white',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    function toggleAccordion(el) {
+      const header = el;
+      const body = header.nextElementSibling;
+      const isOpen = header.classList.contains('open');
+
+      document.querySelectorAll('.accordion-header').forEach(h => {
+        h.classList.remove('open');
+        h.nextElementSibling.classList.remove('open');
+      });
+
+      if (!isOpen) {
+        header.classList.add('open');
+        body.classList.add('open');
+      }
+    }
+
+    function addTag(el) {
+      if (el.value) {
+        showToast(el.value + ' 유형이 추가되었습니다.', 'info');
+        el.value = '';
+      }
+    }
+
+    function removeTag(el) {
+      el.closest('.multi-select-tag').remove();
+    }
+  </script>
+</body>
+</html>

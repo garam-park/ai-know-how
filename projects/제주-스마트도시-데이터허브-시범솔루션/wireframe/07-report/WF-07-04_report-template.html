@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보고서 템플릿 관리 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .page-content { padding: 20px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .new-template-btn { background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .new-template-btn:hover { background: #2563eb; }
+    .search-box { border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 13px; width: 200px; }
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .template-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .template-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); transform: translateY(-4px); }
+    .template-preview { width: 100%; height: 160px; background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #e5e7eb; position: relative; }
+    .preview-icon { font-size: 48px; opacity: 0.3; }
+    .template-badge { position: absolute; top: 8px; right: 8px; background: #eff6ff; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .template-info { padding: 16px; }
+    .template-name { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 8px; }
+    .template-desc { font-size: 12px; color: #6b7280; margin-bottom: 8px; line-height: 1.4; }
+    .template-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .tag-badge { background: #f3f4f6; color: #4b5563; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 500; }
+    .template-meta { font-size: 11px; color: #9ca3af; margin-bottom: 12px; }
+    .template-actions { display: flex; gap: 6px; }
+    .action-btn { flex: 1; padding: 6px 8px; border: 1px solid #d1d5db; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .action-btn:hover { border-color: #3b82f6; color: #3b82f6; background: #f0f9ff; }
+    .action-btn.delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    .preset-section { margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e7eb; }
+    .preset-title { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 16px; }
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .preset-card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .preset-card:hover { background: #eff6ff; border-color: #3b82f6; }
+    .preset-icon { font-size: 36px; margin-bottom: 8px; }
+    .preset-name { font-size: 13px; font-weight: 600; color: #1f2937; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">보고서 템플릿 관리</h1>
+          <p class="page-subtitle">재사용 가능한 보고서 템플릿 관리</p>
+        </div>
+
+        <div class="page-content">
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <button class="new-template-btn">
+              <i data-lucide="plus" style="width:16px;height:16px;"></i>
+              새 템플릿
+            </button>
+            <input type="text" class="search-box" placeholder="템플릿 검색...">
+          </div>
+
+          <!-- Custom Templates -->
+          <div class="template-grid">
+            <!-- Template 1 -->
+            <div class="template-card">
+              <div class="template-preview">
+                <div class="preview-icon">📊</div>
+                <span class="template-badge">커스텀</span>
+              </div>
+              <div class="template-info">
+                <div class="template-name">교통 현황 분석</div>
+                <div class="template-desc">교통량, 주차장, 대중교통 분석 템플릿</div>
+                <div class="template-tags">
+                  <span class="tag-badge">교통</span>
+                  <span class="tag-badge">분석</span>
+                </div>
+                <div class="template-meta">수정: 2026-03-28</div>
+                <div class="template-actions">
+                  <button class="action-btn">
+                    <i data-lucide="edit" style="width:12px;height:12px;"></i>
+                    편집
+                  </button>
+                  <button class="action-btn">
+                    <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                    복제
+                  </button>
+                  <button class="action-btn delete">
+                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template 2 -->
+            <div class="template-card">
+              <div class="template-preview">
+                <div class="preview-icon">📈</div>
+                <span class="template-badge">커스텀</span>
+              </div>
+              <div class="template-info">
+                <div class="template-name">환경 현황 보고</div>
+                <div class="template-desc">대기질, 수질, 소음 현황 보고 템플릿</div>
+                <div class="template-tags">
+                  <span class="tag-badge">환경</span>
+                  <span class="tag-badge">모니터링</span>
+                </div>
+                <div class="template-meta">수정: 2026-03-25</div>
+                <div class="template-actions">
+                  <button class="action-btn">
+                    <i data-lucide="edit" style="width:12px;height:12px;"></i>
+                    편집
+                  </button>
+                  <button class="action-btn">
+                    <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                    복제
+                  </button>
+                  <button class="action-btn delete">
+                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template 3 -->
+            <div class="template-card">
+              <div class="template-preview">
+                <div class="preview-icon">👥</div>
+                <span class="template-badge">커스텀</span>
+              </div>
+              <div class="template-info">
+                <div class="template-name">민원 분석 보고</div>
+                <div class="template-desc">민원 접수, 처리, 만족도 분석 템플릿</div>
+                <div class="template-tags">
+                  <span class="tag-badge">민원</span>
+                  <span class="tag-badge">통계</span>
+                </div>
+                <div class="template-meta">수정: 2026-03-20</div>
+                <div class="template-actions">
+                  <button class="action-btn">
+                    <i data-lucide="edit" style="width:12px;height:12px;"></i>
+                    편집
+                  </button>
+                  <button class="action-btn">
+                    <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                    복제
+                  </button>
+                  <button class="action-btn delete">
+                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template 4 -->
+            <div class="template-card">
+              <div class="template-preview">
+                <div class="preview-icon">🎯</div>
+                <span class="template-badge">커스텀</span>
+              </div>
+              <div class="template-info">
+                <div class="template-name">성과 현황 분석</div>
+                <div class="template-desc">정책 추진 성과 및 목표 달성도 분석</div>
+                <div class="template-tags">
+                  <span class="tag-badge">성과</span>
+                  <span class="tag-badge">평가</span>
+                </div>
+                <div class="template-meta">수정: 2026-03-18</div>
+                <div class="template-actions">
+                  <button class="action-btn">
+                    <i data-lucide="edit" style="width:12px;height:12px;"></i>
+                    편집
+                  </button>
+                  <button class="action-btn">
+                    <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                    복제
+                  </button>
+                  <button class="action-btn delete">
+                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template 5 -->
+            <div class="template-card">
+              <div class="template-preview">
+                <div class="preview-icon">🔍</div>
+                <span class="template-badge">커스텀</span>
+              </div>
+              <div class="template-info">
+                <div class="template-name">긴급 현황 보고</div>
+                <div class="template-desc">즉시 보고 필요한 긴급 상황 보고 템플릿</div>
+                <div class="template-tags">
+                  <span class="tag-badge">긴급</span>
+                  <span class="tag-badge">보고</span>
+                </div>
+                <div class="template-meta">수정: 2026-03-15</div>
+                <div class="template-actions">
+                  <button class="action-btn">
+                    <i data-lucide="edit" style="width:12px;height:12px;"></i>
+                    편집
+                  </button>
+                  <button class="action-btn">
+                    <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                    복제
+                  </button>
+                  <button class="action-btn delete">
+                    <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preset Templates Section -->
+          <div class="preset-section">
+            <div class="preset-title">기본 템플릿</div>
+            <div class="preset-grid">
+              <div class="preset-card">
+                <div class="preset-icon">📋</div>
+                <div class="preset-name">월간정책보고서</div>
+              </div>
+              <div class="preset-card">
+                <div class="preset-icon">📊</div>
+                <div class="preset-name">분기성과보고서</div>
+              </div>
+              <div class="preset-card">
+                <div class="preset-icon">🚨</div>
+                <div class="preset-name">긴급현황보고서</div>
+              </div>
+              <div class="preset-card">
+                <div class="preset-icon">👥</div>
+                <div class="preset-name">민원분석보고서</div>
+              </div>
+              <div class="preset-card">
+                <div class="preset-icon">🛡️</div>
+                <div class="preset-name">안전현황보고서</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('report');
+
+      // New template button
+      document.querySelector('.new-template-btn').addEventListener('click', function() {
+        alert('새 템플릿 생성 페이지로 이동합니다.');
+      });
+
+      // Template action buttons
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const action = this.textContent.trim().split('\n')[0].trim();
+          const templateName = this.closest('.template-card').querySelector('.template-name').textContent;
+          console.log(`${action}: ${templateName}`);
+        });
+      });
+
+      // Preset card clicks
+      document.querySelectorAll('.preset-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const name = this.querySelector('.preset-name').textContent;
+          alert(`"${name}" 템플릿을 사용하여 보고서를 생성합니다.`);
+        });
+      });
+
+      // Search functionality
+      document.querySelector('.search-box').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('.template-card').forEach(card => {
+          const name = card.querySelector('.template-name').textContent.toLowerCase();
+          const desc = card.querySelector('.template-desc').textContent.toLowerCase();
+          const matches = name.includes(query) || desc.includes(query);
+          card.style.display = matches ? 'block' : 'none';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

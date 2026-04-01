@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실시간 감시 콘솔 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .parking-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .parking-cell { position: relative; overflow: hidden; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-color); }
+    .parking-cell:hover { box-shadow: var(--shadow-lg); }
+    .parking-thumbnail { width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; }
+    .parking-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 12px; font-size: 14px; font-weight: 600; }
+    .status-badge { position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: white; }
+    .status-normal { background-color: var(--color-success); }
+    .status-warning { background-color: var(--color-warning); }
+    .status-danger { background-color: var(--color-danger); }
+    .status-critical { background-color: #8B0000; }
+    .event-feed-item { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .event-content { flex: 1; min-width: 0; }
+    .event-time { font-size: 12px; color: var(--text-color-secondary); }
+    .event-title { font-weight: 600; color: var(--text-color); }
+    .event-location { font-size: 12px; color: var(--text-color-secondary); }
+    .risk-segment { height: 24px; display: inline-block; border: 1px solid #ddd; }
+    .segment-normal { background-color: var(--color-success); }
+    .segment-warning { background-color: var(--color-warning); }
+    .segment-danger { background-color: var(--color-danger); }
+    .segment-critical { background-color: #8B0000; }
+    @media (max-width: 1440px) { .parking-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification" onclick="showToast('알림: 신도심 A에서 화재경보 신호 수신', 'warning')">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user" onclick="">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">실시간 감시 콘솔</h1>
+          <p class="page-subtitle">주차장 CCTV 및 센서 통합 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 필터 바 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">조회 기간</label>
+              <select class="filter-select" style="width: 150px;">
+                <option>실시간</option>
+                <option>최근 1시간</option>
+                <option>최근 6시간</option>
+                <option>최근 24시간</option>
+              </select>
+            </div>
+            <button class="filter-button" onclick="location.reload()" style="margin-left: auto;">
+              <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+              새로고침
+            </button>
+          </div>
+
+          <!-- 메인 콘텐츠: 좌측 그리드 + 우측 피드 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; height: calc(100vh - 320px);">
+            <!-- 좌측: 3x3 그리드 -->
+            <div style="overflow-y: auto;">
+              <h3 class="heading-sm" style="margin-bottom: 16px;">주차장 멀티뷰 (9개소)</h3>
+              <div class="parking-grid">
+                <div class="parking-cell" onclick="showEventDetail()">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-critical">긴급 (2)</div>
+                  </div>
+                  <div class="parking-overlay">신도심 A</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-danger">경고 (0)</div>
+                  </div>
+                  <div class="parking-overlay">구시가지 공영</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-warning">주의 (1)</div>
+                  </div>
+                  <div class="parking-overlay">이도2동 지하</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-normal">정상 (0)</div>
+                  </div>
+                  <div class="parking-overlay">동문 시장</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-normal">정상 (0)</div>
+                  </div>
+                  <div class="parking-overlay">연동로</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-warning">주의 (0)</div>
+                  </div>
+                  <div class="parking-overlay">노형동</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-normal">정상 (0)</div>
+                  </div>
+                  <div class="parking-overlay">공항 인근</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-normal">정상 (0)</div>
+                  </div>
+                  <div class="parking-overlay">성산포</div>
+                </div>
+                <div class="parking-cell">
+                  <div class="parking-thumbnail">
+                    <div class="status-badge status-normal">정상 (0)</div>
+                  </div>
+                  <div class="parking-overlay">함덕해변</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측: 이벤트 피드 -->
+            <div style="display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: 8px; background-color: white;">
+              <div style="padding: 16px; border-bottom: 1px solid var(--border-color);">
+                <h3 class="heading-sm">실시간 이벤트 (최근 30건)</h3>
+              </div>
+              <div style="flex: 1; overflow-y: auto;">
+                <div class="event-feed-item">
+                  <div class="event-dot" style="background-color: var(--color-danger);"></div>
+                  <div class="event-content">
+                    <div class="event-time">2분전</div>
+                    <div class="event-title">비정상 음향 탐지</div>
+                    <div class="event-location">신도심 A / 화재경보 의심</div>
+                  </div>
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button>
+                </div>
+                <div class="event-feed-item">
+                  <div class="event-dot" style="background-color: var(--color-danger);"></div>
+                  <div class="event-content">
+                    <div class="event-time">5분전</div>
+                    <div class="event-title">화재경보 신호 수신</div>
+                    <div class="event-location">신도심 A / 긴급</div>
+                  </div>
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button>
+                </div>
+                <div class="event-feed-item">
+                  <div class="event-dot" style="background-color: var(--color-warning);"></div>
+                  <div class="event-content">
+                    <div class="event-time">12분전</div>
+                    <div class="event-title">장기점유 감지</div>
+                    <div class="event-location">이도2동 / 경고</div>
+                  </div>
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button>
+                </div>
+                <div class="event-feed-item">
+                  <div class="event-dot" style="background-color: var(--color-success);"></div>
+                  <div class="event-content">
+                    <div class="event-time">18분전</div>
+                    <div class="event-title">화재 상황 종료</div>
+                    <div class="event-location">구시가지 공영 / 정상화</div>
+                  </div>
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단: 위험도 세그먼트 바 -->
+          <div style="margin-top: 24px; padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+              <span style="font-weight: 600; min-width: 100px;">전체 위험도</span>
+              <div style="display: flex; height: 24px; flex: 1; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+                <div class="risk-segment segment-critical" style="width: 22%; min-width: 10px;" title="신도심 A"></div>
+                <div class="risk-segment segment-normal" style="width: 15%; min-width: 10px;" title="구시가지"></div>
+                <div class="risk-segment segment-warning" style="width: 11%; min-width: 10px;" title="이도2동"></div>
+                <div class="risk-segment segment-normal" style="width: 8%; min-width: 10px;" title="동문 시장"></div>
+                <div class="risk-segment segment-normal" style="width: 12%; min-width: 10px;" title="연동로"></div>
+                <div class="risk-segment segment-warning" style="width: 10%; min-width: 10px;" title="노형동"></div>
+                <div class="risk-segment segment-normal" style="width: 7%; min-width: 10px;" title="공항 인근"></div>
+                <div class="risk-segment segment-normal" style="width: 9%; min-width: 10px;" title="성산포"></div>
+                <div class="risk-segment segment-normal" style="width: 6%; min-width: 10px;" title="함덕해변"></div>
+              </div>
+              <span style="font-weight: 600; min-width: 80px; text-align: right;">평균 28%</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-color-secondary);">
+              신도심 A: 위험 | 구시가지: 정상 | 이도2동: 경고 | 동문: 정상 | 연동로: 정상 | 노형동: 주의 | 공항: 정상 | 성산포: 정상 | 함덕: 정상
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    function showEventDetail() {
+      showModal('이벤트 상세 정보', `
+        <div style="padding: 16px 0;">
+          <h4 style="font-weight: 600; margin-bottom: 12px;">화재경보 신호 수신</h4>
+          <p style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 16px;">신도심 A 주차장 / 2024-04-01 14:25:30</p>
+          <div style="background-color: var(--color-gray-50); padding: 12px; border-radius: 4px; margin-bottom: 16px;">
+            <p style="margin: 4px 0;"><strong>위도/경도:</strong> 33.5123, 126.5234</p>
+            <p style="margin: 4px 0;"><strong>심각도:</strong> <span style="background-color: var(--color-danger); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600;">긴급</span></p>
+            <p style="margin: 4px 0;"><strong>상태:</strong> 대응중</p>
+            <p style="margin: 4px 0;"><strong>신뢰도:</strong> 95%</p>
+          </div>
+          <p style="font-size: 12px;"><strong>분석 근거:</strong></p>
+          <ul style="font-size: 12px; margin-left: 16px; color: var(--text-color-secondary);">
+            <li>음향 특성: 4-8kHz 범위 알람음 패턴</li>
+            <li>MFCC 특성: 표준 화재경보음과 98% 일치</li>
+            <li>시각적 분석: 밝기 이상 없음 (오탐 가능성 낮음)</li>
+          </ul>
+        </div>
+      `, {
+        onConfirm: () => showToast('이벤트 상세 정보를 조회했습니다.', 'info'),
+        confirmText: '닫기',
+        showCancel: false
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+    });
+  </script>
+</body>
+</html>

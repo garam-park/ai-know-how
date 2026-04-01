@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지-알림센터 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">사</div>
+          <div class="user-info">
+            <div class="user-name">사용자</div>
+            <div class="user-role">관리자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="page-title">공지-알림센터</div>
+              <div class="page-subtitle">시스템 공지사항 및 알림을 통합 관리합니다</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" onclick="markAllAsRead()" style="display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+                전체 읽음
+              </button>
+              <button class="btn btn-secondary" onclick="openSettings()">
+                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <!-- 탭 네비게이션 -->
+          <div class="tabs" style="margin-bottom: 24px;">
+            <div class="tab-headers">
+              <button class="tab-header active" onclick="switchTab(0)">
+                전체 <span class="badge info" style="margin-left: 8px;">12</span>
+              </button>
+              <button class="tab-header" onclick="switchTab(1)">
+                시스템 <span class="badge info" style="margin-left: 8px;">5</span>
+              </button>
+              <button class="tab-header" onclick="switchTab(2)">
+                이벤트 <span class="badge info" style="margin-left: 8px;">7</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 필터 영역 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <select class="filter-select">
+                <option value="all">전체</option>
+                <option value="1week">1주일</option>
+                <option value="1month">1개월</option>
+                <option value="3month">3개월</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">유형</label>
+              <select class="filter-select">
+                <option value="all">전체</option>
+                <option value="notice">공지</option>
+                <option value="warning">경고</option>
+                <option value="info">정보</option>
+                <option value="error">에러</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">심각도</label>
+              <select class="filter-select">
+                <option value="all">전체</option>
+                <option value="critical">Critical</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">검색</label>
+              <input type="text" class="filter-input" placeholder="제목 검색..." style="width: 200px;">
+            </div>
+            <button class="filter-button secondary" onclick="resetFilters()">초기화</button>
+          </div>
+
+          <!-- 알림 목록 -->
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- 알림 1 (미읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">주차장 C-04 센서 오류 감지</div>
+                      <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">센서 신호 수신 두절, 수동 점검 필요</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">12:32</div>
+                      <span class="badge warning" style="margin-top: 4px;">Warning</span>
+                    </div>
+                  </div>
+                  <div style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E7EB;" class="detail-content">
+                    <div style="color: #4B5563; font-size: 13px; line-height: 1.6;">
+                      공항로 주차장(C-04) 센서에서 신호 수신이 두절되었습니다. 센서 배터리 확인 및 통신 상태를 점검해주시기 바랍니다. 현재 해당 주차장 가용 정보는 마지막 수신 데이터 기준으로 표시되고 있습니다.
+                    </div>
+                    <div style="margin-top: 12px;">
+                      <a href="#" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;">상세보기</a>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+
+            <!-- 알림 2 (미읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: #1F2937;">일일 보고서 작성 완료</div>
+                      <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">지난 24시간 통계 보고서가 생성되었습니다</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">10:15</div>
+                      <span class="badge info" style="margin-top: 4px;">Info</span>
+                    </div>
+                  </div>
+                  <div style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E7EB;" class="detail-content">
+                    <div style="color: #4B5563; font-size: 13px; line-height: 1.6;">
+                      2026년 4월 1일 일일 보고서가 생성되었습니다. 민원 접수, 처리 현황, AI 분석 결과 등이 포함되어 있습니다.
+                    </div>
+                    <div style="margin-top: 12px;">
+                      <a href="#" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;">보고서 보기</a>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+
+            <!-- 알림 3 (읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 400; color: #6B7280;">시스템 점검 예정 공지</div>
+                      <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">4월 5일 02:00~04:00 시스템 점검 예정</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">09:00</div>
+                      <span class="badge info" style="margin-top: 4px;">Info</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+
+            <!-- 알림 4 (읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 400; color: #6B7280;">LLM 모델 응답 시간 증가</div>
+                      <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">평균 응답 시간이 정상 범위를 초과했습니다</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">08:45</div>
+                      <span class="badge warning" style="margin-top: 4px;">Warning</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+
+            <!-- 알림 5 (읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 400; color: #6B7280;">새로운 민원 카테고리 추가</div>
+                      <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">공공 자전거 관련 민원 카테고리가 추가되었습니다</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">07:30</div>
+                      <span class="badge info" style="margin-top: 4px;">Info</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+
+            <!-- 알림 6 (읽음) -->
+            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 400; color: #6B7280;">이벤트 감지: 교통 체증</div>
+                      <div style="font-size: 13px; color: #9CA3AF; margin-top: 4px;">중앙로 일대 교통 체증이 감지되었습니다</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 12px; color: #9CA3AF;">06:20</div>
+                      <span class="badge warning" style="margin-top: 4px;">Warning</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="toggle-detail" onclick="toggleDetail(event)" style="background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px; font-size: 18px;">▼</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" style="margin-top: 24px;">
+            <button class="pagination-button" onclick="goToPrevPage()" data-action="prev">이전</button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button">2</button>
+            <button class="pagination-button">3</button>
+            <button class="pagination-button" onclick="goToNextPage()" data-action="next">다음</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('main');
+    });
+
+    // 탭 전환
+    function switchTab(index) {
+      const tabs = document.querySelectorAll('.tab-header');
+      tabs.forEach(t => t.classList.remove('active'));
+      tabs[index].classList.add('active');
+      showToast('탭이 전환되었습니다.', 'info');
+    }
+
+    // 상세 내용 토글
+    function toggleDetail(event) {
+      event.stopPropagation();
+      const btn = event.target.closest('.toggle-detail');
+      const card = btn.closest('.card');
+      const detail = card.querySelector('.detail-content');
+
+      if (detail) {
+        detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+        btn.textContent = detail.style.display === 'none' ? '▼' : '▲';
+      }
+    }
+
+    // 전체 읽음 처리
+    function markAllAsRead() {
+      const circles = document.querySelectorAll('.card');
+      circles.forEach(card => {
+        const circle = card.querySelector('div[style*="background-color: #3B82F6"]');
+        if (circle) {
+          circle.style.backgroundColor = '#D1D5DB';
+        }
+      });
+      showToast('모든 알림을 읽음으로 표시했습니다.', 'success');
+    }
+
+    // 설정 열기
+    function openSettings() {
+      showToast('설정 기능은 준비 중입니다.', 'info');
+    }
+
+    // 필터 초기화
+    function resetFilters() {
+      document.querySelectorAll('.filter-select, .filter-input').forEach(el => {
+        if (el.tagName === 'SELECT') el.value = 'all';
+        else el.value = '';
+      });
+      showToast('필터가 초기화되었습니다.', 'info');
+    }
+
+    // 페이지 이동
+    function goToPrevPage() {
+      showToast('이전 페이지로 이동했습니다.', 'info');
+    }
+
+    function goToNextPage() {
+      showToast('다음 페이지로 이동했습니다.', 'info');
+    }
+  </script>
+</body>
+</html>

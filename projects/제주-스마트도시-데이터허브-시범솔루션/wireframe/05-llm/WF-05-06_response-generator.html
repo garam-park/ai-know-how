@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>민원 답변문 생성기 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .complaint-panel {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      height: fit-content;
+    }
+    .complaint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .complaint-title {
+      font-weight: 600;
+      color: #1F2937;
+      font-size: 15px;
+    }
+    .complaint-id {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-urgent {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    .badge-department {
+      background: #DBEAFE;
+      color: #0C4A6E;
+    }
+    .complaint-content {
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #F9FAFB;
+      border-radius: 6px;
+    }
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .tag {
+      background: #EFF6FF;
+      color: #0369A1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .sentiment-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 6px 12px;
+      background: #FEF3C7;
+      border-radius: 6px;
+      color: #92400E;
+    }
+    .editor-wrapper {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .editor-title {
+      font-weight: 600;
+      color: #374151;
+    }
+    .editor-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #E5E7EB;
+      flex-wrap: wrap;
+    }
+    .toolbar-button {
+      padding: 6px 12px;
+      border: 1px solid #E5E7EB;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .toolbar-button:hover {
+      border-color: #2563EB;
+      color: #2563EB;
+    }
+    .editor-textarea {
+      flex: 1;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #1F2937;
+      line-height: 1.6;
+      resize: none;
+      margin-bottom: 12px;
+    }
+    .editor-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .control-select {
+      padding: 8px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .workflow-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .workflow-btn {
+      padding: 10px 12px;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .workflow-btn:hover {
+      border-color: #2563EB;
+      color: #2563EB;
+    }
+    .workflow-btn.primary {
+      background: #2563EB;
+      color: white;
+      border-color: #2563EB;
+    }
+    .reference-panel {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .reference-title {
+      font-weight: 600;
+      color: #374151;
+      font-size: 13px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .reference-item {
+      padding: 12px;
+      background: #F9FAFB;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #4B5563;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .reference-item:hover {
+      border-left-color: #2563EB;
+      background: #F0F9FF;
+    }
+    .reference-item-title {
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">민원 답변문 생성기</div>
+          <div class="page-subtitle">AI 기반 자동 답변문 생성 및 워크플로우 관리</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 메인 2열 레이아웃 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <!-- 좌측: 민원 정보 (읽기 전용) -->
+            <div class="complaint-panel">
+              <div class="complaint-header">
+                <div>
+                  <div class="complaint-id">#COM-2026-001245</div>
+                  <div class="complaint-title">주차장 부족으로 인한 민원</div>
+                </div>
+                <span class="badge badge-urgent">긴급</span>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <span class="badge badge-department">교통 관리과</span>
+              </div>
+
+              <div class="complaint-content">
+                신도심 지역 상업지구의 주차장이 심각하게 부족합니다. 마트, 병원, 식당 등 주요 시설 주변의 주차장 공간이 모자라 합법적 주차 공간을 찾기 어렵습니다. 이로 인해 도로에 불법 주차가 증가하고 있으며 교통 혼잡이 심화되고 있습니다. 시급한 주차장 확충이 필요합니다.
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">태그</div>
+                <div class="tag-container">
+                  <div class="tag">주차장</div>
+                  <div class="tag">교통</div>
+                  <div class="tag">시설</div>
+                  <div class="tag">신도심</div>
+                </div>
+              </div>
+
+              <div class="control-group" style="margin-top: 12px;">
+                <div class="control-label">감정 분석</div>
+                <div class="sentiment-badge">
+                  <span style="color: #DC2626;">●</span>
+                  부정적 (0.87)
+                </div>
+              </div>
+
+              <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 12px; color: #6B7280;">
+                <div>접수일: 2026-04-02 09:30</div>
+                <div>접수자: 박민준</div>
+                <div>담당부서: 교통 관리과</div>
+              </div>
+            </div>
+
+            <!-- 우측: 답변문 에디터 -->
+            <div class="editor-wrapper">
+              <div class="editor-header">
+                <div class="editor-title">AI 생성 답변문</div>
+              </div>
+
+              <div class="editor-toolbar">
+                <button class="toolbar-button">
+                  <i data-lucide="bold" style="width: 14px; height: 14px;"></i>
+                  굵게
+                </button>
+                <button class="toolbar-button">
+                  <i data-lucide="italic" style="width: 14px; height: 14px;"></i>
+                  기울임
+                </button>
+                <button class="toolbar-button">
+                  <i data-lucide="list" style="width: 14px; height: 14px;"></i>
+                  목록
+                </button>
+                <button class="toolbar-button">
+                  <i data-lucide="redo" style="width: 14px; height: 14px;"></i>
+                  재생성
+                </button>
+              </div>
+
+              <textarea class="editor-textarea" placeholder="답변문을 입력하거나 AI로 생성합니다.">주차장 부족 문제에 대해 소중한 의견을 주셔서 감사합니다.
+
+제주시는 신도심 지역의 주차장 부족 문제를 인식하고 있으며, 다음과 같은 개선 계획을 추진하고 있습니다:
+
+1. 단기 계획 (2026년 상반기)
+   - 임시 주차장 3개소 추가 조성
+   - 기존 시설 주변 불법 주차 단속 강화
+
+2. 중장기 계획 (2026년 하반기~2027년)
+   - 공용 주차장 확충 사업 추진
+   - 스마트 주차 유도 시스템 도입
+   - 대중교통 네트워크 개선
+
+더 자세한 사항은 교통 관리과(064-XXXX-XXXX)로 연락 주시기 바랍니다. 감사합니다.</textarea>
+
+              <div class="editor-controls">
+                <div class="control-group">
+                  <div class="control-label">톤 (Tone)</div>
+                  <select class="control-select">
+                    <option selected>정중한</option>
+                    <option>친근한</option>
+                    <option>공식적</option>
+                    <option>간결한</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <div class="control-label">답변 유형</div>
+                  <select class="control-select">
+                    <option selected>정책 안내</option>
+                    <option>진행 상황 보고</option>
+                    <option>민원 불가</option>
+                    <option>추가 정보 요청</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="workflow-buttons">
+                <button class="workflow-btn" onclick="saveDraft()">
+                  <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+                  초안저장
+                </button>
+                <button class="workflow-btn" onclick="requestReview()">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i>
+                  검토요청
+                </button>
+                <button class="workflow-btn primary" onclick="approve()">
+                  <i data-lucide="thumbs-up" style="width: 14px; height: 14px;"></i>
+                  승인
+                </button>
+                <button class="workflow-btn primary" onclick="send()">
+                  <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+                  발송
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 참고 답변 패널 -->
+          <div class="reference-panel">
+            <div class="reference-title">유사 민원 참고 답변</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+              <div class="reference-item">
+                <div class="reference-item-title">민원 #001198</div>
+                <div style="margin-bottom: 6px;">동부 지역 주차장 확충 요청</div>
+                <div style="font-size: 11px; color: #9CA3AF;">2026-03-28 처리완료</div>
+              </div>
+
+              <div class="reference-item">
+                <div class="reference-item-title">민원 #001156</div>
+                <div style="margin-bottom: 6px;">상업지구 불법 주차 단속 강화</div>
+                <div style="font-size: 11px; color: #9CA3AF;">2026-03-25 처리완료</div>
+              </div>
+
+              <div class="reference-item">
+                <div class="reference-item-title">민원 #001087</div>
+                <div style="margin-bottom: 6px;">관광지 주변 주차 시설 부족</div>
+                <div style="font-size: 11px; color: #9CA3AF;">2026-03-18 처리완료</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+    });
+
+    function saveDraft() {
+      showToast('답변문이 초안으로 저장되었습니다.', 'success');
+    }
+
+    function requestReview() {
+      showToast('담당자에게 검토를 요청했습니다.', 'success');
+    }
+
+    function approve() {
+      showToast('답변문이 승인되었습니다.', 'success');
+    }
+
+    function send() {
+      showToast('답변문이 발송되었습니다.', 'success');
+    }
+  </script>
+</body>
+</html>

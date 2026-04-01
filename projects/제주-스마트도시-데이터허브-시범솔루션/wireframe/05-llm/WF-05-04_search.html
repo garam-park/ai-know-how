@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 검색 인터페이스 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .search-container {
+      background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+      padding: 40px 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: transparent;
+    }
+    .search-mode-toggle {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: #F3F4F6;
+      border-radius: 6px;
+    }
+    .search-mode-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: #6B7280;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .search-mode-btn.active {
+      background: white;
+      color: #2563EB;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .facet-panel {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      max-width: 280px;
+    }
+    .facet-section {
+      margin-bottom: 20px;
+    }
+    .facet-title {
+      font-weight: 600;
+      color: #374151;
+      font-size: 13px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .facet-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #4B5563;
+      cursor: pointer;
+    }
+    .facet-item input {
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .facet-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+    .facet-divider {
+      border-top: 1px solid #E5E7EB;
+      margin-bottom: 16px;
+    }
+    .slider-input {
+      width: 100%;
+      cursor: pointer;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6B7280;
+      margin-top: 8px;
+    }
+    .result-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .result-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #2563EB;
+    }
+    .result-score {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .result-score-bar {
+      flex: 1;
+      height: 4px;
+      background: #E5E7EB;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .result-score-fill {
+      height: 100%;
+      background: #2563EB;
+    }
+    .result-title {
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .result-text {
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .result-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+    .recent-history {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .history-tag {
+      background: #F3F4F6;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #6B7280;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-tag:hover {
+      background: #E5E7EB;
+      color: #1F2937;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">LLM 검색 인터페이스</div>
+          <div class="page-subtitle">벡터 임베딩 및 키워드 기반 하이브리드 검색</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 검색 박스 -->
+          <div class="search-container">
+            <div class="search-bar">
+              <i data-lucide="search" style="width: 20px; height: 20px; color: #6B7280;"></i>
+              <input type="text" placeholder="검색어를 입력하세요..." id="searchInput">
+              <div class="search-mode-toggle">
+                <button class="search-mode-btn" onclick="switchSearchMode(this, 'hybrid')">하이브리드</button>
+                <button class="search-mode-btn" onclick="switchSearchMode(this, 'vector')">벡터</button>
+                <button class="search-mode-btn" onclick="switchSearchMode(this, 'keyword')">키워드</button>
+              </div>
+              <button class="btn btn-primary" style="padding: 8px 20px; white-space: nowrap;">
+                <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                검색
+              </button>
+            </div>
+            <div class="recent-history">
+              <span style="font-size: 12px; color: rgba(255,255,255,0.7);">최근 검색:</span>
+              <div class="history-tag" style="background: rgba(255,255,255,0.2); color: white;">주차장 문제</div>
+              <div class="history-tag" style="background: rgba(255,255,255,0.2); color: white;">도로 파손</div>
+              <div class="history-tag" style="background: rgba(255,255,255,0.2); color: white;">상수도 누수</div>
+            </div>
+          </div>
+
+          <!-- 메인 영역 -->
+          <div style="display: grid; grid-template-columns: 280px 1fr; gap: 16px;">
+            <!-- 좌측 필터 -->
+            <div>
+              <div class="facet-panel">
+                <!-- 문서 유형 -->
+                <div class="facet-section">
+                  <div class="facet-title">문서 유형</div>
+                  <label class="facet-item">
+                    <input type="checkbox" checked>
+                    민원 <span class="facet-count">1,245</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox" checked>
+                    정책 <span class="facet-count">342</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox" checked>
+                    회의록 <span class="facet-count">156</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox">
+                    보고서 <span class="facet-count">87</span>
+                  </label>
+                </div>
+
+                <div class="facet-divider"></div>
+
+                <!-- 부서 -->
+                <div class="facet-section">
+                  <div class="facet-title">부서</div>
+                  <label class="facet-item">
+                    <input type="checkbox" checked>
+                    교통 관리과 <span class="facet-count">523</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox" checked>
+                    시설 관리과 <span class="facet-count">412</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox">
+                    환경 관리과 <span class="facet-count">289</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="checkbox">
+                    상수도 관리과 <span class="facet-count">201</span>
+                  </label>
+                </div>
+
+                <div class="facet-divider"></div>
+
+                <!-- 기간 -->
+                <div class="facet-section">
+                  <div class="facet-title">기간</div>
+                  <label class="facet-item">
+                    <input type="radio" name="period" checked>
+                    지난 7일 <span class="facet-count">456</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="radio" name="period">
+                    지난 30일 <span class="facet-count">1,123</span>
+                  </label>
+                  <label class="facet-item">
+                    <input type="radio" name="period">
+                    전체 <span class="facet-count">2,934</span>
+                  </label>
+                </div>
+
+                <div class="facet-divider"></div>
+
+                <!-- 관련도 -->
+                <div class="facet-section">
+                  <div class="facet-title">최소 관련도</div>
+                  <input type="range" min="0" max="100" value="50" class="slider-input" id="relevanceSlider" onchange="updateRelevance(this.value)">
+                  <div class="slider-label">
+                    <span>낮음</span>
+                    <span id="relevanceValue">50%</span>
+                    <span>높음</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측 결과 -->
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #6B7280;">
+                  <strong style="color: #1F2937;">834</strong>개의 결과 (0.23초)
+                </div>
+                <select style="padding: 6px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                  <option>관련도 높은순</option>
+                  <option>최근순</option>
+                  <option>오래된순</option>
+                </select>
+              </div>
+
+              <!-- 결과 카드 1 -->
+              <div class="result-card">
+                <div class="result-score">
+                  <span style="font-size: 12px; font-weight: 600; color: #2563EB;">98%</span>
+                  <div class="result-score-bar">
+                    <div class="result-score-fill" style="width: 98%;"></div>
+                  </div>
+                </div>
+                <div class="result-title">주차장 부족으로 인한 교통 혼잡 민원</div>
+                <div class="result-text">
+                  제주도 신도심 지역에서 <mark style="background: #FBBF24; padding: 2px 4px;">주차장 부족</mark>으로 인해 교통 혼잡이 심화되고 있습니다. 특히 주말의 경우 관광객과 지역 주민들의 차량으로 인해 도로 혼잡이 가중되고 있으며...
+                </div>
+                <div class="result-meta">
+                  <span>📋 민원</span>
+                  <span>🏢 교통 관리과</span>
+                  <span>📅 2026-04-02</span>
+                </div>
+              </div>
+
+              <!-- 결과 카드 2 -->
+              <div class="result-card">
+                <div class="result-score">
+                  <span style="font-size: 12px; font-weight: 600; color: #2563EB;">92%</span>
+                  <div class="result-score-bar">
+                    <div class="result-score-fill" style="width: 92%;"></div>
+                  </div>
+                </div>
+                <div class="result-title">상업지구 야간 불법 주차 단속 강화</div>
+                <div class="result-text">
+                  제주 중심상업지구에서 야간 불법 <mark style="background: #FBBF24; padding: 2px 4px;">주차</mark> 문제가 지속되고 있으며, 이로 인한 교통 혼잡과 주민 민원이 증가 추세입니다. 단속 강화 및 <mark style="background: #FBBF24; padding: 2px 4px;">주차장</mark> 확충이 필요합니다...
+                </div>
+                <div class="result-meta">
+                  <span>📋 민원</span>
+                  <span>🏢 교통 관리과</span>
+                  <span>📅 2026-03-28</span>
+                </div>
+              </div>
+
+              <!-- 결과 카드 3 -->
+              <div class="result-card">
+                <div class="result-score">
+                  <span style="font-size: 12px; font-weight: 600; color: #2563EB;">87%</span>
+                  <div class="result-score-bar">
+                    <div class="result-score-fill" style="width: 87%;"></div>
+                  </div>
+                </div>
+                <div class="result-title">도심 공용 주차장 확충 정책안</div>
+                <div class="result-text">
+                  제주 주요 도심지역의 <mark style="background: #FBBF24; padding: 2px 4px;">주차장</mark> 부족 문제 해결을 위해 공용 주차장 확충 및 스마트 주차 시스템 도입을 제안합니다. 예상 투자액 150억원, 2026년 상반기 완료 목표...
+                </div>
+                <div class="result-meta">
+                  <span>📋 정책</span>
+                  <span>🏢 도시계획과</span>
+                  <span>📅 2026-03-15</span>
+                </div>
+              </div>
+
+              <!-- 결과 카드 4 -->
+              <div class="result-card">
+                <div class="result-score">
+                  <span style="font-size: 12px; font-weight: 600; color: #2563EB;">84%</span>
+                  <div class="result-score-bar">
+                    <div class="result-score-fill" style="width: 84%;"></div>
+                  </div>
+                </div>
+                <div class="result-title">관광지 인근 주차 문제 협의회 회의록</div>
+                <div class="result-text">
+                  2026년 4월 1일 개최된 관광지 인근 <mark style="background: #FBBF24; padding: 2px 4px;">주차</mark> 문제 협의회에서 사라 여행객 증가에 따른 주차 공간 부족 현황을 논의하였습니다. 임시 주차장 조성 및 대중교통...
+                </div>
+                <div class="result-meta">
+                  <span>📋 회의록</span>
+                  <span>🏢 교통 관리과</span>
+                  <span>📅 2026-04-01</span>
+                </div>
+              </div>
+
+              <!-- 페이지네이션 -->
+              <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px;">
+                <button class="btn btn-secondary" style="padding: 8px 12px;">
+                  <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-primary" style="padding: 8px 16px;">1</button>
+                <button class="btn btn-secondary" style="padding: 8px 16px;">2</button>
+                <button class="btn btn-secondary" style="padding: 8px 16px;">3</button>
+                <span style="color: #6B7280; margin: 0 8px;">...</span>
+                <button class="btn btn-secondary" style="padding: 8px 16px;">42</button>
+                <button class="btn btn-secondary" style="padding: 8px 12px;">
+                  <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+      // Set first mode button as active
+      document.querySelector('.search-mode-btn').classList.add('active');
+    });
+
+    function switchSearchMode(el, mode) {
+      document.querySelectorAll('.search-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      el.classList.add('active');
+    }
+
+    function updateRelevance(value) {
+      document.getElementById('relevanceValue').textContent = value + '%';
+    }
+  </script>
+</body>
+</html>

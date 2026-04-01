@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>히트맵 분석 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/1.0.4/leaflet-heat.min.js"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/map.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    #map { height: calc(100vh - 130px); width: 80%; }
+    .filter-panel { width: 20%; background-color: var(--bg-color); padding: 20px; border-right: 1px solid var(--border-color); overflow-y: auto; }
+    .map-container { display: flex; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content" style="flex-direction: row;">
+        <!-- 좌측 필터 패널 -->
+        <div class="filter-panel">
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">기간</h3>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: var(--text-color-secondary);">시작일</label>
+              <input type="date" class="filter-input" value="2025-01-01" style="margin-top: 4px;">
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--text-color-secondary);">종료일</label>
+              <input type="date" class="filter-input" value="2025-01-31" style="margin-top: 4px;">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">민원유형</h3>
+            <select class="filter-select" multiple style="min-height: 80px;">
+              <option selected>불법주차</option>
+              <option selected>보행안전</option>
+              <option>시설불편</option>
+              <option>화재위험</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">심각도</h3>
+            <input type="range" min="1" max="5" value="3" class="filter-input" style="width: 100%;">
+            <div style="font-size: 12px; color: var(--text-color-secondary); margin-top: 8px;">레벨: <span id="severity-level">3</span> / 5</div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="filter-button" style="flex: 1;">적용</button>
+            <button class="filter-button secondary" style="flex: 1;">초기화</button>
+          </div>
+        </div>
+
+        <!-- 지도 영역 -->
+        <div style="flex: 1; position: relative;">
+          <div id="map"></div>
+
+          <!-- 범례 (지도 우측) -->
+          <div style="position: absolute; top: 20px; right: 20px; background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; font-size: 12px;">
+            <h4 style="font-weight: bold; margin-bottom: 12px;">히트맵 범례</h4>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <div style="width: 16px; height: 16px; background: #0000FF; margin-right: 8px; border-radius: 2px;"></div>
+              <span>매우 낮음 (0~10건)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <div style="width: 16px; height: 16px; background: #00FFFF; margin-right: 8px; border-radius: 2px;"></div>
+              <span>낮음 (11~50건)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <div style="width: 16px; height: 16px; background: #FFFF00; margin-right: 8px; border-radius: 2px;"></div>
+              <span>중간 (51~100건)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <div style="width: 16px; height: 16px; background: #FF8800; margin-right: 8px; border-radius: 2px;"></div>
+              <span>높음 (101~200건)</span>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <div style="width: 16px; height: 16px; background: #FF0000; margin-right: 8px; border-radius: 2px;"></div>
+              <span>매우 높음 (201+건)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 지도 생성
+      const map = createJejuMap('map');
+
+      // 히트맵 데이터 생성 및 추가
+      const heatmapData = generateHeatmapData(150);
+      addHeatmapLayer(map, heatmapData, {
+        radius: 20,
+        blur: 20,
+        max: 1.0,
+        minOpacity: 0.4
+      });
+
+      // 주요 집중구역 폴리곤 추가
+      const zones = [
+        {
+          name: '제주시 구도심',
+          coordinates: [[33.5070, 126.5200], [33.5070, 126.5300], [33.5150, 126.5300], [33.5150, 126.5200]],
+          color: '#DC2626',
+          fillColor: '#DC2626',
+          complaints: 245,
+          types: '불법주차(85%), 보행안전(10%), 시설불편(5%)'
+        },
+        {
+          name: '서귀포시 중심가',
+          coordinates: [[33.2540, 126.5640], [33.2540, 126.5750], [33.2620, 126.5750], [33.2620, 126.5640]],
+          color: '#DC2626',
+          fillColor: '#DC2626',
+          complaints: 187,
+          types: '불법주차(80%), 충전구역(15%), 보행안전(5%)'
+        },
+        {
+          name: '제주공항 주변',
+          coordinates: [[33.5090, 126.4920], [33.5090, 126.5050], [33.5170, 126.5050], [33.5170, 126.4920]],
+          color: '#DC2626',
+          fillColor: '#DC2626',
+          complaints: 156,
+          types: '불법주차(90%), 화재위험(10%)'
+        }
+      ];
+
+      zones.forEach(zone => {
+        const polygon = L.polygon(zone.coordinates, {
+          color: zone.color,
+          fillColor: zone.fillColor,
+          fillOpacity: 0.2,
+          weight: 2
+        }).addTo(map);
+
+        polygon.bindPopup(`
+          <div style="width: 220px;">
+            <h4 style="margin: 0 0 8px 0; font-weight: bold;">${zone.name}</h4>
+            <hr style="margin: 8px 0; border: none; border-top: 1px solid #ddd;">
+            <div style="font-size: 12px; color: #333;">
+              <p><strong>민원 건수:</strong> ${zone.complaints}건</p>
+              <p><strong>주요 유형:</strong> ${zone.types}</p>
+              <a href="WF-02-08_gis-zones.html" style="color: #2563EB; text-decoration: none; display: block; margin-top: 8px;">상세보기</a>
+            </div>
+          </div>
+        `);
+
+        polygon.on('mouseover', function() {
+          this.setStyle({ fillOpacity: 0.5, weight: 3 });
+        });
+        polygon.on('mouseout', function() {
+          this.setStyle({ fillOpacity: 0.2, weight: 2 });
+        });
+      });
+
+      // 심각도 슬라이더 업데이트
+      document.querySelector('input[type="range"]').addEventListener('change', function(e) {
+        document.getElementById('severity-level').textContent = e.target.value;
+      });
+    });
+  </script>
+</body>
+</html>

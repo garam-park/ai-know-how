@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOP 체크리스트 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .incident-card { padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; display: flex; gap: 16px; align-items: flex-start; }
+    .incident-icon { width: 48px; height: 48px; background-color: var(--color-danger); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
+    .step-card { padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px; }
+    .step-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; }
+    .step-number { width: 32px; height: 32px; background-color: var(--color-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+    .step-title { font-size: 16px; font-weight: 600; color: var(--text-color); flex: 1; }
+    .step-status { font-size: 12px; padding: 4px 8px; border-radius: 4px; background-color: var(--color-warning); color: white; }
+    .step-status.complete { background-color: var(--color-success); }
+    .checklist-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+    .checklist-item input { width: 16px; height: 16px; margin-top: 3px; cursor: pointer; }
+    .checklist-item label { flex: 1; cursor: pointer; font-size: 14px; }
+    .form-group-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+    .form-select { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; }
+    .progress-section { padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; }
+    .memo-area { min-height: 120px; }
+    .action-buttons { position: sticky; bottom: 0; right: 0; left: 0; padding: 16px; background-color: white; border-top: 1px solid var(--border-color); display: flex; gap: 8px; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">SOP 체크리스트</h1>
+          <p class="page-subtitle">인시던트 대응 절차 단계별 체크리스트</p>
+        </div>
+
+        <div class="page-content" style="padding-bottom: 100px;">
+          <!-- 인시던트 정보 카드 -->
+          <div class="incident-card">
+            <div class="incident-icon">🔥</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <div>
+                  <div style="font-size: 12px; color: var(--text-color-secondary);">INC-2024-04-001</div>
+                  <div style="font-size: 16px; font-weight: 600; color: var(--text-color);">화재경보 신호</div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="background-color: var(--color-danger); color: white; padding: 6px 12px; border-radius: 4px; font-weight: 600; font-size: 12px;">긴급</span>
+                </div>
+              </div>
+              <div style="font-size: 13px; color: var(--text-color-secondary);">신도심 A 주차장 / 2024-04-01 14:25:30</div>
+            </div>
+          </div>
+
+          <!-- 진행률 -->
+          <div class="progress-section">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-weight: 600;">진행 상황</span>
+              <span style="color: var(--color-primary); font-weight: 600;">3/6 단계 (50%)</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <!-- 1단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-success);">✓</div>
+              <div class="step-title">1단계: 상황인지</div>
+              <div class="step-status complete">완료</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step1_1" checked>
+                <label for="step1_1">인시던트 알람 확인</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step1_2" checked>
+                <label for="step1_2">관련 센서/영상 수집</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step1_3" checked>
+                <label for="step1_3">주차장 현황 파악</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select" disabled>
+                  <option>김영준 (감시팀)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" value="2024-04-01 14:26:00" disabled style="background-color: var(--color-gray-50);">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-success);">✓</div>
+              <div class="step-title">2단계: 초기대응</div>
+              <div class="step-status complete">완료</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step2_1" checked>
+                <label for="step2_1">현장 접근성 확인</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step2_2" checked>
+                <label for="step2_2">안전 조치 (진입 제한, 경고 표시)</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step2_3" checked>
+                <label for="step2_3">추가 센서 활성화</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step2_4" checked>
+                <label for="step2_4">영상 저장 시작</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step2_5" checked>
+                <label for="step2_5">관련자 연락 시작</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select" disabled>
+                  <option>이지현 (응급대응팀)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" value="2024-04-01 14:28:00" disabled style="background-color: var(--color-gray-50);">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-success);">✓</div>
+              <div class="step-title">3단계: 유관기관연락</div>
+              <div class="step-status complete">완료</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step3_1" checked>
+                <label for="step3_1">소방서 통보</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step3_2">
+                <label for="step3_2">경찰청 통보</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step3_3">
+                <label for="step3_3">보건당국 통보 (필요시)</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step3_4">
+                <label for="step3_4">관리사 별도 지시</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select">
+                  <option>박준호 (관리팀)</option>
+                  <option>김영준 (감시팀)</option>
+                  <option>이지현 (응급대응팀)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" placeholder="자동 기록">
+              </div>
+            </div>
+          </div>
+
+          <!-- 4단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-warning);">4</div>
+              <div class="step-title">4단계: 현장조치</div>
+              <div class="step-status">진행중</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step4_1">
+                <label for="step4_1">화재/위험물 제거</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step4_2">
+                <label for="step4_2">부상자 응급처치</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step4_3">
+                <label for="step4_3">장비 안정화</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step4_4">
+                <label for="step4_4">주변 주민 대피 완료</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select">
+                  <option>선택...</option>
+                  <option>김영준 (감시팀)</option>
+                  <option>이지현 (응급대응팀)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" placeholder="자동 기록">
+              </div>
+            </div>
+          </div>
+
+          <!-- 5단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-gray-400);">5</div>
+              <div class="step-title">5단계: 상황종료</div>
+              <div class="step-status">미시작</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step5_1">
+                <label for="step5_1">현장 안정 확인</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step5_2">
+                <label for="step5_2">사후 검사 실시</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select" disabled>
+                  <option>선택...</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" placeholder="자동 기록" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6단계 -->
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-number" style="background-color: var(--color-gray-400);">6</div>
+              <div class="step-title">6단계: 사후보고</div>
+              <div class="step-status">미시작</div>
+            </div>
+            <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 12px;">
+              <div class="checklist-item">
+                <input type="checkbox" id="step6_1">
+                <label for="step6_1">사건 보고서 작성</label>
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="step6_2">
+                <label for="step6_2">원인 분석 완료</label>
+              </div>
+            </div>
+            <div class="form-group-inline">
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">담당자</label>
+                <select class="form-select" disabled>
+                  <option>선택...</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-weight: 600; font-size: 12px; color: var(--text-color-secondary);">완료 시각</label>
+                <input type="text" class="form-select" placeholder="자동 기록" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- 비고/메모 -->
+          <div style="padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 8px;">비고/메모</label>
+            <textarea class="form-textarea" placeholder="현장 상황, 추가 조치 사항 등을 기록하세요." style="width: 100%;">신도심 A 2층 주차구역에서 화재 알람 수신. CCTV 확인 결과 오탐 가능성 높음. 소방서에 통보 예정.</textarea>
+          </div>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="action-buttons">
+          <button class="btn btn-secondary" onclick="tempSave()">
+            <i data-lucide="save" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+            임시저장
+          </button>
+          <button class="btn btn-primary" onclick="submit()">
+            <i data-lucide="check" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+            제출
+          </button>
+          <button class="btn" style="background-color: var(--color-warning); color: white;" onclick="complete()">
+            <i data-lucide="x" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+            종료
+          </button>
+          <button class="btn btn-secondary" onclick="print()">
+            <i data-lucide="printer" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+            인쇄
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function tempSave() {
+      showToast('임시저장되었습니다.', 'success');
+    }
+
+    function submit() {
+      showModal('제출 확인', '체크리스트를 제출하시겠습니까?', {
+        onConfirm: () => showToast('제출되었습니다.', 'success'),
+        confirmText: '제출'
+      });
+    }
+
+    function complete() {
+      showModal('종료 확인', '인시던트 처리를 종료하시겠습니까?', {
+        onConfirm: () => showToast('인시던트가 종료되었습니다.', 'success'),
+        confirmText: '종료'
+      });
+    }
+
+    function print() {
+      window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+    });
+  </script>
+</body>
+</html>

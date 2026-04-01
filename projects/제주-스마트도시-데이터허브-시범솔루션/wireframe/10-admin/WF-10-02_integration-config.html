@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>연계 시스템 설정</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">관리자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">연계 시스템 설정</h1>
+          <p class="page-subtitle">외부 시스템과의 연계 구성 및 상태 관리</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 연계 시스템 카드 그리드 -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <!-- 카드 1 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: var(--color-primary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">📋</div>
+                  <div class="card-title">민원포털</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge success">연결됨</span>
+                  <span class="badge info">API</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:32</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 2 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: var(--color-success); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">🌡️</div>
+                  <div class="card-title">기상청</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge danger">오류</span>
+                  <span class="badge warning">API</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 13:15</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 3 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: var(--color-secondary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">📱</div>
+                  <div class="card-title">통합관제</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge success">연결됨</span>
+                  <span class="badge info">API</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:20</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 4 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: var(--color-warning); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">🔌</div>
+                  <div class="card-title">전기차충전</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge success">연결됨</span>
+                  <span class="badge info">API</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:10</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 5 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: #888; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">🚔</div>
+                  <div class="card-title">112/119</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge default">미연결</span>
+                  <span class="badge default">배치</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">아직 동기화 안 됨</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 6 -->
+            <div class="card" style="cursor: pointer;" onclick="alert('설정 패널 열기')">
+              <div class="card-header">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                  <div style="width: 48px; height: 48px; background-color: var(--color-primary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 20px;">🏢</div>
+                  <div class="card-title">스마트시티</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                  <span class="badge success">연결됨</span>
+                  <span class="badge info">API</span>
+                </div>
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:00</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
+                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단: 연계 현황 요약 -->
+          <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">연계 현황 요약</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>시스템명</th>
+                <th>상태</th>
+                <th>최종동기화</th>
+                <th>수집주기</th>
+                <th>마지막 에러</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>민원포털</td>
+                <td><span class="badge success">연결</span></td>
+                <td>2026-03-25 14:32</td>
+                <td>실시간</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>기상청</td>
+                <td><span class="badge danger">오류</span></td>
+                <td>2026-03-25 13:15</td>
+                <td>1시간</td>
+                <td>Connection timeout</td>
+              </tr>
+              <tr>
+                <td>통합관제</td>
+                <td><span class="badge success">연결</span></td>
+                <td>2026-03-25 14:20</td>
+                <td>실시간</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>전기차충전</td>
+                <td><span class="badge success">연결</span></td>
+                <td>2026-03-25 14:10</td>
+                <td>5분</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>112/119</td>
+                <td><span class="badge default">미연결</span></td>
+                <td>-</td>
+                <td>배치</td>
+                <td>Not configured</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('admin');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

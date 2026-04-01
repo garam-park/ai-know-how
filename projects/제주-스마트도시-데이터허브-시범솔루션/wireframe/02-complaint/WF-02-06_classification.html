@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>민원 분류 현황 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">민원 분류 현황</div>
+          <div class="page-subtitle">분류별 민원 통계 및 트렌드</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Charts Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Doughnut Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">분류별 비율</div>
+              </div>
+              <div class="card-body">
+                <canvas id="classificationChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <!-- Stacked Bar Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">분류별 트렌드 (월별)</div>
+              </div>
+              <div class="card-body">
+                <canvas id="trendChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Classification Details Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">분류별 상세</div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th onclick="console.log('sort')" style="cursor: pointer;">분류명</th>
+                  <th onclick="console.log('sort')" style="cursor: pointer;">건수</th>
+                  <th onclick="console.log('sort')" style="cursor: pointer;">비율</th>
+                  <th onclick="console.log('sort')" style="cursor: pointer;">전월대비</th>
+                  <th>주요 키워드</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=불법주차'">
+                  <td><strong>불법주차</strong></td>
+                  <td>734</td>
+                  <td>52.3%</td>
+                  <td><span style="color: var(--color-danger); font-weight: 600;">+8%</span></td>
+                  <td><small>불법주차, 주차위반, 차단</small></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=보행안전'">
+                  <td><strong>보행안전</strong></td>
+                  <td>267</td>
+                  <td>19.1%</td>
+                  <td><span style="color: var(--color-danger); font-weight: 600;">+5%</span></td>
+                  <td><small>보행로, 안전, 신호</small></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=시설불편'">
+                  <td><strong>시설불편</strong></td>
+                  <td>178</td>
+                  <td>12.7%</td>
+                  <td><span style="color: var(--color-success); font-weight: 600;">-2%</span></td>
+                  <td><small>시설, 파손, 불편</small></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=충전구역점유'">
+                  <td><strong>충전구역점유</strong></td>
+                  <td>142</td>
+                  <td>10.1%</td>
+                  <td><span style="color: var(--color-danger); font-weight: 600;">+12%</span></td>
+                  <td><small>충전, 점유, 스탠드</small></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=화재위험'">
+                  <td><strong>화재위험</strong></td>
+                  <td>54</td>
+                  <td>3.9%</td>
+                  <td><span style="color: var(--color-danger); font-weight: 600;">+1%</span></td>
+                  <td><small>화재, 위험, 방치</small></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-09_complaint-list.html?type=주차안전'">
+                  <td><strong>주차안전</strong></td>
+                  <td>24</td>
+                  <td>1.9%</td>
+                  <td><span style="color: var(--color-gray-500);">0%</span></td>
+                  <td><small>주차, 사고, 안전</small></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding: 12px; background: var(--bg-color-secondary); border-top: 1px solid var(--border-color); text-align: right; font-weight: 600;">
+              합계: 1,399건
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 분류별 비율 도넛 차트
+      createDoughnutChart('classificationChart',
+        ['불법주차', '보행안전', '시설불편', '충전구역점유', '화재위험', '주차안전'],
+        [734, 267, 178, 142, 54, 24]
+      );
+
+      // 월별 트렌드 스택 바 차트 (유형별)
+      const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      const illegalData = [200, 215, 230, 250, 268, 285, 305, 290, 280, 260, 240, 223];
+      const pedestrianData = [75, 78, 82, 89, 95, 110, 125, 120, 112, 102, 95, 88];
+      const facilityData = [50, 48, 52, 62, 68, 76, 80, 76, 70, 62, 56, 47];
+      const chargingData = [35, 38, 42, 50, 58, 68, 75, 70, 60, 52, 45, 32];
+      const fireData = [15, 16, 18, 22, 24, 28, 32, 30, 25, 20, 18, 10];
+      const parkingData = [5, 6, 6, 7, 9, 10, 11, 10, 9, 8, 7, 6];
+
+      createBarChart('trendChart', months, [
+        { label: '불법주차', data: illegalData, backgroundColor: '#DC2626' },
+        { label: '보행안전', data: pedestrianData, backgroundColor: '#16A34A' },
+        { label: '시설불편', data: facilityData, backgroundColor: '#2563EB' },
+        { label: '충전구역', data: chargingData, backgroundColor: '#EAB308' },
+        { label: '화재위험', data: fireData, backgroundColor: '#F97316' },
+        { label: '주차안전', data: parkingData, backgroundColor: '#7C3AED' }
+      ], {
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

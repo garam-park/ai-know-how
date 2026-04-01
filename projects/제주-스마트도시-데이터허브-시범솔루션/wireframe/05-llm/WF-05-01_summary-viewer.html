@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 요약 결과 뷰어 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .summary-tab-button {
+      padding: 12px 16px;
+      border: none;
+      background: #F3F4F6;
+      color: #6B7280;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .summary-tab-button.active {
+      background: white;
+      color: #2563EB;
+      border-bottom-color: #2563EB;
+    }
+    .summary-tab-button:hover {
+      background: white;
+      color: #1F2937;
+    }
+    .summary-card {
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .summary-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #2563EB;
+    }
+    .confidence-bar {
+      height: 6px;
+      background: #E5E7EB;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .confidence-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .confidence-fill.high {
+      background: #16A34A;
+    }
+    .confidence-fill.medium {
+      background: #F59E0B;
+    }
+    .confidence-fill.low {
+      background: #DC2626;
+    }
+    .side-panel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 400px;
+      height: 100vh;
+      background: white;
+      border-left: 1px solid #E5E7EB;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s;
+      z-index: 100;
+      padding-top: 60px;
+    }
+    .side-panel.open {
+      transform: translateX(0);
+    }
+    .side-panel-header {
+      padding: 16px;
+      border-bottom: 1px solid #E5E7EB;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .side-panel-body {
+      padding: 16px;
+    }
+    .comparison-section {
+      margin-bottom: 20px;
+    }
+    .comparison-title {
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .comparison-text {
+      font-size: 14px;
+      color: #4B5563;
+      line-height: 1.6;
+      padding: 12px;
+      background: #F9FAFB;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">LLM 요약 결과 뷰어</div>
+          <div class="page-subtitle">민원, 정책, 회의록 등 다양한 문서의 요약 결과를 확인합니다</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 제어 영역 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <input type="date" class="filter-select" value="2026-04-01">
+              <span style="margin: 0 8px; color: #9CA3AF;">~</span>
+              <input type="date" class="filter-select" value="2026-04-02">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">검색</label>
+              <input type="text" class="filter-select" placeholder="키워드 검색..." style="flex: 1; max-width: 300px;">
+            </div>
+          </div>
+
+          <!-- 탭 메뉴 -->
+          <div style="display: flex; border-bottom: 1px solid #E5E7EB; margin-bottom: 24px;">
+            <button class="summary-tab-button active" onclick="switchTab(this, 'all')">전체</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'complaint')">민원요약</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'policy')">정책요약</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'meeting')">회의록</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'report')">보고서</button>
+          </div>
+
+          <!-- 카드 그리드 -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- 카드 1 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">민원요약</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">주차장 부족으로 인한 민원 다수 접수</div>
+                </div>
+                <span style="background: #DBEAFE; color: #2563EB; padding: 4px 8px; border-radius: 4px; font-size: 12px;">시설</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">제주도 신도심 지역의 주차장 부족으로 인한 교통 혼잡과 주민 민원이 증가하고 있는 상황...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 1,245자 → 요약: 245자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 92%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 92% | 2026-04-02 14:30</div>
+            </div>
+
+            <!-- 카드 2 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">정책요약</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">제주 관광 인프라 개발 정책</div>
+                </div>
+                <span style="background: #FEE2E2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 12px;">정책</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">2026년 상반기 제주 관광지 인프라 개선 및 문화 자원 개발 정책...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 2,156자 → 요약: 348자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 88%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 88% | 2026-04-02 13:15</div>
+            </div>
+
+            <!-- 카드 3 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">회의록</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">교통 정책 협의회 회의록</div>
+                </div>
+                <span style="background: #FEF3C7; color: #F59E0B; padding: 4px 8px; border-radius: 4px; font-size: 12px;">회의</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">2026년 제주도 교통 정책 협의회 회의 결과 및 향후 추진 방안...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 1,876자 → 요약: 312자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill medium" style="width: 75%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 75% | 2026-04-02 11:45</div>
+            </div>
+
+            <!-- 카드 4 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">보고서</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">3월 민원처리 실적 보고서</div>
+                </div>
+                <span style="background: #DCFCE7; color: #16A34A; padding: 4px 8px; border-radius: 4px; font-size: 12px;">보고서</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">2026년 3월 월간 민원 접수, 처리, 만족도 등 종합 실적 분석...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 3,421자 → 요약: 512자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 95%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 95% | 2026-04-02 10:20</div>
+            </div>
+
+            <!-- 카드 5 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">민원요약</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">환경 오염 민원 집중 분석</div>
+                </div>
+                <span style="background: #DBEAFE; color: #2563EB; padding: 4px 8px; border-radius: 4px; font-size: 12px;">환경</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">제주 동부 지역 수질 오염 및 대기 오염 민원의 원인 분석 및 대책...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 987자 → 요약: 187자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill medium" style="width: 81%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 81% | 2026-04-01 16:05</div>
+            </div>
+
+            <!-- 카드 6 -->
+            <div class="summary-card" onclick="openPanel(this)">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">정책요약</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">도시 재정비 종합 계획안</div>
+                </div>
+                <span style="background: #FEE2E2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 12px;">도시계획</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">제주도 구도심 지역의 도시 재정비 및 현대화 추진 계획...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 2,834자 → 요약: 421자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 90%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 90% | 2026-04-01 14:32</div>
+            </div>
+          </div>
+
+          <!-- 페이지네이션 -->
+          <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <button class="btn btn-secondary" style="padding: 8px 12px;">
+              <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+            </button>
+            <button class="btn btn-primary" style="padding: 8px 16px;">1</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px;">2</button>
+            <button class="btn btn-secondary" style="padding: 8px 16px;">3</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px;">
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사이드 패널 -->
+    <div class="side-panel" id="sidePanel">
+      <div class="side-panel-header">
+        <span style="font-weight: 600;">상세 비교</span>
+        <button onclick="closePanel()" style="background: none; border: none; cursor: pointer; padding: 8px;">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+      </div>
+      <div class="side-panel-body">
+        <div class="comparison-section">
+          <div class="comparison-title">원본 텍스트</div>
+          <div class="comparison-text">
+            제주도 신도심 지역의 주차장 부족으로 인해 최근 교통 혼잡이 심화되고 있습니다. 특히 주말의 경우 관광객과 지역 주민들의 차량으로 인해 도로 혼잡이 가중되고 있으며, 이로 인한 주민 민원이 지속적으로 증가하고 있는 상황입니다. 해당 지역에 추가 주차장 조성 및 대중교통 활성화가 필요합니다.
+          </div>
+        </div>
+
+        <div class="comparison-section">
+          <div class="comparison-title">요약 결과</div>
+          <div class="comparison-text">
+            제주 신도심 주차장 부족으로 교통 혼잡 심화, 특히 주말 관광객 증가로 민원 지속 증가. 추가 주차장 조성 및 대중교통 활성화 필요.
+          </div>
+        </div>
+
+        <div class="comparison-section">
+          <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px; font-size: 14px;">메타데이터</div>
+          <div style="font-size: 13px; color: #4B5563; line-height: 1.8;">
+            <div><strong>신뢰도:</strong> 92%</div>
+            <div><strong>모델:</strong> GPT-4 Turbo</div>
+            <div><strong>처리시간:</strong> 2.3초</div>
+            <div><strong>원문길이:</strong> 1,245자</div>
+            <div><strong>요약길이:</strong> 245자</div>
+            <div><strong>압축률:</strong> 80.4%</div>
+            <div><strong>생성일시:</strong> 2026-04-02 14:30:45</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px;">
+          <button class="btn btn-secondary" style="font-size: 12px;">
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+            다운로드
+          </button>
+          <button class="btn btn-secondary" style="font-size: 12px;">
+            <i data-lucide="share-2" style="width: 14px; height: 14px;"></i>
+            공유
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+    });
+
+    function switchTab(el, tab) {
+      document.querySelectorAll('.summary-tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      el.classList.add('active');
+      showToast(tab + ' 탭으로 필터링되었습니다.', 'info');
+    }
+
+    function openPanel(el) {
+      document.getElementById('sidePanel').classList.add('open');
+    }
+
+    function closePanel() {
+      document.getElementById('sidePanel').classList.remove('open');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>알림 설정</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">관리자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">알림 설정</h1>
+          <p class="page-subtitle">시스템 알림 규칙 및 채널 관리</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 규칙 추가 버튼 -->
+          <div style="margin-bottom: var(--spacing-lg);">
+            <button class="btn btn-primary" onclick="alert('규칙 추가 모달')">
+              <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+              규칙 추가
+            </button>
+          </div>
+
+          <!-- 알림 규칙 테이블 -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>규칙명</th>
+                <th>조건</th>
+                <th>채널</th>
+                <th>수신그룹</th>
+                <th>활성</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: var(--color-primary); cursor: pointer;" onclick="alert('편집 모달')">데이터 수집 실패</strong></td>
+                <td>데이터 수집 실패</td>
+                <td>
+                  <span class="badge info">SMS</span>
+                  <span class="badge info">이메일</span>
+                  <span class="badge info">앱푸시</span>
+                </td>
+                <td>관리자, 기술팀</td>
+                <td>
+                  <input type="checkbox" checked>
+                </td>
+                <td style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                  <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('삭제')">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--color-primary); cursor: pointer;" onclick="alert('편집 모달')">데이터 품질 저하</strong></td>
+                <td>완전성 85% 이하</td>
+                <td>
+                  <span class="badge info">이메일</span>
+                </td>
+                <td>기술팀</td>
+                <td>
+                  <input type="checkbox" checked>
+                </td>
+                <td style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                  <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('삭제')">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--color-primary); cursor: pointer;" onclick="alert('편집 모달')">시스템 오류</strong></td>
+                <td>높음 심각도</td>
+                <td>
+                  <span class="badge info">SMS</span>
+                  <span class="badge info">웹훅</span>
+                </td>
+                <td>관리자</td>
+                <td>
+                  <input type="checkbox">
+                </td>
+                <td style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                  <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('삭제')">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--color-primary); cursor: pointer;" onclick="alert('편집 모달')">OCR 처리 실패율 높음</strong></td>
+                <td>실패율 10% 이상</td>
+                <td>
+                  <span class="badge info">이메일</span>
+                  <span class="badge info">앱푸시</span>
+                </td>
+                <td>운영팀</td>
+                <td>
+                  <input type="checkbox" checked>
+                </td>
+                <td style="display: flex; gap: var(--spacing-sm);">
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                  <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('삭제')">삭제</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 하단: 알림 발송 이력 -->
+          <h3 style="font-size: var(--font-heading-sm); margin: var(--spacing-2xl) 0 var(--spacing-lg); color: var(--text-color);">알림 발송 이력</h3>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>시각</th>
+                <th>규칙명</th>
+                <th>이벤트</th>
+                <th>채널</th>
+                <th>수신자</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026-03-25 14:32</td>
+                <td>데이터 수집 실패</td>
+                <td>민원포털 수집 실패</td>
+                <td><span class="badge info">SMS</span> <span class="badge info">이메일</span></td>
+                <td>관리자</td>
+                <td><span class="badge success">발송완료</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 13:15</td>
+                <td>데이터 품질 저하</td>
+                <td>완전성 85%</td>
+                <td><span class="badge info">이메일</span></td>
+                <td>기술팀</td>
+                <td><span class="badge success">발송완료</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 12:00</td>
+                <td>OCR 처리 실패율 높음</td>
+                <td>실패율 12%</td>
+                <td><span class="badge info">이메일</span> <span class="badge info">앱푸시</span></td>
+                <td>운영팀</td>
+                <td><span class="badge success">발송완료</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-24 23:45</td>
+                <td>시스템 오류</td>
+                <td>DB 연결 오류</td>
+                <td><span class="badge info">SMS</span></td>
+                <td>관리자</td>
+                <td><span class="badge warning">발송중</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-24 20:30</td>
+                <td>데이터 수집 실패</td>
+                <td>기상청 API 오류</td>
+                <td><span class="badge info">이메일</span> <span class="badge info">웹훅</span></td>
+                <td>기술팀</td>
+                <td><span class="badge danger">발송실패</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" style="margin-top: var(--spacing-lg);">
+            <button class="pagination-button" data-action="prev">이전</button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button">2</button>
+            <button class="pagination-button">3</button>
+            <button class="pagination-button" data-action="next">다음</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('admin');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

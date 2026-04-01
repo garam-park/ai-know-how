@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 클러스터링 시각화 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .slider-value {
+      font-weight: 600;
+      color: #2563EB;
+      min-width: 40px;
+    }
+    .cluster-detail-panel {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .cluster-name {
+      font-weight: 600;
+      color: #1F2937;
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cluster-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .keyword-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 16px;
+    }
+    .keyword-item {
+      padding: 8px 0;
+      font-size: 13px;
+      color: #4B5563;
+      padding-left: 12px;
+      border-left: 2px solid #E5E7EB;
+    }
+    .keyword-item strong {
+      color: #1F2937;
+      font-weight: 600;
+    }
+    .representative-item {
+      padding: 12px;
+      background: #F9FAFB;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.5;
+      border-left: 3px solid #2563EB;
+    }
+    .history-timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 16px;
+      border-left: 2px solid #E5E7EB;
+      padding-left: 16px;
+      margin-left: -24px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #2563EB;
+      border-radius: 50%;
+      border: 3px solid white;
+      left: -20px;
+      top: 2px;
+    }
+    .timeline-item:last-child {
+      border-left: none;
+    }
+    .timeline-date {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-bottom: 4px;
+    }
+    .timeline-description {
+      font-size: 13px;
+      color: #4B5563;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">김</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div class="page-title">LLM 클러스터링 시각화</div>
+          <div class="page-subtitle">텍스트 임베딩 기반 유사 문서 그룹화 분석</div>
+        </div>
+
+        <div class="page-content">
+          <!-- 클러스터 개수 슬라이더 -->
+          <div class="filter-bar" style="margin-bottom: 24px;">
+            <div style="flex: 1;">
+              <label class="filter-label">클러스터 개수</label>
+              <div class="slider-container">
+                <input type="range" min="2" max="20" value="8" id="clusterSlider"
+                  style="flex: 1; cursor: pointer;" onchange="updateClusters(this.value)">
+                <span class="slider-value" id="clusterValue">8</span>
+                <span style="color: #6B7280; font-size: 13px;">개</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 메인 차트 영역 -->
+          <div style="display: grid; grid-template-columns: 1fr 350px; gap: 16px; margin-bottom: 24px;">
+            <!-- 버블 차트 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">클러스터 분포</div>
+                <div class="card-subtitle">문서 임베딩 공간의 클러스터 시각화</div>
+              </div>
+              <div class="card-body">
+                <canvas id="clusterChart" style="max-height: 400px;"></canvas>
+              </div>
+            </div>
+
+            <!-- 클러스터 상세 정보 -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="cluster-detail-panel">
+                <div class="cluster-name">
+                  <div class="cluster-badge" style="background: #2563EB;"></div>
+                  클러스터 #1
+                </div>
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
+                  <strong>48</strong>개 문서
+                </div>
+
+                <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px;">상위 5개 키워드</div>
+                <ul class="keyword-list">
+                  <li class="keyword-item"><strong>주차장</strong> (0.92)</li>
+                  <li class="keyword-item"><strong>부족</strong> (0.88)</li>
+                  <li class="keyword-item"><strong>교통</strong> (0.85)</li>
+                  <li class="keyword-item"><strong>혼잡</strong> (0.82)</li>
+                  <li class="keyword-item"><strong>민원</strong> (0.79)</li>
+                </ul>
+
+                <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px;">대표 민원</div>
+                <div class="representative-item">
+                  신도심 지역 주차장 부족으로 인한 교통 혼잡
+                </div>
+                <div class="representative-item">
+                  상업지구 야간 불법 주차 단속 요청
+                </div>
+                <div class="representative-item">
+                  대형마트 주차장 부족에 따른 주변 도로 점유
+                </div>
+              </div>
+
+              <div class="cluster-detail-panel">
+                <div class="cluster-name">
+                  <div class="cluster-badge" style="background: #7C3AED;"></div>
+                  클러스터 #2
+                </div>
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
+                  <strong>35</strong>개 문서
+                </div>
+
+                <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px;">상위 5개 키워드</div>
+                <ul class="keyword-list">
+                  <li class="keyword-item"><strong>도로</strong> (0.91)</li>
+                  <li class="keyword-item"><strong>파손</strong> (0.87)</li>
+                  <li class="keyword-item"><strong>복구</strong> (0.84)</li>
+                  <li class="keyword-item"><strong>포트홀</strong> (0.81)</li>
+                  <li class="keyword-item"><strong>안전</strong> (0.78)</li>
+                </ul>
+
+                <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px;">대표 민원</div>
+                <div class="representative-item">
+                  관광지 진입로 포트홀 복구 신청
+                </div>
+                <div class="representative-item">
+                  노후 도로 아스팔트 들뜸 현상
+                </div>
+                <div class="representative-item">
+                  우수관 파손으로 인한 도로 함몰
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 병합/분할 히스토리 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">클러스터 변경 이력</div>
+              <div class="card-subtitle">병합 및 분할 작업 시간순 기록</div>
+            </div>
+            <div class="card-body">
+              <div class="history-timeline">
+                <div class="timeline-item">
+                  <div class="timeline-date">2026-04-02 15:30:00</div>
+                  <div class="timeline-description">
+                    클러스터 #5, #6 병합 → 시설 관리 그룹으로 통합 (84개 문서)
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-date">2026-04-02 14:15:00</div>
+                  <div class="timeline-description">
+                    클러스터 #3 분할 → 교통 위반 (28개) / 주차 관련 (20개) 분리
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-date">2026-04-02 13:45:00</div>
+                  <div class="timeline-description">
+                    자동 클러스터링 실행 (8개 클러스터 생성, 총 239개 문서)
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-date">2026-04-01 11:20:00</div>
+                  <div class="timeline-description">
+                    노이즈 클러스터 #8 제거 (고아 문서 5개 재분배)
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-date">2026-03-31 09:00:00</div>
+                  <div class="timeline-description">
+                    이전 클러스터링 결과 보관 (9개 클러스터, 이전 임베딩 모델)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('llm');
+      initClusterChart();
+    });
+
+    function initClusterChart() {
+      const ctx = document.getElementById('clusterChart').getContext('2d');
+
+      const colors = [
+        '#2563EB', '#7C3AED', '#DC2626', '#F59E0B',
+        '#16A34A', '#0891B2', '#DB2777', '#EA580C'
+      ];
+
+      const clusterData = [
+        { x: 25, y: 45, r: 15, cluster: 0, label: 'C1' },
+        { x: 65, y: 35, r: 12, cluster: 1, label: 'C2' },
+        { x: 45, y: 70, r: 18, cluster: 2, label: 'C3' },
+        { x: 75, y: 55, r: 10, cluster: 3, label: 'C4' },
+        { x: 35, y: 25, r: 14, cluster: 4, label: 'C5' },
+        { x: 55, y: 50, r: 11, cluster: 5, label: 'C6' },
+        { x: 20, y: 65, r: 9, cluster: 6, label: 'C7' },
+        { x: 70, y: 20, r: 13, cluster: 7, label: 'C8' }
+      ];
+
+      const datasets = clusterData.map((d, idx) => ({
+        label: `클러스터 ${idx + 1}`,
+        data: [{ x: d.x, y: d.y, r: d.r * 2 }],
+        backgroundColor: colors[idx],
+        borderColor: colors[idx],
+        opacity: 0.8,
+        pointStyle: 'circle'
+      }));
+
+      const chart = new Chart(ctx, {
+        type: 'bubble',
+        data: { datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: true, position: 'bottom' }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              position: 'bottom',
+              min: 0, max: 100,
+              title: { display: true, text: 'Dimension 1' }
+            },
+            y: {
+              min: 0, max: 100,
+              title: { display: true, text: 'Dimension 2' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateClusters(value) {
+      document.getElementById('clusterValue').textContent = value;
+      showToast('클러스터 개수가 ' + value + '개로 설정되었습니다.', 'info');
+    }
+  </script>
+</body>
+</html>

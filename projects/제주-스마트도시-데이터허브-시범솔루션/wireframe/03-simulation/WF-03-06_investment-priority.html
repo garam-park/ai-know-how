@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>투자 우선순위 보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    .weight-adjustment {
+      background: white;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .weight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .weight-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .weight-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .weight-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--color-gray-300);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .ranking-table thead {
+      background: var(--color-gray-100);
+      border-bottom: 1px solid var(--color-gray-300);
+    }
+    .ranking-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .ranking-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    .ranking-table tbody tr:hover {
+      background: var(--color-gray-50);
+      cursor: pointer;
+    }
+    .ranking-table tbody tr.selected {
+      background: #EDE9FE;
+    }
+    .rank-number {
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: 14px;
+    }
+    .parking-name {
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .score-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .score-fill {
+      flex: 1;
+      height: 20px;
+      background: var(--color-gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .score-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      font-size: 11px;
+      color: white;
+      font-weight: 700;
+    }
+    .sub-score {
+      padding: 4px 8px;
+      background: var(--color-gray-100);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-primary);
+      text-align: center;
+    }
+    .detail-card {
+      background: white;
+      border: 2px solid var(--color-primary);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .detail-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-color-primary);
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--color-primary);
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    .detail-row:last-child {
+      margin-bottom: 0;
+    }
+    .detail-label {
+      color: var(--text-color-secondary);
+      font-weight: 500;
+    }
+    .detail-value {
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .radar-small {
+      margin: 16px 0;
+      min-height: 180px;
+    }
+    .checklist-section {
+      background: white;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .checklist-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-gray-300);
+    }
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: var(--color-gray-50);
+      border-radius: 6px;
+      border: 1px solid var(--color-gray-200);
+    }
+    .checklist-item:last-child {
+      margin-bottom: 0;
+    }
+    .checklist-check {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-gray-300);
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .checklist-check.checked {
+      background: var(--color-success);
+      border-color: var(--color-success);
+      color: white;
+    }
+    .checklist-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .checklist-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .checklist-cost {
+      font-size: 11px;
+      color: var(--text-color-secondary);
+    }
+    .cost-badge {
+      padding: 2px 6px;
+      background: var(--color-primary-light);
+      color: white;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">투자 우선순위 보드</div>
+          <div class="page-subtitle">주차시설 투자의 우선순위 결정 및 투자 계획</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Weight Adjustment Section -->
+          <div class="weight-adjustment">
+            <h3 style="font-size: 13px; font-weight: 600; margin-bottom: 16px; color: var(--text-color-primary);">가중치 조정</h3>
+            <div class="weight-grid">
+              <div class="weight-item">
+                <div class="weight-label">
+                  <span>안전위험도</span>
+                  <span class="weight-value" id="weight1Value">25%</span>
+                </div>
+                <input type="range" id="weight1" min="0" max="100" value="25" step="5">
+              </div>
+              <div class="weight-item">
+                <div class="weight-label">
+                  <span>민원빈도</span>
+                  <span class="weight-value" id="weight2Value">30%</span>
+                </div>
+                <input type="range" id="weight2" min="0" max="100" value="30" step="5">
+              </div>
+              <div class="weight-item">
+                <div class="weight-label">
+                  <span>이용패턴</span>
+                  <span class="weight-value" id="weight3Value">25%</span>
+                </div>
+                <input type="range" id="weight3" min="0" max="100" value="25" step="5">
+              </div>
+              <div class="weight-item">
+                <div class="weight-label">
+                  <span>사고이력</span>
+                  <span class="weight-value" id="weight4Value">20%</span>
+                </div>
+                <input type="range" id="weight4" min="0" max="100" value="20" step="5">
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority Ranking -->
+          <div class="main-grid">
+            <!-- Left: Table -->
+            <div>
+              <h3 style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-color-primary);">우선순위 순위</h3>
+              <table class="ranking-table">
+                <thead>
+                  <tr>
+                    <th style="width: 5%;">순</th>
+                    <th style="width: 25%;">주차장명</th>
+                    <th style="width: 35%;">복합점수</th>
+                    <th style="width: 35%;">하위 점수</th>
+                  </tr>
+                </thead>
+                <tbody id="rankingTableBody">
+                  <tr class="parking-row" data-lot-id="1">
+                    <td><span class="rank-number">1</span></td>
+                    <td><span class="parking-name">제주시 신청로 지하</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 94%;">94</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>28</div>
+                        <div class="sub-score">민원<br/>32</div>
+                        <div class="sub-score">이용<br/>22</div>
+                        <div class="sub-score">사고<br/>12</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="2">
+                    <td><span class="rank-number">2</span></td>
+                    <td><span class="parking-name">제주시 조천로 지상</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 86%;">86</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>24</div>
+                        <div class="sub-score">민원<br/>28</div>
+                        <div class="sub-score">이용<br/>24</div>
+                        <div class="sub-score">사고<br/>10</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="3">
+                    <td><span class="rank-number">3</span></td>
+                    <td><span class="parking-name">제주시 칠산로 지상</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 78%;">78</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>22</div>
+                        <div class="sub-score">민원<br/>25</div>
+                        <div class="sub-score">이용<br/>20</div>
+                        <div class="sub-score">사고<br/>11</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="4">
+                    <td><span class="rank-number">4</span></td>
+                    <td><span class="parking-name">서귀포시 중앙로</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 72%;">72</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>20</div>
+                        <div class="sub-score">민원<br/>22</div>
+                        <div class="sub-score">이용<br/>19</div>
+                        <div class="sub-score">사고<br/>11</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="5">
+                    <td><span class="rank-number">5</span></td>
+                    <td><span class="parking-name">제주시 연동 지하</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 68%;">68</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>18</div>
+                        <div class="sub-score">민원<br/>20</div>
+                        <div class="sub-score">이용<br/>18</div>
+                        <div class="sub-score">사고<br/>12</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="6">
+                    <td><span class="rank-number">6</span></td>
+                    <td><span class="parking-name">서귀포시 태평로</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 62%;">62</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>16</div>
+                        <div class="sub-score">민원<br/>18</div>
+                        <div class="sub-score">이용<br/>16</div>
+                        <div class="sub-score">사고<br/>12</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="7">
+                    <td><span class="rank-number">7</span></td>
+                    <td><span class="parking-name">북제주군 구좌로</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 58%;">58</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>14</div>
+                        <div class="sub-score">민원<br/>16</div>
+                        <div class="sub-score">이용<br/>15</div>
+                        <div class="sub-score">사고<br/>13</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="8">
+                    <td><span class="rank-number">8</span></td>
+                    <td><span class="parking-name">남제주군 중산</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 54%;">54</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>12</div>
+                        <div class="sub-score">민원<br/>14</div>
+                        <div class="sub-score">이용<br/>14</div>
+                        <div class="sub-score">사고<br/>14</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="parking-row" data-lot-id="9">
+                    <td><span class="rank-number">9</span></td>
+                    <td><span class="parking-name">북제주군 조천읍</span></td>
+                    <td>
+                      <div class="score-bar">
+                        <div class="score-fill">
+                          <div class="score-progress" style="width: 48%;">48</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <div class="sub-score">안전<br/>10</div>
+                        <div class="sub-score">민원<br/>12</div>
+                        <div class="sub-score">이용<br/>12</div>
+                        <div class="sub-score">사고<br/>14</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right: Detail Card -->
+            <div>
+              <h3 style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-color-primary);">상세 정보</h3>
+              <div class="detail-card" id="detailCard">
+                <div class="detail-header" id="detailLotName">제주시 신청로 지하</div>
+                <div class="detail-row">
+                  <span class="detail-label">복합점수</span>
+                  <span class="detail-value">94/100</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">위험순위</span>
+                  <span class="detail-value">1위 (최우선)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">현황 혼잡도</span>
+                  <span class="detail-value">82%</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">월간 민원</span>
+                  <span class="detail-value">23건</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">연간 사고</span>
+                  <span class="detail-value">8건</span>
+                </div>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-gray-300);">
+                  <div style="font-size: 11px; font-weight: 600; color: var(--text-color-secondary); margin-bottom: 12px;">다각도 점수</div>
+                  <div class="radar-small">
+                    <canvas id="radarChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Investment Checklist -->
+          <div class="checklist-section">
+            <div class="checklist-title">투자 항목 및 예상 비용</div>
+            <div id="checklistContainer">
+              <div class="checklist-item">
+                <div class="checklist-check" onclick="this.classList.toggle('checked')">
+                  <i data-lucide="check" width="12" height="12" style="display: none;"></i>
+                </div>
+                <div class="checklist-content">
+                  <div class="checklist-name">신청로 지하주차장 확장 공사</div>
+                  <div class="checklist-cost"><span class="cost-badge">₩2,500M</span> 2026년 상반기</div>
+                </div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-check" onclick="this.classList.toggle('checked')">
+                  <i data-lucide="check" width="12" height="12" style="display: none;"></i>
+                </div>
+                <div class="checklist-content">
+                  <div class="checklist-name">스마트 주차관제시스템 도입</div>
+                  <div class="checklist-cost"><span class="cost-badge">₩850M</span> 2026년 상반기</div>
+                </div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-check" onclick="this.classList.toggle('checked')">
+                  <i data-lucide="check" width="12" height="12" style="display: none;"></i>
+                </div>
+                <div class="checklist-content">
+                  <div class="checklist-name">조천로 지상 주차장 재포장</div>
+                  <div class="checklist-cost"><span class="cost-badge">₩1,200M</span> 2026년 중반기</div>
+                </div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-check" onclick="this.classList.toggle('checked')">
+                  <i data-lucide="check" width="12" height="12" style="display: none;"></i>
+                </div>
+                <div class="checklist-content">
+                  <div class="checklist-name">안전 CCTV 및 조명 확충</div>
+                  <div class="checklist-cost"><span class="cost-badge">₩650M</span> 2026년 중반기</div>
+                </div>
+              </div>
+              <div class="checklist-item">
+                <div class="checklist-check" onclick="this.classList.toggle('checked')">
+                  <i data-lucide="check" width="12" height="12" style="display: none;"></i>
+                </div>
+                <div class="checklist-content">
+                  <div class="checklist-name">칠산로 지상주차장 기계식 확장</div>
+                  <div class="checklist-cost"><span class="cost-badge">₩1,800M</span> 2026년 하반기</div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-gray-300);">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;">
+                <span>총 예상 투자비</span>
+                <span style="color: var(--color-primary); font-size: 16px;">₩7,000M</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-color-secondary); margin-top: 8px;">
+                <span>예상 완료 기간</span>
+                <span>2026년 12월</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('simulation');
+
+      // Weight adjustment
+      const weights = [
+        { slider: document.getElementById('weight1'), value: document.getElementById('weight1Value') },
+        { slider: document.getElementById('weight2'), value: document.getElementById('weight2Value') },
+        { slider: document.getElementById('weight3'), value: document.getElementById('weight3Value') },
+        { slider: document.getElementById('weight4'), value: document.getElementById('weight4Value') }
+      ];
+
+      weights.forEach(w => {
+        w.slider.addEventListener('input', function() {
+          w.value.textContent = this.value + '%';
+        });
+      });
+
+      // Parking row selection
+      const parkingRows = document.querySelectorAll('.parking-row');
+      parkingRows.forEach(row => {
+        row.addEventListener('click', function() {
+          parkingRows.forEach(r => r.classList.remove('selected'));
+          this.classList.add('selected');
+
+          const lotId = this.dataset.lotId;
+          const lotData = {
+            1: { name: '제주시 신청로 지하', score: 94, rank: '1위 (최우선)', congestion: '82%', complaints: '23건', accidents: '8건' },
+            2: { name: '제주시 조천로 지상', score: 86, rank: '2위', congestion: '78%', complaints: '20건', accidents: '7건' },
+            3: { name: '제주시 칠산로 지상', score: 78, rank: '3위', congestion: '72%', complaints: '18건', accidents: '6건' },
+            4: { name: '서귀포시 중앙로', score: 72, rank: '4위', congestion: '68%', complaints: '15건', accidents: '5건' },
+            5: { name: '제주시 연동 지하', score: 68, rank: '5위', congestion: '65%', complaints: '14건', accidents: '5건' },
+            6: { name: '서귀포시 태평로', score: 62, rank: '6위', congestion: '60%', complaints: '12건', accidents: '4건' },
+            7: { name: '북제주군 구좌로', score: 58, rank: '7위', congestion: '55%', complaints: '10건', accidents: '4건' },
+            8: { name: '남제주군 중산', score: 54, rank: '8위', congestion: '52%', complaints: '9건', accidents: '4건' },
+            9: { name: '북제주군 조천읍', score: 48, rank: '9위', congestion: '48%', complaints: '7건', accidents: '3건' }
+          };
+
+          const data = lotData[lotId];
+          document.getElementById('detailLotName').textContent = data.name;
+          document.getElementById('detailCard').innerHTML = `
+            <div class="detail-header">${data.name}</div>
+            <div class="detail-row">
+              <span class="detail-label">복합점수</span>
+              <span class="detail-value">${data.score}/100</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">위험순위</span>
+              <span class="detail-value">${data.rank}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">현황 혼잡도</span>
+              <span class="detail-value">${data.congestion}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">월간 민원</span>
+              <span class="detail-value">${data.complaints}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">연간 사고</span>
+              <span class="detail-value">${data.accidents}</span>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-gray-300);">
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-color-secondary); margin-bottom: 12px;">다각도 점수</div>
+              <div class="radar-small">
+                <canvas id="radarChart"></canvas>
+              </div>
+            </div>
+          `;
+
+          // Render new radar chart
+          renderRadarChart(lotId);
+        });
+      });
+
+      // Select first row by default
+      parkingRows[0].click();
+
+      function renderRadarChart(lotId) {
+        const radarData = {
+          1: [28, 32, 22, 12, 18, 15],
+          2: [24, 28, 24, 10, 16, 14],
+          3: [22, 25, 20, 11, 14, 13],
+          4: [20, 22, 19, 11, 12, 12],
+          5: [18, 20, 18, 12, 14, 11],
+          6: [16, 18, 16, 12, 10, 10],
+          7: [14, 16, 15, 13, 8, 9],
+          8: [12, 14, 14, 14, 8, 8],
+          9: [10, 12, 12, 14, 6, 7]
+        };
+
+        const chartCanvas = document.getElementById('radarChart');
+        if (chartCanvas && chartCanvas.parentElement) {
+          const ctx = chartCanvas.getContext('2d');
+          new Chart(ctx, {
+            type: 'radar',
+            data: {
+              labels: ['안전', '민원', '이용', '사고', '환경', '기타'],
+              datasets: [{
+                label: '점수',
+                data: radarData[lotId] || [20, 20, 20, 20, 20, 20],
+                borderColor: '#2563EB',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#2563EB'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: { legend: { display: false } },
+              scales: { r: { beginAtZero: true, max: 35 } }
+            }
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

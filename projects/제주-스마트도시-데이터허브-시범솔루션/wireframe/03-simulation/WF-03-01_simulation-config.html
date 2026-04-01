@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시뮬레이션 설정 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    .map-container {
+      background: linear-gradient(135deg, #e0e7ff 0%, #f0fdf4 100%);
+      border: 2px solid var(--color-gray-300);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 20px;
+      height: 500px;
+      overflow-y: auto;
+    }
+    .grid-cell {
+      background: white;
+      border: 1px solid var(--color-gray-200);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      text-align: center;
+      min-height: 80px;
+    }
+    .grid-cell:hover {
+      background: var(--color-primary-light);
+      color: white;
+      transform: scale(1.05);
+    }
+    .grid-cell.selected {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary-dark);
+    }
+    .settings-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      background: var(--color-gray-50);
+      border-radius: 8px;
+      height: 500px;
+      overflow-y: auto;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .form-group input[type="text"],
+    .form-group select {
+      padding: 10px;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--font-family-base);
+    }
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .radio-item input[type="radio"] {
+      cursor: pointer;
+    }
+    .radio-item label {
+      cursor: pointer;
+      font-weight: 400;
+      margin: 0;
+    }
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .slider-header label {
+      font-weight: 600;
+      margin: 0;
+    }
+    .slider-value {
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--color-gray-300);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-primary {
+      padding: 12px 20px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      background: var(--color-primary-dark);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .history-section {
+      margin-top: 20px;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .history-table thead {
+      background: var(--color-gray-100);
+      border-bottom: 1px solid var(--color-gray-300);
+    }
+    .history-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .history-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    .history-table tbody tr:hover {
+      background: var(--color-gray-50);
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">시뮬레이션 설정</div>
+          <div class="page-subtitle">주차정책 시뮬레이션 설정 및 실행</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px;">
+            <!-- Left: Map with grid -->
+            <div>
+              <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-color-primary);">제주시 주차구역 선택</h3>
+              <div class="map-container" id="mapContainer">
+                <div class="grid-cell" data-zone="A1">제주시<br/>중1구</div>
+                <div class="grid-cell" data-zone="A2">제주시<br/>중2구</div>
+                <div class="grid-cell" data-zone="A3">제주시<br/>동1구</div>
+                <div class="grid-cell" data-zone="A4">제주시<br/>동2구</div>
+                <div class="grid-cell" data-zone="B1">제주시<br/>서1구</div>
+                <div class="grid-cell" data-zone="B2">제주시<br/>서2구</div>
+                <div class="grid-cell" data-zone="B3">서귀포시<br/>중앙구</div>
+                <div class="grid-cell" data-zone="B4">서귀포시<br/>동부구</div>
+                <div class="grid-cell" data-zone="C1">서귀포시<br/>서부구</div>
+                <div class="grid-cell" data-zone="C2">북제주군<br/>구좌읍</div>
+                <div class="grid-cell" data-zone="C3">북제주군<br/>조천읍</div>
+                <div class="grid-cell" data-zone="C4">남제주군<br/>중산간</div>
+              </div>
+            </div>
+
+            <!-- Right: Settings Panel -->
+            <div class="settings-panel">
+              <div class="form-group">
+                <label>시나리오 이름</label>
+                <input type="text" placeholder="예: 2026년 상반기 정책 시뮬레이션" value="2026년 상반기 정책 시뮬레이션">
+              </div>
+
+              <div class="form-group">
+                <label>정책 유형</label>
+                <div class="radio-group">
+                  <div class="radio-item">
+                    <input type="radio" id="policy1" name="policy" value="expansion" checked>
+                    <label for="policy1">주차장 확장</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="policy2" name="policy" value="improvement">
+                    <label for="policy2">노변정비</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="policy3" name="policy" value="tariff">
+                    <label for="policy3">요금제 적용</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" id="policy4" name="policy" value="sharing">
+                    <label for="policy4">공유주차</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <label>증설 면수</label>
+                  <span class="slider-value"><span id="expansionValue">250</span>면</span>
+                </div>
+                <input type="range" id="expansionSlider" min="0" max="500" value="250" step="10">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <label>요금 단가</label>
+                  <span class="slider-value">₩<span id="tariffValue">2500</span></span>
+                </div>
+                <input type="range" id="tariffSlider" min="0" max="5000" value="2500" step="100">
+              </div>
+
+              <div class="slider-container">
+                <div class="slider-header">
+                  <label>적용 기간</label>
+                  <span class="slider-value"><span id="durationValue">12</span>개월</span>
+                </div>
+                <input type="range" id="durationSlider" min="1" max="24" value="12" step="1">
+              </div>
+
+              <button class="btn-primary">시뮬레이션 실행</button>
+            </div>
+          </div>
+
+          <!-- History Section -->
+          <div class="history-section">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-color-primary);">최근 시뮬레이션 이력</h3>
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th style="width: 8%;">번호</th>
+                  <th style="width: 25%;">시나리오 이름</th>
+                  <th style="width: 15%;">정책 유형</th>
+                  <th style="width: 15%;">실행 일시</th>
+                  <th style="width: 20%;">대상 구역</th>
+                  <th style="width: 17%;">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>2026년 상반기 정책</td>
+                  <td>주차장 확장</td>
+                  <td>2026-04-01 14:30</td>
+                  <td>제주시 중1구, 중2구</td>
+                  <td><span class="badge success">완료</span></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>요금제 시범 사업</td>
+                  <td>요금제 적용</td>
+                  <td>2026-03-28 10:15</td>
+                  <td>서귀포시 중앙구</td>
+                  <td><span class="badge success">완료</span></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>공유주차 도입 계획</td>
+                  <td>공유주차</td>
+                  <td>2026-03-25 16:45</td>
+                  <td>제주시 동1구</td>
+                  <td><span class="badge warning">진행중</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('simulation');
+
+      // Map grid cell selection
+      const gridCells = document.querySelectorAll('.grid-cell');
+      gridCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+          this.classList.toggle('selected');
+        });
+      });
+
+      // Slider value updates
+      const expansionSlider = document.getElementById('expansionSlider');
+      const expansionValue = document.getElementById('expansionValue');
+      expansionSlider.addEventListener('input', function() {
+        expansionValue.textContent = this.value;
+      });
+
+      const tariffSlider = document.getElementById('tariffSlider');
+      const tariffValue = document.getElementById('tariffValue');
+      tariffSlider.addEventListener('input', function() {
+        tariffValue.textContent = this.value;
+      });
+
+      const durationSlider = document.getElementById('durationSlider');
+      const durationValue = document.getElementById('durationValue');
+      durationSlider.addEventListener('input', function() {
+        durationValue.textContent = this.value;
+      });
+    });
+  </script>
+</body>
+</html>

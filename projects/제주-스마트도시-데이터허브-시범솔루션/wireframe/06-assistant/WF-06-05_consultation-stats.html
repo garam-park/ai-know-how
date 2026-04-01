@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상담 통계 대시보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .page-content { padding: 20px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .kpi-label { font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 8px; }
+    .kpi-value { font-size: 32px; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
+    .kpi-unit { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
+    .kpi-change { font-size: 13px; display: inline-block; padding: 4px 8px; border-radius: 4px; }
+    .kpi-change.up { background: #d1fae5; color: #059669; }
+    .kpi-change.down { background: #fee2e2; color: #dc2626; }
+    .chart-container { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .chart-title { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 16px; }
+    .chart-wrapper { position: relative; height: 300px; margin-bottom: 20px; }
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .list-container { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .list-title { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 16px; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+    .list-item:last-child { border-bottom: none; }
+    .item-left { flex: 1; }
+    .item-question { font-size: 13px; color: #1f2937; font-weight: 500; margin-bottom: 4px; }
+    .item-reason { font-size: 12px; color: #6b7280; }
+    .item-badge { display: inline-block; padding: 4px 8px; background: #fee2e2; color: #dc2626; border-radius: 4px; font-size: 11px; }
+    .item-count { font-size: 13px; font-weight: 600; color: #1f2937; min-width: 50px; text-align: right; }
+    .satisfaction-bar { display: flex; gap: 4px; align-items: center; }
+    .satisfaction-level { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6b7280; }
+    .satisfaction-level strong { color: #1f2937; font-weight: 600; }
+    .star-row { display: flex; gap: 4px; }
+    .star { font-size: 14px; }
+    .hist-bar { height: 120px; display: flex; align-items: flex-end; gap: 4px; justify-content: center; }
+    .hist-column { flex: 1; background: #3b82f6; border-radius: 4px 4px 0 0; position: relative; }
+    .hist-label { font-size: 11px; color: #6b7280; text-align: center; margin-top: 4px; }
+    .hist-value { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: #1f2937; margin-bottom: 2px; }
+    .table-container { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { background: #f3f4f6; padding: 10px; text-align: left; border: 1px solid #e5e7eb; font-weight: 600; color: #1f2937; }
+    .data-table td { padding: 10px; border: 1px solid #e5e7eb; color: #4b5563; }
+    .data-table tr:hover { background: #f8fafc; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .badge.traffic { background: #dbeafe; color: #0369a1; }
+    .badge.parking { background: #fef3c7; color: #b45309; }
+    .badge.environment { background: #d1fae5; color: #047857; }
+    .badge.welfare { background: #e9d5ff; color: #7e22ce; }
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-item { display: flex; gap: 8px; align-items: center; }
+    .filter-label { font-size: 13px; font-weight: 500; color: #6b7280; }
+    .filter-select { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 13px; background: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">상담 통계 대시보드</h1>
+          <p class="page-subtitle">AI 어시스턴트 상담 현황 분석</p>
+        </div>
+
+        <div class="page-content">
+          <!-- Filter Bar -->
+          <div class="filter-bar">
+            <div class="filter-item">
+              <span class="filter-label">기간:</span>
+              <select class="filter-select">
+                <option>지난 30일</option>
+                <option>지난 60일</option>
+                <option>지난 90일</option>
+                <option>지난 1년</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">상담사:</span>
+              <select class="filter-select">
+                <option>전체</option>
+                <option>AI-Assistant-1</option>
+                <option>AI-Assistant-2</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">카테고리:</span>
+              <select class="filter-select">
+                <option>전체</option>
+                <option>교통</option>
+                <option>주차</option>
+                <option>환경</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">일상담건수</div>
+              <div class="kpi-value">847</div>
+              <div class="kpi-unit">건/일</div>
+              <div class="kpi-change up">
+                <i data-lucide="trending-up" style="width:12px;height:12px;display:inline;margin-right:4px;"></i>
+                +8.3% (어제 대비)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">평균만족도</div>
+              <div class="kpi-value">4.2</div>
+              <div class="kpi-unit">/5.0 점</div>
+              <div class="kpi-change up">
+                <i data-lucide="trending-up" style="width:12px;height:12px;display:inline;margin-right:4px;"></i>
+                +0.3 (지난주 대비)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">정확도</div>
+              <div class="kpi-value">92.3%</div>
+              <div class="kpi-unit">응답 정확률</div>
+              <div class="kpi-change down">
+                <i data-lucide="trending-down" style="width:12px;height:12px;display:inline;margin-right:4px;"></i>
+                -1.2% (지난주 대비)
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">평균응답시간</div>
+              <div class="kpi-value">2.1</div>
+              <div class="kpi-unit">초</div>
+              <div class="kpi-change up">
+                <i data-lucide="trending-up" style="width:12px;height:12px;display:inline;margin-right:4px;"></i>
+                -0.3초 (어제 대비)
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="data-grid">
+            <!-- Line Chart -->
+            <div class="chart-container">
+              <div class="chart-title">
+                <i data-lucide="line-chart" style="width:16px;height:16px;display:inline;margin-right:8px;"></i>
+                상담건수 추이 (30일)
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Donut Chart -->
+            <div class="chart-container">
+              <div class="chart-title">
+                <i data-lucide="pie-chart" style="width:16px;height:16px;display:inline;margin-right:8px;"></i>
+                질문 유형별 분포
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Satisfaction Histogram -->
+          <div class="chart-container">
+            <div class="chart-title">
+              <i data-lucide="bar-chart-2" style="width:16px;height:16px;display:inline;margin-right:8px;"></i>
+              만족도 분포
+            </div>
+            <div style="display: flex; gap: 20px; align-items: flex-end; height: 160px;">
+              <div style="flex: 1; text-align: center;">
+                <div class="hist-bar">
+                  <div class="hist-column" style="height: 8%; background: #ef4444;">
+                    <div class="hist-value">0.3%</div>
+                  </div>
+                </div>
+                <div class="hist-label">1점</div>
+              </div>
+              <div style="flex: 1; text-align: center;">
+                <div class="hist-bar">
+                  <div class="hist-column" style="height: 6%; background: #f97316;">
+                    <div class="hist-value">0.8%</div>
+                  </div>
+                </div>
+                <div class="hist-label">2점</div>
+              </div>
+              <div style="flex: 1; text-align: center;">
+                <div class="hist-bar">
+                  <div class="hist-column" style="height: 18%; background: #eab308;">
+                    <div class="hist-value">5.9%</div>
+                  </div>
+                </div>
+                <div class="hist-label">3점</div>
+              </div>
+              <div style="flex: 1; text-align: center;">
+                <div class="hist-bar">
+                  <div class="hist-column" style="height: 48%; background: #84cc16;">
+                    <div class="hist-value">22.8%</div>
+                  </div>
+                </div>
+                <div class="hist-label">4점</div>
+              </div>
+              <div style="flex: 1; text-align: center;">
+                <div class="hist-bar">
+                  <div class="hist-column" style="height: 100%; background: #10b981;">
+                    <div class="hist-value">70.2%</div>
+                  </div>
+                </div>
+                <div class="hist-label">5점</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Grid -->
+          <div class="data-grid" style="margin-top: 20px;">
+            <!-- Unanswered Queries -->
+            <div class="list-container">
+              <div class="list-title">
+                <i data-lucide="alert-circle" style="width:16px;height:16px;display:inline;margin-right:8px; color: #ef4444;"></i>
+                미답변/오류 (5)
+              </div>
+              <div class="list-item">
+                <div class="item-left">
+                  <div class="item-question">제주도 카지노 위치는?</div>
+                  <div class="item-reason">정책상 답변 불가</div>
+                </div>
+                <div class="item-count">3건</div>
+              </div>
+              <div class="list-item">
+                <div class="item-left">
+                  <div class="item-question">야간 음식점 추천</div>
+                  <div class="item-reason">데이터 부족</div>
+                </div>
+                <div class="item-count">2건</div>
+              </div>
+              <div class="list-item">
+                <div class="item-left">
+                  <div class="item-question">특정 개인정보 요청</div>
+                  <div class="item-reason">개인정보 보호</div>
+                </div>
+                <div class="item-count">1건</div>
+              </div>
+              <div class="list-item">
+                <div class="item-left">
+                  <div class="item-question">실시간 버스 위치</div>
+                  <div class="item-reason">시스템 통합 필요</div>
+                </div>
+                <div class="item-count">1건</div>
+              </div>
+              <div class="list-item">
+                <div class="item-left">
+                  <div class="item-question">날씨 상세 예보</div>
+                  <div class="item-reason">기능 미지원</div>
+                </div>
+                <div class="item-count">1건</div>
+              </div>
+            </div>
+
+            <!-- Top FAQ -->
+            <div class="list-container">
+              <div class="list-title">
+                <i data-lucide="help-circle" style="width:16px;height:16px;display:inline;margin-right:8px; color: #3b82f6;"></i>
+                Top 10 FAQ
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <tr>
+                    <th>순위</th>
+                    <th>질문</th>
+                    <th>횟수</th>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>주차장 위치는?</td>
+                    <td><strong>287</strong></td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>버스 운행시간</td>
+                    <td><strong>264</strong></td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td>관광지 추천</td>
+                    <td><strong>198</strong></td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td>식당 추천</td>
+                    <td><strong>156</strong></td>
+                  </tr>
+                  <tr>
+                    <td>5</td>
+                    <td>날씨 정보</td>
+                    <td><strong>143</strong></td>
+                  </tr>
+                  <tr>
+                    <td>6</td>
+                    <td>공항 이동 방법</td>
+                    <td><strong>128</strong></td>
+                  </tr>
+                  <tr>
+                    <td>7</td>
+                    <td>숙박 정보</td>
+                    <td><strong>112</strong></td>
+                  </tr>
+                  <tr>
+                    <td>8</td>
+                    <td>민원 신청 방법</td>
+                    <td><strong>98</strong></td>
+                  </tr>
+                  <tr>
+                    <td>9</td>
+                    <td>교통 카드 충전</td>
+                    <td><strong>87</strong></td>
+                  </tr>
+                  <tr>
+                    <td>10</td>
+                    <td>환경 정보</td>
+                    <td><strong>76</strong></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('assistant');
+
+      // Trend Chart (Line Chart)
+      const trendCtx = document.getElementById('trendChart').getContext('2d');
+      new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: ['1일', '3일', '5일', '7일', '9일', '11일', '13일', '15일', '17일', '19일', '21일', '23일', '25일', '27일', '29일'],
+          datasets: [{
+            label: '상담건수',
+            data: [650, 720, 680, 845, 760, 850, 920, 880, 790, 870, 920, 895, 847, 920, 880],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1000
+            }
+          }
+        }
+      });
+
+      // Category Chart (Donut)
+      const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+      new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['교통 (35%)', '주차 (28%)', '환경 (15%)', '복지 (12%)', '기타 (10%)'],
+          datasets: [{
+            data: [35, 28, 15, 12, 10],
+            backgroundColor: [
+              '#3b82f6',
+              '#10b981',
+              '#f59e0b',
+              '#8b5cf6',
+              '#6b7280'
+            ],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right'
+            }
+          }
+        }
+      });
+
+      // Filter interactions
+      document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', function() {
+          console.log('Filter changed:', this.value);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터 모델 탐색</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">데이터 모델 탐색</h1>
+          <p class="page-subtitle">NGSI-LD 표준 기반 데이터 모델 관리</p>
+        </div>
+
+        <div class="page-content">
+          <div style="display: grid; grid-template-columns: 220px 1fr; gap: var(--spacing-lg); height: calc(100vh - 350px);">
+            <!-- 좌측: 엔티티 타입 트리 -->
+            <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: var(--spacing-lg); overflow-y: auto;">
+              <input type="text" class="filter-input" placeholder="검색..." style="width: 100%; margin-bottom: var(--spacing-lg);">
+
+              <div style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-md);">엔티티 타입</div>
+
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; background-color: var(--color-primary); color: white; border-radius: var(--radius-md); margin-bottom: var(--spacing-sm);">
+                  <i data-lucide="chevron-down" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Device
+                </li>
+                <li style="padding-left: 28px; padding: var(--spacing-sm) var(--spacing-md); margin-bottom: var(--spacing-sm); color: var(--text-color-secondary);">
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Sensor
+                </li>
+                <li style="padding-left: 28px; padding: var(--spacing-sm) var(--spacing-md); margin-bottom: var(--spacing-sm); color: var(--text-color-secondary);">
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Camera
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; margin-bottom: var(--spacing-sm); color: var(--text-color-secondary);">
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Building
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; margin-bottom: var(--spacing-sm); color: var(--text-color-secondary);">
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Road
+                </li>
+                <li style="padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; margin-bottom: var(--spacing-sm); color: var(--text-color-secondary);">
+                  <i data-lucide="chevron-right" style="width: 14px; height: 14px; display: inline; margin-right: 4px;"></i>
+                  Traffic
+                </li>
+              </ul>
+            </div>
+
+            <!-- 중앙: 엔티티 상세 정보 -->
+            <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: var(--spacing-lg); overflow-y: auto;">
+              <h2 style="font-size: var(--font-heading-md); margin-bottom: var(--spacing-lg); color: var(--text-color);">Device</h2>
+
+              <p style="font-size: var(--font-body-md); color: var(--text-color-secondary); margin-bottom: var(--spacing-lg);">
+                센서, 카메라 등의 IoT 장치를 나타내는 엔티티 타입입니다.
+              </p>
+
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">속성 목록</h3>
+
+              <table class="data-table" style="margin-bottom: var(--spacing-lg);">
+                <thead>
+                  <tr>
+                    <th>속성명</th>
+                    <th>타입</th>
+                    <th>NGSI-LD 맵핑</th>
+                    <th>설명</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>id</td>
+                    <td><span class="badge default">String</span></td>
+                    <td>@id</td>
+                    <td>고유 식별자</td>
+                  </tr>
+                  <tr>
+                    <td>type</td>
+                    <td><span class="badge default">String</span></td>
+                    <td>@type</td>
+                    <td>엔티티 타입</td>
+                  </tr>
+                  <tr>
+                    <td>name</td>
+                    <td><span class="badge default">String</span></td>
+                    <td>schema:name</td>
+                    <td>장치명</td>
+                  </tr>
+                  <tr>
+                    <td>location</td>
+                    <td><span class="badge warning">GeoProperty</span></td>
+                    <td>geo:location</td>
+                    <td>지리적 위치</td>
+                  </tr>
+                  <tr>
+                    <td>temperature</td>
+                    <td><span class="badge default">Number</span></td>
+                    <td>custom:temperature</td>
+                    <td>온도 측정값</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">관계 (Relations)</h3>
+
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="padding: var(--spacing-md); border-bottom: 1px solid var(--border-color); color: var(--text-color-secondary);">
+                  <strong style="color: var(--text-color);">hasLocation</strong> → Building
+                </li>
+                <li style="padding: var(--spacing-md); color: var(--text-color-secondary);">
+                  <strong style="color: var(--text-color);">belongsTo</strong> → Organization
+                </li>
+              </ul>
+            </div>
+
+            <!-- 우측: 노드-엣지 시각화 -->
+            <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: var(--spacing-lg); display: flex; align-items: center; justify-content: center; grid-column: 1 / -1;">
+              <div style="text-align: center; color: var(--text-color-secondary);">
+                <i data-lucide="share-2" style="width: 48px; height: 48px; opacity: 0.3; margin: 0 auto var(--spacing-lg);"></i>
+                <p style="font-size: var(--font-body-md);">관계 시각화</p>
+                <p style="font-size: var(--font-body-sm);">Device ↔ Building ↔ Location</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단: AI 자동 탐색 결과 -->
+          <div style="margin-top: var(--spacing-2xl);">
+            <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">데이터허브에서 발견된 후보 모델</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+              <div class="card" style="cursor: pointer;" onclick="alert('SmartDevice로 이동')">
+                <div class="card-header">
+                  <div class="card-title">SmartDevice</div>
+                  <div class="card-subtitle">유사도: 92%</div>
+                </div>
+                <div class="card-body">
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary);">스마트 시티 플랫폼의 다목적 장치 모델</p>
+                </div>
+              </div>
+
+              <div class="card" style="cursor: pointer;" onclick="alert('IoTSensor로 이동')">
+                <div class="card-header">
+                  <div class="card-title">IoTSensor</div>
+                  <div class="card-subtitle">유사도: 85%</div>
+                </div>
+                <div class="card-body">
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary);">IoT 기반 센서 자산 모델</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

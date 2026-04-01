@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메타데이터 편집</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <!-- Content -->
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">메타데이터 편집</h1>
+          <p class="page-subtitle">실시간 도로 교통 정보</p>
+        </div>
+
+        <div class="page-content">
+          <!-- AI 자동 추출 버튼 -->
+          <div style="margin-bottom: var(--spacing-2xl);">
+            <button class="btn btn-primary" onclick="alert('AI 자동 추출 기능입니다')">
+              <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+              AI 자동 추출
+            </button>
+          </div>
+
+          <!-- AI 추출 결과 Diff 뷰 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <div>
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">기존 메타데이터</h3>
+              <div style="background-color: var(--color-gray-100); border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                <div style="margin-bottom: var(--spacing-md);">
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">데이터셋명</p>
+                  <p style="font-size: var(--font-body-md); color: var(--text-color);">실시간 도로 교통 정보</p>
+                </div>
+                <div style="margin-bottom: var(--spacing-md);">
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">설명</p>
+                  <p style="font-size: var(--font-body-md); color: var(--text-color); white-space: pre-wrap;">제주시 전역 도로의 실시간 교통 상황 데이터입니다.</p>
+                </div>
+                <div>
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">공개수준</p>
+                  <p style="font-size: var(--font-body-md); color: var(--text-color);">공개</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">AI 추출 제안</h3>
+              <div style="background-color: #f0fdf4; border-radius: var(--radius-lg); padding: var(--spacing-lg);">
+                <div style="margin-bottom: var(--spacing-md);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">데이터셋명</p>
+                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('개별 필드 적용')">적용</button>
+                  </div>
+                  <p style="font-size: var(--font-body-md); color: var(--text-color);">Real-time Road Traffic Information</p>
+                </div>
+                <div style="margin-bottom: var(--spacing-md);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">설명</p>
+                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('개별 필드 적용')">적용</button>
+                  </div>
+                  <p style="font-size: var(--font-body-md); color: var(--text-color); white-space: pre-wrap;">제주시 전역 도로의 실시간 교통 상황 데이터입니다. 신호등 정보, 혼잡도, 사고 정보 등이 포함되어 있습니다.</p>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-md);" onclick="alert('모든 제안 적용')">모두 적용</button>
+            </div>
+          </div>
+
+          <!-- 메인 폼 영역 -->
+          <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); padding: var(--spacing-xl); border: 1px solid var(--border-color); margin-bottom: var(--spacing-2xl);">
+            <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">메타데이터</h3>
+
+            <div class="form-group">
+              <label class="form-label">
+                데이터셋명 <span style="color: var(--color-danger);">*</span>
+              </label>
+              <input type="text" class="form-input" value="실시간 도로 교통 정보">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                설명 <span style="color: var(--color-danger);">*</span>
+              </label>
+              <textarea class="form-textarea" style="min-height: 120px;">제주시 전역 도로의 실시간 교통 상황 데이터입니다. 신호등 정보, 혼잡도, 사고 정보 등이 포함되어 있습니다.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">키워드</label>
+              <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); padding: var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span class="badge info">교통 <button style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 4px;">×</button></span>
+                <span class="badge info">실시간 <button style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 4px;">×</button></span>
+                <span class="badge info">도로 <button style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 4px;">×</button></span>
+                <input type="text" placeholder="새 키워드 입력..." style="border: none; background: none; flex: 1; min-width: 100px; outline: none;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+              <div class="form-group">
+                <label class="form-label">
+                  제공기관 <span style="color: var(--color-danger);">*</span>
+                </label>
+                <select class="form-select">
+                  <option>제주시청</option>
+                  <option>서귀포시청</option>
+                  <option>기상청</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  담당부서 <span style="color: var(--color-danger);">*</span>
+                </label>
+                <select class="form-select">
+                  <option>교통과</option>
+                  <option>안전과</option>
+                  <option>민원과</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">라이선스</label>
+                <select class="form-select">
+                  <option selected>CC BY 4.0</option>
+                  <option>CC BY-SA 4.0</option>
+                  <option>공공누리</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  공개수준 <span style="color: var(--color-danger);">*</span>
+                </label>
+                <select class="form-select">
+                  <option selected>공개</option>
+                  <option>제한공개</option>
+                  <option>비공개</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">갱신주기</label>
+                <select class="form-select">
+                  <option selected>실시간</option>
+                  <option>일간</option>
+                  <option>주간</option>
+                  <option>월간</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 변경 이력 아코디언 -->
+          <div class="accordion" style="margin-bottom: var(--spacing-2xl);">
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="this.classList.toggle('active')">
+                <div class="accordion-title">변경 이력</div>
+                <i class="accordion-icon" data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+              </div>
+              <div class="accordion-content">
+                <div style="padding: var(--spacing-lg);">
+                  <div style="border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">2026-03-25 14:32 · 김수현</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color); margin-top: var(--spacing-sm);">공개수준 변경: '제한공개' → '공개'</p>
+                  </div>
+                  <div style="border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">2026-03-20 10:15 · 박영민</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color); margin-top: var(--spacing-sm);">설명 내용 업데이트</p>
+                  </div>
+                  <div>
+                    <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold);">2026-02-15 09:00 · 이순신</p>
+                    <p style="font-size: var(--font-body-md); color: var(--text-color); margin-top: var(--spacing-sm);">초기 등록</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 버튼 -->
+          <div style="display: flex; gap: var(--spacing-md); justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="alert('취소되었습니다')">취소</button>
+            <button class="btn btn-primary" onclick="alert('검토 요청되었습니다')">검토요청</button>
+            <button class="btn btn-primary" onclick="alert('저장되었습니다')">저장</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

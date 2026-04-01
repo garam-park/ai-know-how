@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용자 역할 관리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">관리자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">사용자 역할 관리</h1>
+          <p class="page-subtitle">시스템 사용자 및 권한 관리</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 통계 카드 -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+            <div class="kpi-card medium">
+              <div class="kpi-header">
+                <span class="kpi-icon">👥</span>
+              </div>
+              <div class="kpi-title">전체 사용자</div>
+              <div class="kpi-value">45</div>
+              <div class="kpi-change positive">
+                <span class="kpi-change-icon">↑</span>
+                <span>지난 주 대비 +3명</span>
+              </div>
+            </div>
+
+            <div class="kpi-card medium">
+              <div class="kpi-header">
+                <span class="kpi-icon success">✓</span>
+              </div>
+              <div class="kpi-title">활성 사용자</div>
+              <div class="kpi-value">42</div>
+              <div class="kpi-change positive">
+                <span class="kpi-change-icon">↑</span>
+                <span>93% 활성률</span>
+              </div>
+            </div>
+
+            <div class="kpi-card medium">
+              <div class="kpi-header">
+                <span class="kpi-icon danger">✗</span>
+              </div>
+              <div class="kpi-title">비활성 사용자</div>
+              <div class="kpi-value">3</div>
+              <div class="kpi-change negative">
+                <span class="kpi-change-icon">↓</span>
+                <span>7% 비활성률</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 탭 네비게이션 -->
+          <div class="tabs" id="userTabs">
+            <div class="tab-headers">
+              <button class="tab-header active" onclick="switchUserTab(0)">사용자 관리</button>
+              <button class="tab-header" onclick="switchUserTab(1)">역할 관리</button>
+            </div>
+
+            <!-- 탭 1: 사용자 관리 -->
+            <div class="tab-content active">
+              <div style="margin-bottom: var(--spacing-lg);">
+                <button class="btn btn-primary" onclick="alert('사용자 추가 모달 표시')">
+                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                  사용자 추가
+                </button>
+              </div>
+
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>이메일</th>
+                    <th>부서</th>
+                    <th>역할</th>
+                    <th>상태</th>
+                    <th>최종로그인</th>
+                    <th>액션</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>김수현</td>
+                    <td>suhyun.kim@jeju.go.kr</td>
+                    <td>디지털정책과</td>
+                    <td><span class="badge secondary">운영자</span></td>
+                    <td><span class="badge success">활성</span></td>
+                    <td>2026-03-25 14:32</td>
+                    <td style="display: flex; gap: var(--spacing-sm);">
+                      <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('비활성화')">비활성</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>박영민</td>
+                    <td>youngmin.park@jeju.go.kr</td>
+                    <td>데이터팀</td>
+                    <td><span class="badge info">관리자</span></td>
+                    <td><span class="badge success">활성</span></td>
+                    <td>2026-03-24 09:15</td>
+                    <td style="display: flex; gap: var(--spacing-sm);">
+                      <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('비활성화')">비활성</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>이순신</td>
+                    <td>soonsin.lee@jeju.go.kr</td>
+                    <td>정보통신과</td>
+                    <td><span class="badge default">열람자</span></td>
+                    <td><span class="badge success">활성</span></td>
+                    <td>2026-03-23 15:45</td>
+                    <td style="display: flex; gap: var(--spacing-sm);">
+                      <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                      <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="alert('비활성화')">비활성</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>최민지</td>
+                    <td>minji.choi@jeju.go.kr</td>
+                    <td>기획담당관</td>
+                    <td><span class="badge secondary">운영자</span></td>
+                    <td><span class="badge default" style="background-color: var(--color-gray-300);">비활성</span></td>
+                    <td>2026-02-10 10:20</td>
+                    <td style="display: flex; gap: var(--spacing-sm);">
+                      <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('편집')">편집</button>
+                      <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="alert('활성화')">활성화</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 탭 2: 역할 관리 -->
+            <div class="tab-content">
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">권한 매트릭스</h3>
+
+              <div style="overflow-x: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width: 150px;">메뉴</th>
+                      <th style="min-width: 150px;">관리자</th>
+                      <th style="min-width: 150px;">운영자</th>
+                      <th style="min-width: 150px;">열람자</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>대시보드</strong></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox" checked> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>데이터 수집</strong></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox" checked> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox"> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>데이터 카탈로그</strong></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox" checked> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>보고서</strong></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox" checked> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><strong>시스템 관리</strong></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" checked> 조회<br>
+                        <input type="checkbox" checked> 수정<br>
+                        <input type="checkbox" checked> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox"> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox"> 조회<br>
+                        <input type="checkbox"> 수정<br>
+                        <input type="checkbox"> 삭제
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <button class="btn btn-primary" style="margin-top: var(--spacing-lg);" onclick="alert('권한 설정 저장됨')">저장</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function switchUserTab(index) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const headers = document.querySelectorAll('.tab-header');
+
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+
+      headers.forEach((header, i) => {
+        header.classList.toggle('active', i === index);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initLayout('admin');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

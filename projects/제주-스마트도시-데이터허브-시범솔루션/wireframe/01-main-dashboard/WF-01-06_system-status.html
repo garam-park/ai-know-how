@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시스템 상태 모니터링 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">사</div>
+          <div class="user-info">
+            <div class="user-name">사용자</div>
+            <div class="user-role">관리자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="page-title">시스템 상태 모니터링</div>
+              <div class="page-subtitle">인프라 및 데이터 수집 파이프라인 상태를 실시간 모니터링합니다</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div class="filter-group" style="margin: 0;">
+                <label class="filter-label">기간</label>
+                <select class="filter-select" style="width: 120px;">
+                  <option>실시간</option>
+                  <option>1시간</option>
+                  <option>6시간</option>
+                  <option>24시간</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="refreshStatus()" style="margin-top: 20px;">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+              </button>
+              <button class="btn btn-secondary" onclick="openSettings()" style="margin-top: 20px;">
+                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 20px;">최종 업데이트: 10:32:45</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <!-- 인프라 상태 현황 카드 (1행 4열) -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- CPU -->
+            <div class="card">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #1F2937;">CPU</div>
+                <div style="width: 32px; height: 32px; background-color: #EBF8FF; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="cpu" style="width: 18px; height: 18px; color: #2563EB;"></i>
+                </div>
+              </div>
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 28px; font-weight: 600; color: #2563EB;">68%</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 68%; background-color: #16A34A;"></div>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 12px;">
+                <div>평균: <strong style="color: #1F2937;">62%</strong></div>
+                <div>피크: <strong style="color: #1F2937;">85%</strong></div>
+                <div style="margin-top: 8px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                  <span style="color: #16A34A;">정상</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 메모리 -->
+            <div class="card">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #1F2937;">메모리</div>
+                <div style="width: 32px; height: 32px; background-color: #FEF3C7; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="hard-drive" style="width: 18px; height: 18px; color: #EAB308;"></i>
+                </div>
+              </div>
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 28px; font-weight: 600; color: #EAB308;">74.2%</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 74.2%; background-color: #EAB308;"></div>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 12px;">
+                <div>사용: <strong style="color: #1F2937;">18.5GB / 25GB</strong></div>
+                <div>여유: <strong style="color: #1F2937;">6.5GB</strong></div>
+                <div style="margin-top: 8px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; background-color: #EAB308; border-radius: 50%; margin-right: 4px;"></span>
+                  <span style="color: #EAB308;">주의</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 디스크 -->
+            <div class="card">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #1F2937;">디스크</div>
+                <div style="width: 32px; height: 32px; background-color: #DCFCE7; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="server" style="width: 18px; height: 18px; color: #16A34A;"></i>
+                </div>
+              </div>
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 28px; font-weight: 600; color: #16A34A;">56.8%</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 56.8%; background-color: #16A34A;"></div>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 12px;">
+                <div>사용: <strong style="color: #1F2937;">1.42TB / 2.5TB</strong></div>
+                <div>여유: <strong style="color: #1F2937;">1.08TB</strong></div>
+                <div style="margin-top: 8px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                  <span style="color: #16A34A;">정상</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 네트워크 -->
+            <div class="card">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+                <div style="font-weight: 600; color: #1F2937;">네트워크</div>
+                <div style="width: 32px; height: 32px; background-color: #DBEAFE; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i data-lucide="network" style="width: 18px; height: 18px; color: #2563EB;"></i>
+                </div>
+              </div>
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 28px; font-weight: 600; color: #2563EB;">42.1%</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 42.1%; background-color: #2563EB;"></div>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 12px;">
+                <div>대역폭: <strong style="color: #1F2937;">2.1Gbps / 5Gbps</strong></div>
+                <div>패킷손실: <strong style="color: #1F2937;">0.1%</strong></div>
+                <div style="margin-top: 8px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; background-color: #16A34A; border-radius: 50%; margin-right: 4px;"></span>
+                  <span style="color: #16A34A;">정상</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 데이터 수집 파이프라인 테이블 -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">데이터 수집 파이프라인 상태</div>
+              <div class="card-subtitle">최근 수집 현황</div>
+            </div>
+            <div class="card-body">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>소스명</th>
+                    <th>최종 수집 시각</th>
+                    <th>수집 건수</th>
+                    <th>에러</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>공영주차장 센서</td>
+                    <td>2026-04-01 10:32:15</td>
+                    <td>1,245건</td>
+                    <td>0</td>
+                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                  </tr>
+                  <tr>
+                    <td>민원 신청 시스템</td>
+                    <td>2026-04-01 10:31:50</td>
+                    <td>156건</td>
+                    <td>0</td>
+                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                  </tr>
+                  <tr>
+                    <td>교통 신호 제어</td>
+                    <td>2026-04-01 10:32:00</td>
+                    <td>8,934건</td>
+                    <td>2</td>
+                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                  </tr>
+                  <tr>
+                    <td>상수도 관리 시스템</td>
+                    <td>2026-04-01 10:30:20</td>
+                    <td>542건</td>
+                    <td>0</td>
+                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                  </tr>
+                  <tr>
+                    <td>IoT 센서 게이트웨이</td>
+                    <td>2026-04-01 10:32:30</td>
+                    <td>45,123건</td>
+                    <td>0</td>
+                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                  </tr>
+                  <tr>
+                    <td>CCTV 분석 서버</td>
+                    <td>2026-04-01 10:25:45</td>
+                    <td>234건</td>
+                    <td>5</td>
+                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                  </tr>
+                  <tr>
+                    <td>기상청 데이터 API</td>
+                    <td>2026-04-01 10:00:00</td>
+                    <td>12건</td>
+                    <td>0</td>
+                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                  </tr>
+                  <tr>
+                    <td>외부 DB 동기화</td>
+                    <td>2026-04-01 09:50:30</td>
+                    <td>8,456건</td>
+                    <td>1</td>
+                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 성능 분석 영역 (2열) -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- API 응답시간 추이 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">API 평균 응답시간</div>
+                <div class="card-subtitle">지난 24시간 추이</div>
+              </div>
+              <div class="card-body">
+                <canvas id="apiResponseChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <!-- 에러 로그 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">최근 에러 로그</div>
+                <div class="card-subtitle">최근 10건</div>
+              </div>
+              <div class="card-body">
+                <table class="data-table" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>시간</th>
+                      <th>레벨</th>
+                      <th>메시지</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>10:28:34</td>
+                      <td><span style="color: #DC2626;">ERROR</span></td>
+                      <td>교통 신호 제어 데이터 수집 오류: 타임아웃</td>
+                    </tr>
+                    <tr>
+                      <td>10:15:12</td>
+                      <td><span style="color: #EAB308;">WARNING</span></td>
+                      <td>CCTV 분석 서버 응답 지연 (5.2초)</td>
+                    </tr>
+                    <tr>
+                      <td>10:02:45</td>
+                      <td><span style="color: #DC2626;">ERROR</span></td>
+                      <td>외부 DB 동기화 실패: 연결 거부</td>
+                    </tr>
+                    <tr>
+                      <td>09:58:23</td>
+                      <td><span style="color: #EAB308;">WARNING</span></td>
+                      <td>메모리 사용률 72% 초과</td>
+                    </tr>
+                    <tr>
+                      <td>09:45:10</td>
+                      <td><span style="color: #EAB308;">WARNING</span></td>
+                      <td>네트워크 패킷 손실 검출 (0.3%)</td>
+                    </tr>
+                    <tr>
+                      <td>09:30:55</td>
+                      <td><span style="color: #6B7280;">INFO</span></td>
+                      <td>데이터 압축 작업 완료 (2.3GB)</td>
+                    </tr>
+                    <tr>
+                      <td>09:15:30</td>
+                      <td><span style="color: #6B7280;">INFO</span></td>
+                      <td>일일 백업 시작</td>
+                    </tr>
+                    <tr>
+                      <td>08:45:20</td>
+                      <td><span style="color: #EAB308;">WARNING</span></td>
+                      <td>디스크 I/O 사용률 높음 (85%)</td>
+                    </tr>
+                    <tr>
+                      <td>08:30:15</td>
+                      <td><span style="color: #DC2626;">ERROR</span></td>
+                      <td>API 서버 일시적 오류: 429 Too Many Requests</td>
+                    </tr>
+                    <tr>
+                      <td>08:12:00</td>
+                      <td><span style="color: #6B7280;">INFO</span></td>
+                      <td>시스템 헬스 체크 완료</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 요약 정보 -->
+          <div class="card">
+            <div class="card-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+              <div style="padding: 12px; background-color: #DCFCE7; border-radius: 8px;">
+                <div style="font-size: 12px; color: #6B7280;">전체 상태</div>
+                <div style="font-size: 16px; font-weight: 600; color: #16A34A; margin-top: 4px;">✓ 정상</div>
+              </div>
+              <div style="padding: 12px; background-color: #DBEAFE; border-radius: 8px;">
+                <div style="font-size: 12px; color: #6B7280;">마지막 정기 점검</div>
+                <div style="font-size: 14px; font-weight: 600; color: #2563EB; margin-top: 4px;">2026-04-01 09:00</div>
+              </div>
+              <div style="padding: 12px; background-color: #F3E8FF; border-radius: 8px;">
+                <div style="font-size: 12px; color: #6B7280;">다음 예정 점검</div>
+                <div style="font-size: 14px; font-weight: 600; color: #7C3AED; margin-top: 4px;">2026-04-05 02:00~04:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('main');
+      initCharts();
+    });
+
+    // 차트 초기화
+    function initCharts() {
+      // API 응답시간 추이 라인차트
+      const apiData = {
+        labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00',
+                 '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
+                 '20:00', '21:00', '22:00', '23:00'],
+        datasets: [
+          {
+            label: '평균 응답시간',
+            data: [245, 238, 230, 235, 242, 250, 265, 280, 295, 312, 298, 275, 268, 255, 245, 252, 260, 285, 310, 305, 290, 270, 255, 240],
+            borderColor: '#2563EB',
+            fill: false
+          },
+          {
+            label: '목표치',
+            data: [300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300, 300],
+            borderColor: '#16A34A',
+            borderDash: [5, 5],
+            fill: false
+          }
+        ]
+      };
+      createLineChart('apiResponseChart', apiData.labels, apiData.datasets);
+    }
+
+    // 새로고침
+    function refreshStatus() {
+      showToast('시스템 상태가 새로고침되었습니다.', 'info');
+    }
+
+    // 설정
+    function openSettings() {
+      showToast('설정 기능은 준비 중입니다.', 'info');
+    }
+  </script>
+</body>
+</html>

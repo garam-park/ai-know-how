@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      font-family: var(--font-family-base);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+    }
+
+    .login-box {
+      background-color: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--spacing-3xl) var(--spacing-lg);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .login-logo {
+      width: 100px;
+      height: 100px;
+      background-color: var(--color-primary);
+      border-radius: var(--radius-lg);
+      margin: 0 auto var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .login-title {
+      font-size: var(--font-heading-md);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .login-subtitle {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .login-description {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color);
+      font-size: var(--font-body-md);
+    }
+
+    .form-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-icon {
+      position: absolute;
+      left: var(--spacing-md);
+      color: var(--text-color-secondary);
+      font-size: 20px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 44px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: var(--font-body-md);
+      font-family: inherit;
+      color: var(--text-color);
+      background-color: white;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-color-secondary);
+    }
+
+    .form-toggle-password {
+      position: absolute;
+      right: var(--spacing-md);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-color-secondary);
+      font-size: 20px;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-body-md);
+      font-weight: var(--font-weight-medium);
+      transition: all 0.2s ease;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .login-button:hover:not(:disabled) {
+      background-color: var(--color-primary-dark);
+    }
+
+    .login-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .login-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .login-footer-links {
+      text-align: right;
+      font-size: var(--font-body-sm);
+    }
+
+    .login-footer-links a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .login-footer-links a:hover {
+      text-decoration: underline;
+      color: var(--color-primary-dark);
+    }
+
+    .error-message {
+      color: var(--color-danger);
+      font-size: var(--font-body-sm);
+      margin-top: var(--spacing-sm);
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* Role Selection Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .role-modal {
+      background-color: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      max-width: 500px;
+      width: 90%;
+      z-index: 50;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-size: var(--font-heading-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-color-secondary);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background-color: var(--color-gray-100);
+      color: var(--text-color);
+    }
+
+    .modal-body {
+      padding: var(--spacing-lg);
+    }
+
+    .modal-description {
+      font-size: var(--font-body-md);
+      color: var(--text-color-secondary);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .role-option {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-start;
+    }
+
+    .role-option:hover {
+      border-color: var(--color-primary);
+      background-color: var(--color-gray-50);
+    }
+
+    .role-option.selected {
+      border-color: var(--color-primary);
+      border-width: 2px;
+      background-color: #f0f4ff;
+    }
+
+    .role-radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .role-option.selected .role-radio {
+      border-color: var(--color-primary);
+      background-color: var(--color-primary);
+      box-shadow: inset 0 0 0 4px white;
+    }
+
+    .role-content {
+      flex: 1;
+    }
+
+    .role-title {
+      font-size: var(--font-heading-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .role-description {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.5;
+    }
+
+    .role-menus {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+    }
+
+    .role-menus-label {
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .role-menus-list {
+      list-style: none;
+      padding-left: 0;
+      font-size: 12px;
+    }
+
+    .role-menus-list li {
+      padding: 2px 0;
+      color: var(--text-color-secondary);
+    }
+
+    .modal-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: flex-end;
+    }
+
+    .modal-button {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-body-md);
+      font-weight: var(--font-weight-medium);
+      transition: all 0.2s ease;
+    }
+
+    .modal-button-primary {
+      background-color: var(--color-primary);
+      color: white;
+      width: 100%;
+    }
+
+    .modal-button-primary:hover {
+      background-color: var(--color-primary-dark);
+    }
+
+    .modal-button-secondary {
+      background-color: var(--color-gray-200);
+      color: var(--text-color);
+      width: 48%;
+    }
+
+    .modal-button-secondary:hover {
+      background-color: var(--color-gray-300);
+    }
+
+    /* Footer */
+    .login-page-footer {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: var(--spacing-lg);
+      text-align: center;
+      font-size: var(--font-body-sm);
+    }
+
+    .login-page-footer a {
+      color: white;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .login-page-footer a:hover {
+      opacity: 0.8;
+    }
+
+    .footer-links {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .footer-links a {
+      margin: 0 var(--spacing-md);
+    }
+
+    @media (max-width: 640px) {
+      .login-box {
+        padding: var(--spacing-2xl) var(--spacing-md);
+      }
+
+      .role-modal {
+        max-width: 100%;
+      }
+
+      .modal-footer {
+        flex-direction: column-reverse;
+      }
+
+      .modal-button-secondary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <div class="login-logo">J</div>
+        <h1 class="login-title">제주 스마트도시 데이터허브</h1>
+        <p class="login-subtitle">Jeju Smart City Data Hub</p>
+        <p class="login-description">
+          스마트 도시 운영 및 관리를 위한 통합 데이터 플랫폼
+        </p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="userId" class="form-label">아이디</label>
+          <div class="form-input-group">
+            <span class="form-icon">👤</span>
+            <input
+              type="text"
+              id="userId"
+              name="userId"
+              class="form-input"
+              placeholder="사용자 아이디를 입력하세요"
+              autocomplete="username"
+              required
+            >
+          </div>
+          <div class="error-message" id="userIdError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">비밀번호</label>
+          <div class="form-input-group">
+            <span class="form-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="비밀번호를 입력하세요"
+              autocomplete="current-password"
+            >
+            <button
+              type="button"
+              class="form-toggle-password"
+              id="togglePassword"
+              onclick="togglePasswordVisibility()"
+            >
+              👁️
+            </button>
+          </div>
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <button type="submit" class="login-button" id="loginBtn">로그인</button>
+      </form>
+
+      <div class="login-footer-links">
+        <a href="#" onclick="showForgotPasswordModal(); return false;">비밀번호 찾기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Selection Modal -->
+  <div class="modal-backdrop" id="roleModal">
+    <div class="role-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">역할 선택</h2>
+        <button type="button" class="modal-close" onclick="closeRoleModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">
+          로그인할 역할을 선택하세요. 역할에 따라 보이는 메뉴가 다릅니다.
+        </p>
+
+        <!-- Admin Role -->
+        <div class="role-option" data-role="admin" onclick="selectRole('admin')">
+          <div class="role-radio"></div>
+          <div class="role-content">
+            <div class="role-title">관리자</div>
+            <p class="role-description">
+              전체 시스템 관리 및 설정 권한. 모든 메뉴 및 기능 접근 가능
+            </p>
+            <div class="role-menus">
+              <div class="role-menus-label">접근 가능 메뉴:</div>
+              <ul class="role-menus-list">
+                <li>✓ 메인, 민원분석, 정책시뮬레이션</li>
+                <li>✓ 이벤트감시, LLM분석, AI어시스턴트</li>
+                <li>✓ 보고서, 데이터수집, 카탈로그</li>
+                <li>✓ 시스템관리</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operator Role -->
+        <div class="role-option" data-role="operator" onclick="selectRole('operator')">
+          <div class="role-radio"></div>
+          <div class="role-content">
+            <div class="role-title">운영자</div>
+            <p class="role-description">
+              시스템 운영 및 데이터 모니터링 권한. 제한된 메뉴 접근
+            </p>
+            <div class="role-menus">
+              <div class="role-menus-label">접근 가능 메뉴:</div>
+              <ul class="role-menus-list">
+                <li>✓ 메인, 민원분석, 정책시뮬레이션</li>
+                <li>✓ 이벤트감시, LLM분석, 보고서</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viewer Role -->
+        <div class="role-option" data-role="viewer" onclick="selectRole('viewer')">
+          <div class="role-radio"></div>
+          <div class="role-content">
+            <div class="role-title">열람자</div>
+            <p class="role-description">
+              데이터 조회 및 보고서 확인만 가능. 수정 권한 없음
+            </p>
+            <div class="role-menus">
+              <div class="role-menus-label">접근 가능 메뉴:</div>
+              <ul class="role-menus-list">
+                <li>✓ 메인, 민원분석, 보고서</li>
+                <li>✓ 카탈로그 (조회만)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-button modal-button-secondary" onclick="closeRoleModal()">취소</button>
+        <button type="button" class="modal-button modal-button-primary" id="confirmRoleBtn" onclick="confirmRole()">진입</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="login-page-footer">
+    <div class="footer-links">
+      <a href="#">서비스약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">문의</a>
+    </div>
+    <div>Copyright 2024 Jeju Smart City Data Hub | v1.0</div>
+  </footer>
+
+  <script src="../common/nav-data.js"></script>
+  <script>
+    // 더미 사용자 데이터
+    const DUMMY_USERS = {
+      'admin': { password: 'demo', role: 'admin', name: '홍길동' },
+      'operator': { password: 'demo', role: 'operator', name: '김영희' },
+      'viewer': { password: 'demo', role: 'viewer', name: '이순신' }
+    };
+
+    let selectedRole = 'viewer';
+
+    // 로그인 폼 제출
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const userId = document.getElementById('userId').value.trim();
+      const password = document.getElementById('password').value;
+
+      // 유효성 검사
+      let hasError = false;
+      const userIdError = document.getElementById('userIdError');
+      const passwordError = document.getElementById('passwordError');
+
+      userIdError.classList.remove('show');
+      passwordError.classList.remove('show');
+
+      if (!userId) {
+        userIdError.textContent = '아이디를 입력하세요.';
+        userIdError.classList.add('show');
+        hasError = true;
+      }
+
+      if (!DUMMY_USERS[userId]) {
+        userIdError.textContent = '존재하지 않는 사용자입니다.';
+        userIdError.classList.add('show');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // 사용자 정보 세션에 저장
+      setUserId(userId);
+      selectedRole = DUMMY_USERS[userId].role;
+
+      // 역할 선택 모달 표시
+      showRoleModal();
+    });
+
+    // 비밀번호 표시/숨김 토글
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+    }
+
+    // 역할 선택
+    function selectRole(role) {
+      selectedRole = role;
+      document.querySelectorAll('.role-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
+      document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+    }
+
+    // 역할 모달 표시
+    function showRoleModal() {
+      document.getElementById('roleModal').classList.add('open');
+      selectRole(selectedRole); // 기본 역할 선택
+    }
+
+    // 역할 모달 닫기
+    function closeRoleModal() {
+      document.getElementById('roleModal').classList.remove('open');
+    }
+
+    // 역할 선택 확인
+    function confirmRole() {
+      setUserRole(selectedRole);
+      // 메인 대시보드로 리다이렉트
+      window.location.href = '../01-main-dashboard/WF-01-01_kpi-dashboard.html';
+    }
+
+    // 비밀번호 찾기 (더미)
+    function showForgotPasswordModal() {
+      alert('비밀번호 재설정 기능은 구현 예정입니다.');
+    }
+
+    // 페이지 로드 시
+    window.addEventListener('load', () => {
+      // 이미 로그인된 경우 대시보드로 리다이렉트
+      if (isLoggedIn()) {
+        window.location.href = '../01-main-dashboard/WF-01-01_kpi-dashboard.html';
+      }
+    });
+
+    // ESC 키로 모달 닫기 불가 (역할은 반드시 선택해야 함)
+  </script>
+</body>
+</html>

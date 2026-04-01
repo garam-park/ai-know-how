@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감성 분석 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">감성 분석</div>
+          <div class="page-subtitle">민원 감성도 및 감정 강도 분석</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Top Charts Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Sentiment Distribution Pie -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">감성 분포</div>
+              </div>
+              <div class="card-body">
+                <canvas id="sentimentChart" style="max-height: 280px;"></canvas>
+              </div>
+            </div>
+
+            <!-- Negative Trend Line -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">부정 민원 추이 (30일)</div>
+              </div>
+              <div class="card-body">
+                <canvas id="negativeChart" style="max-height: 280px;"></canvas>
+              </div>
+            </div>
+
+            <!-- Emotion Strength Histogram -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">감정 강도 분포</div>
+              </div>
+              <div class="card-body">
+                <canvas id="strengthChart" style="max-height: 280px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wordcloud & Top Lists -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Wordcloud -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">주요 키워드 (부정)</div>
+              </div>
+              <div class="card-body" style="height: 300px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px;">
+                <span style="font-size: 32px; font-weight: bold; color: var(--color-danger);">불법주차</span>
+                <span style="font-size: 24px; font-weight: bold; color: var(--color-danger);">위반</span>
+                <span style="font-size: 20px; font-weight: 600; color: var(--color-warning);">문제</span>
+                <span style="font-size: 18px; font-weight: 600; color: var(--color-warning);">점유</span>
+                <span style="font-size: 16px; font-weight: 600; color: var(--color-warning);">위험</span>
+                <span style="font-size: 14px; color: var(--color-gray-500);">방치</span>
+                <span style="font-size: 14px; color: var(--color-gray-500);">단속</span>
+                <span style="font-size: 13px; color: var(--color-gray-500);">피해</span>
+                <span style="font-size: 13px; color: var(--color-gray-500);">불편</span>
+                <span style="font-size: 12px; color: var(--color-gray-500);">안전</span>
+              </div>
+            </div>
+
+            <!-- Sentiment Scores -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">상/하위 감성 민원</div>
+              </div>
+              <div class="card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <!-- Positive -->
+                  <div>
+                    <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--color-success);">긍정 (상위 5)</h4>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-success);">
+                      <div style="font-weight: 600; font-size: 13px;">9.2점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0512</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">빠른 처리에 감사</div>
+                    </div>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-success);">
+                      <div style="font-weight: 600; font-size: 13px;">8.9점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0487</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">정성스럽게 대응</div>
+                    </div>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-success);">
+                      <div style="font-weight: 600; font-size: 13px;">8.7점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0465</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">문제 해결 만족</div>
+                    </div>
+                  </div>
+
+                  <!-- Negative -->
+                  <div>
+                    <h4 style="font-weight: 600; margin-bottom: 8px; color: var(--color-danger);">부정 (상위 5)</h4>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-danger);">
+                      <div style="font-weight: 600; font-size: 13px;">0.8점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0542</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">계속되는 불법주차</div>
+                    </div>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-danger);">
+                      <div style="font-weight: 600; font-size: 13px;">1.1점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0535</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">여러 번 신고 미개선</div>
+                    </div>
+                    <div style="margin-bottom: 8px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px; cursor: pointer; border-left: 3px solid var(--color-danger);">
+                      <div style="font-weight: 600; font-size: 13px;">1.3점</div>
+                      <div style="font-size: 12px; color: var(--color-primary);">CMP-2025-0528</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">처리 미흡 느림</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 감성 분포 파이 차트
+      createPieChart('sentimentChart',
+        ['긍정', '중립', '부정'],
+        [168, 490, 741],
+        {
+          plugins: {
+            legend: { display: true, position: 'right' }
+          }
+        }
+      );
+
+      // 부정 민원 추이 (일별 30일)
+      const days = Array.from({ length: 30 }, (_, i) => `${i+1}일`);
+      const negativeData = [18, 22, 19, 25, 28, 26, 24, 27, 30, 29, 31, 28, 26, 29, 32, 31, 28, 30, 29, 31, 32, 30, 29, 31, 32, 30, 29, 31, 29, 32];
+
+      createLineChart('negativeChart', days, [
+        { label: '부정 민원', data: negativeData, borderColor: '#DC2626' }
+      ]);
+
+      // 감정 강도 분포 히스토그램
+      const scores = ['0점', '1점', '2점', '3점', '4점', '5점', '6점', '7점', '8점', '9점', '10점'];
+      const strength = [2, 5, 12, 28, 45, 68, 62, 55, 38, 22, 12];
+
+      createBarChart('strengthChart', scores, [
+        { label: '민원 건수', data: strength, backgroundColor: '#2563EB' }
+      ]);
+    });
+  </script>
+</body>
+</html>

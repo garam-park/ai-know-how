@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DCAT 외부 제공 관리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">DCAT 외부 제공 관리</h1>
+          <p class="page-subtitle">RDF 기반 메타데이터 내보내기 및 외부 제공 설정</p>
+        </div>
+
+        <div class="page-content">
+          <div style="display: grid; grid-template-columns: 1fr 350px; gap: var(--spacing-lg);">
+            <!-- 메인 영역 -->
+            <div>
+              <!-- 탭: 제공 형식 선택 -->
+              <div class="tabs" id="formatTabs" style="margin-bottom: var(--spacing-2xl);">
+                <div class="tab-headers">
+                  <button class="tab-header active" onclick="switchFormat(0)">JSON-LD</button>
+                  <button class="tab-header" onclick="switchFormat(1)">Turtle</button>
+                  <button class="tab-header" onclick="switchFormat(2)">DCAT-AP-KR</button>
+                </div>
+
+                <!-- JSON-LD -->
+                <div class="tab-content active">
+                  <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">내보낼 데이터셋 선택</h3>
+
+                  <div class="filter-bar" style="margin-bottom: var(--spacing-lg);">
+                    <button class="filter-button" onclick="alert('전체 선택')">전체 선택</button>
+                    <button class="filter-button secondary" onclick="alert('전체 해제')">전체 해제</button>
+                    <input type="text" class="filter-input" placeholder="데이터셋 검색..." style="flex: 1;">
+                  </div>
+
+                  <div style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                    <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-md); border-bottom: 1px solid var(--border-color);">
+                      <input type="checkbox" checked>
+                      <span>실시간 도로 교통 정보</span>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-md); border-bottom: 1px solid var(--border-color);">
+                      <input type="checkbox" checked>
+                      <span>민원 통계 현황</span>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-md); border-bottom: 1px solid var(--border-color);">
+                      <input type="checkbox" checked>
+                      <span>기상 관측 데이터</span>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-md); padding: var(--spacing-md);">
+                      <input type="checkbox">
+                      <span>전기차 충전소 정보</span>
+                    </div>
+                  </div>
+
+                  <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">미리보기</h3>
+
+                  <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; max-height: 300px;"><code class="language-json">{
+  "@context": "https://www.w3.org/ns/dcat",
+  "@type": "dcat:Dataset",
+  "@id": "http://data-hub.jeju.go.kr/dataset/traffic",
+  "dcat:title": "실시간 도로 교통 정보",
+  "dcat:description": "제주시 전역 도로의 교통 정보",
+  "dcat:keyword": ["교통", "실시간"],
+  "dcat:issued": "2026-03-25",
+  "dcat:modified": "2026-03-25",
+  "dcat:language": "ko",
+  "dcat:accrualPeriodicity": "PT1M"
+}</code></pre>
+
+                  <button class="btn btn-secondary" onclick="alert('코드 복사됨')" style="width: 100%; margin-top: var(--spacing-md);">
+                    <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+                    코드 복사
+                  </button>
+                </div>
+
+                <!-- Turtle -->
+                <div class="tab-content">
+                  <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; max-height: 300px;"><code>@prefix dcat: &lt;http://www.w3.org/ns/dcat#&gt; .
+@prefix dcterms: &lt;http://purl.org/dc/terms/&gt; .
+
+&lt;http://data-hub.jeju.go.kr/dataset/traffic&gt; a dcat:Dataset ;
+  dcterms:title "실시간 도로 교통 정보"@ko ;
+  dcterms:description "제주시 전역 도로의 교통 정보"@ko ;
+  dcat:keyword "교통", "실시간" ;
+  dcterms:issued "2026-03-25"^^xsd:date .</code></pre>
+                </div>
+
+                <!-- DCAT-AP-KR -->
+                <div class="tab-content">
+                  <pre style="background-color: var(--color-gray-100); padding: var(--spacing-lg); border-radius: var(--radius-lg); overflow-x: auto; max-height: 300px;"><code class="language-xml">&lt;rdf:RDF&gt;
+  &lt;dcat:Dataset rdf:about="http://data-hub.jeju.go.kr/dataset/traffic"&gt;
+    &lt;dcterms:title xml:lang="ko"&gt;실시간 도로 교통 정보&lt;/dcterms:title&gt;
+    &lt;dcterms:description xml:lang="ko"&gt;제주시 전역 도로의 교통 정보&lt;/dcterms:description&gt;
+    &lt;dcat:keyword&gt;교통&lt;/dcat:keyword&gt;
+  &lt;/dcat:Dataset&gt;
+&lt;/rdf:RDF&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측: 설정 패널 -->
+            <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: var(--spacing-lg); height: fit-content; position: sticky; top: 20px;">
+              <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">외부 제공 설정</h3>
+
+              <div style="margin-bottom: var(--spacing-lg);">
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-sm);">API 엔드포인트</p>
+                <div style="background-color: var(--color-gray-100); padding: var(--spacing-md); border-radius: var(--radius-md); word-break: break-all;">
+                  <p style="font-size: var(--font-body-sm); color: var(--text-color); margin: 0;">https://api.data-hub.jeju.go.kr/catalog/export/jsonld</p>
+                </div>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: var(--spacing-sm);" onclick="alert('복사됨')">
+                  <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+                  복사
+                </button>
+              </div>
+
+              <div style="margin-bottom: var(--spacing-lg);">
+                <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-sm);">인증키</p>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                  <input type="password" class="form-input" value="api_key_1234" readonly style="flex: 1; background-color: var(--color-gray-100);">
+                  <button class="btn btn-secondary" onclick="alert('재발급됨')">재발급</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">갱신주기</label>
+                <select class="form-select">
+                  <option selected>실시간</option>
+                  <option>일간</option>
+                  <option>주간</option>
+                  <option>월간</option>
+                </select>
+              </div>
+
+              <button class="btn btn-primary" style="width: 100%;" onclick="alert('설정 저장됨')">설정 저장</button>
+
+              <hr style="margin: var(--spacing-lg) 0; border: none; border-top: 1px solid var(--border-color);">
+
+              <h4 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">최근 제공 이력</h4>
+              <table class="data-table" style="margin: 0; box-shadow: none; font-size: var(--font-body-sm);">
+                <thead>
+                  <tr>
+                    <th>시각</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-03-25 14:32</td>
+                    <td><span class="badge success">성공</span></td>
+                  </tr>
+                  <tr>
+                    <td>2026-03-24 10:15</td>
+                    <td><span class="badge success">성공</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 하단: 제공 이력 로그 테이블 -->
+          <div style="margin-top: var(--spacing-2xl);">
+            <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">제공 이력 로그</h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>시각</th>
+                  <th>요청자</th>
+                  <th>데이터셋 수</th>
+                  <th>형식</th>
+                  <th>상태</th>
+                  <th>행위</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-03-25 14:32</td>
+                  <td>API-KEY-001</td>
+                  <td>5</td>
+                  <td><span class="badge info">JSON-LD</span></td>
+                  <td><span class="badge success">성공</span></td>
+                  <td>다운로드</td>
+                </tr>
+                <tr>
+                  <td>2026-03-25 13:15</td>
+                  <td>외부시스템</td>
+                  <td>3</td>
+                  <td><span class="badge info">Turtle</span></td>
+                  <td><span class="badge success">성공</span></td>
+                  <td>조회</td>
+                </tr>
+                <tr>
+                  <td>2026-03-24 10:45</td>
+                  <td>API-KEY-002</td>
+                  <td>8</td>
+                  <td><span class="badge info">JSON-LD</span></td>
+                  <td><span class="badge success">성공</span></td>
+                  <td>다운로드</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    function switchFormat(index) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const headers = document.querySelectorAll('.tab-header');
+
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+
+      headers.forEach((header, i) => {
+        header.classList.toggle('active', i === index);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+      hljs.highlightAll();
+    });
+  </script>
+</body>
+</html>

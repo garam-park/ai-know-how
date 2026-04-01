@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>민원 현황 대시보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">민원 현황 대시보드</div>
+          <div class="page-subtitle">제주시 민원 현황 종합 분석</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- 필터 바 -->
+          <div id="filter-section" class="filter-bar">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <input type="date" class="filter-input" value="2025-01-01">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">~</label>
+              <input type="date" class="filter-input" value="2025-01-31">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">지역</label>
+              <select class="filter-select">
+                <option>전체</option>
+                <option>제주시</option>
+                <option>서귀포시</option>
+                <option>북제주군</option>
+                <option>남제주군</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">민원유형</label>
+              <select class="filter-select" multiple>
+                <option selected>불법주차</option>
+                <option selected>보행안전</option>
+                <option>시설불편</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">상태</label>
+              <select class="filter-select">
+                <option>전체</option>
+                <option>접수</option>
+                <option>처리중</option>
+                <option>완료</option>
+                <option>미처리</option>
+              </select>
+            </div>
+            <button class="filter-button" data-action="apply">조회</button>
+            <button class="filter-button secondary" data-action="reset">초기화</button>
+          </div>
+
+          <!-- KPI Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" style="margin-top: 20px;">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div>
+                  <div class="kpi-title">총 접수건수</div>
+                  <div class="kpi-value">1,234</div>
+                  <div class="kpi-change positive">
+                    <span style="color: var(--color-success);">↑ +12%</span>
+                    <span style="color: var(--text-color-secondary); font-size: 11px;">전주 대비</span>
+                  </div>
+                </div>
+                <div class="kpi-icon">
+                  <i data-lucide="file-text" width="24" height="24"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div>
+                  <div class="kpi-title">처리 완료</div>
+                  <div class="kpi-value">890</div>
+                  <div class="kpi-change positive" style="color: var(--color-success);">72.1%</div>
+                </div>
+                <div class="kpi-icon success">
+                  <i data-lucide="check-circle" width="24" height="24"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div>
+                  <div class="kpi-title">처리중</div>
+                  <div class="kpi-value">234</div>
+                  <div class="kpi-change positive" style="color: var(--color-warning);">19.0%</div>
+                </div>
+                <div class="kpi-icon warning">
+                  <i data-lucide="clock" width="24" height="24"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <div>
+                  <div class="kpi-title">미처리</div>
+                  <div class="kpi-value">110</div>
+                  <div class="kpi-change negative" style="color: var(--color-danger);">8.9%</div>
+                </div>
+                <div class="kpi-icon danger">
+                  <i data-lucide="alert-circle" width="24" height="24"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Line Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">시간대별 민원 발생 추이</div>
+              </div>
+              <div class="card-body">
+                <canvas id="hourlyChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+
+            <!-- Doughnut Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">지역별 민원 비율</div>
+              </div>
+              <div class="card-body">
+                <canvas id="districtChart" style="max-height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Complaints Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">최근 민원 (상세보기: <a href="WF-02-09_complaint-list.html" style="color: var(--color-primary); text-decoration: underline;">더보기</a>)</div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>번호</th>
+                  <th>접수일</th>
+                  <th>지역</th>
+                  <th>유형</th>
+                  <th>제목</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-05_complaint-detail.html'">
+                  <td>1</td>
+                  <td>2025-01-15</td>
+                  <td>제주시</td>
+                  <td>불법주차</td>
+                  <td>상업지구 앞 불법주차 집중</td>
+                  <td><span class="badge info">완료</span></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-05_complaint-detail.html'">
+                  <td>2</td>
+                  <td>2025-01-15</td>
+                  <td>서귀포시</td>
+                  <td>보행안전</td>
+                  <td>횡단보도 신호 오작동</td>
+                  <td><span class="badge warning">처리중</span></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-05_complaint-detail.html'">
+                  <td>3</td>
+                  <td>2025-01-14</td>
+                  <td>북제주군</td>
+                  <td>시설불편</td>
+                  <td>가로등 손상</td>
+                  <td><span class="badge success">완료</span></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-05_complaint-detail.html'">
+                  <td>4</td>
+                  <td>2025-01-14</td>
+                  <td>제주시</td>
+                  <td>충전구역</td>
+                  <td>충전구역 점유 문제</td>
+                  <td><span class="badge default">접수</span></td>
+                </tr>
+                <tr style="cursor: pointer;" onclick="window.location.href='WF-02-05_complaint-detail.html'">
+                  <td>5</td>
+                  <td>2025-01-13</td>
+                  <td>서귀포시</td>
+                  <td>화재위험</td>
+                  <td>불법 화물 방치</td>
+                  <td><span class="badge danger">미처리</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 시간대별 라인 차트
+      const hourlyLabels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+      const illegalParking = [3, 5, 2, 8, 12, 18, 25, 32, 41, 38, 35, 33, 30, 28, 26, 25, 27, 29, 31, 28, 24, 18, 12, 6];
+      const pedestrianSafety = [2, 3, 1, 4, 7, 10, 15, 18, 22, 20, 18, 16, 14, 13, 12, 11, 13, 14, 15, 12, 10, 8, 5, 3];
+      const facilityDiscomfort = [1, 2, 1, 3, 5, 7, 10, 12, 14, 13, 12, 11, 10, 9, 8, 8, 9, 10, 11, 9, 7, 5, 3, 2];
+
+      createLineChart('hourlyChart', hourlyLabels, [
+        { label: '불법주차', data: illegalParking, borderColor: '#DC2626' },
+        { label: '보행안전', data: pedestrianSafety, borderColor: '#16A34A' },
+        { label: '시설불편', data: facilityDiscomfort, borderColor: '#2563EB' }
+      ]);
+
+      // 지역별 도넛 차트
+      createDoughnutChart('districtChart',
+        ['제주시', '서귀포시', '북제주군', '남제주군', '기타'],
+        [556, 346, 185, 99, 49]
+      );
+
+      // 히트맵 클릭 이벤트
+      document.querySelector('.card-body')?.addEventListener('click', function() {
+        // WF-02-02로 이동 가능하도록 설정
+      });
+    });
+  </script>
+</body>
+</html>

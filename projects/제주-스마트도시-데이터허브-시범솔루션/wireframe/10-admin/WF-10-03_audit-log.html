@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감사 로그</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">관리자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">감사 로그</h1>
+          <p class="page-subtitle">시스템 사용 기록 및 행위 추적</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 필터 영역 -->
+          <div class="filter-bar" style="margin-bottom: var(--spacing-2xl); flex-wrap: wrap;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <input type="date" class="filter-input" value="2026-03-01">
+              <span style="margin: 0 8px;">~</span>
+              <input type="date" class="filter-input" value="2026-03-25">
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">행위유형</label>
+              <select class="filter-select">
+                <option selected>로그인</option>
+                <option>조회</option>
+                <option>수정</option>
+                <option>삭제</option>
+                <option>내보내기</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">IP</label>
+              <input type="text" class="filter-input" placeholder="192.168.">
+            </div>
+
+            <button class="filter-button" onclick="alert('검색 실행')">검색</button>
+            <button class="filter-button secondary" onclick="alert('필터 초기화')">초기화</button>
+
+            <div style="margin-left: auto;">
+              <button class="btn btn-secondary" onclick="alert('CSV 다운로드')">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                CSV 내보내기
+              </button>
+            </div>
+          </div>
+
+          <!-- 감사 로그 테이블 -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>시각</th>
+                <th>사용자</th>
+                <th>IP</th>
+                <th>행위</th>
+                <th>대상</th>
+                <th>상세</th>
+                <th>결과</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background-color: #fffacd;">
+                <td>2026-03-25 02:15:30</td>
+                <td>박영민</td>
+                <td>192.168.1.150</td>
+                <td>로그인</td>
+                <td>시스템</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/login</td>
+                <td><span class="badge danger">실패</span></td>
+              </tr>
+              <tr style="background-color: #fffacd;">
+                <td>2026-03-25 02:10:15</td>
+                <td>박영민</td>
+                <td>192.168.1.150</td>
+                <td>로그인</td>
+                <td>시스템</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/login</td>
+                <td><span class="badge danger">실패</span></td>
+              </tr>
+              <tr style="background-color: #fffacd;">
+                <td>2026-03-25 02:05:45</td>
+                <td>박영민</td>
+                <td>192.168.1.150</td>
+                <td>로그인</td>
+                <td>시스템</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/login</td>
+                <td><span class="badge danger">실패</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:32:45</td>
+                <td>김수현</td>
+                <td>192.168.1.100</td>
+                <td>조회</td>
+                <td>데이터 카탈로그 > 실시간 도로 정보</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/datasets</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:30:20</td>
+                <td>이순신</td>
+                <td>192.168.1.200</td>
+                <td>수정</td>
+                <td>사용자 관리 > 박영민</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">PUT /api/users/박영민</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:28:10</td>
+                <td>최민지</td>
+                <td>192.168.1.50</td>
+                <td>내보내기</td>
+                <td>감사 로그</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/audit-logs/export</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:25:00</td>
+                <td>김수현</td>
+                <td>192.168.1.100</td>
+                <td>조회</td>
+                <td>시스템 설정</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/settings</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:20:15</td>
+                <td>박영민</td>
+                <td>192.168.1.150</td>
+                <td>삭제</td>
+                <td>데이터 카탈로그 > 임시 데이터</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">DELETE /api/datasets/temp</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:15:30</td>
+                <td>이순신</td>
+                <td>192.168.1.200</td>
+                <td>로그인</td>
+                <td>시스템</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">POST /api/login</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+              <tr>
+                <td>2026-03-25 14:10:45</td>
+                <td>김수현</td>
+                <td>192.168.1.100</td>
+                <td>조회</td>
+                <td>대시보드</td>
+                <td style="color: var(--color-primary); cursor: pointer;" onclick="alert('상세정보')">GET /api/dashboard</td>
+                <td><span class="badge success">성공</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" style="margin-top: var(--spacing-lg);">
+            <button class="pagination-button" data-action="prev">이전</button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button">2</button>
+            <button class="pagination-button">3</button>
+            <button class="pagination-button" data-action="next">다음</button>
+          </div>
+
+          <!-- 범례 -->
+          <div style="margin-top: var(--spacing-2xl); padding: var(--spacing-lg); background-color: var(--color-gray-50); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+            <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-sm); font-weight: var(--font-weight-semibold);">이상 접근 하이라이트:</p>
+            <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+              <li style="font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                <span style="background-color: #fffacd; padding: 2px 6px; border-radius: 2px; margin-right: 8px;">■</span>
+                비정상 시간 접근 (자정~새벽 00:00~06:00)
+              </li>
+              <li style="font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                <span style="background-color: #ffdab9; padding: 2px 6px; border-radius: 2px; margin-right: 8px;">■</span>
+                반복 실패 (5회 이상 연속)
+              </li>
+              <li style="font-size: var(--font-body-sm); color: var(--text-color-secondary);">
+                <span style="background-color: #ffe4e1; padding: 2px 6px; border-radius: 2px; margin-right: 8px;">■</span>
+                대량 내보내기 (100건 이상)
+              </li>
+            </ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('admin');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

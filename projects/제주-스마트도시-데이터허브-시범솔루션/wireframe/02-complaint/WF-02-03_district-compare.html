@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>읍면동 비교 카드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    .district-card {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 240px;
+    }
+    .district-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">읍면동 비교 카드</div>
+          <div class="page-subtitle">지역별 민원 현황 비교</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Control Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: white; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div>
+              <label style="font-weight: 500; margin-right: 16px; display: inline-flex; align-items: center; gap: 8px;">
+                <input type="radio" name="sort" value="count" checked> 건수순
+              </label>
+              <label style="font-weight: 500; margin-right: 16px; display: inline-flex; align-items: center; gap: 8px;">
+                <input type="radio" name="sort" value="increase"> 증가율순
+              </label>
+              <label style="font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+                <input type="radio" name="sort" value="name"> 가나다순
+              </label>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button style="padding: 8px 16px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer;" title="카드뷰" data-view="card">
+                <i data-lucide="grid" width="20" height="20"></i>
+              </button>
+              <button style="padding: 8px 16px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer;" title="테이블뷰" data-view="table">
+                <i data-lucide="list" width="20" height="20"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="card-grid" id="card-container">
+            <!-- Cards will be inserted here by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 더미 데이터
+      const districts = [
+        { name: '건입동', count: 45, change: 12, types: ['불법주차', '보행안전', '시설불편'], values: [27, 11, 7] },
+        { name: '이도동', count: 52, change: 8, types: ['불법주차', '보행안전', '시설불편'], values: [34, 10, 8] },
+        { name: '삼도동', count: 38, change: -5, types: ['불법주차', '보행안전', '시설불편'], values: [27, 6, 5] },
+        { name: '일도동', count: 41, change: 10, types: ['불법주차', '보행안전', '시설불편'], values: [25, 9, 7] },
+        { name: '오일동', count: 35, change: 2, types: ['불법주차', '보행안전', '시설불편'], values: [24, 6, 5] },
+        { name: '용담동', count: 28, change: -8, types: ['불법주차', '보행안전', '시설불편'], values: [18, 6, 4] },
+        { name: '화북동', count: 33, change: 4, types: ['불법주차', '보행안전', '시설불편'], values: [22, 7, 4] },
+        { name: '화산동', count: 29, change: -3, types: ['불법주차', '보행안전', '시설불편'], values: [20, 5, 4] },
+        { name: '아라동', count: 26, change: 1, types: ['불법주차', '보행안전', '시설불편'], values: [18, 4, 4] },
+        { name: '노형동', count: 31, change: 6, types: ['불법주차', '보행안전', '시설불편'], values: [20, 7, 4] },
+        { name: '서홍동', count: 42, change: 15, types: ['불법주차', '보행안전', '시설불편'], values: [24, 12, 6] },
+        { name: '동홍동', count: 48, change: 10, types: ['불법주차', '보행안전', '시설불편'], values: [29, 12, 7] },
+        { name: '중앙동', count: 55, change: 18, types: ['불법주차', '보행안전', '시설불편'], values: [35, 12, 8] },
+        { name: '서호동', count: 32, change: -2, types: ['불법주차', '보행안전', '시설불편'], values: [21, 6, 5] },
+        { name: '영천동', count: 29, change: 5, types: ['불법주차', '보행안전', '시설불편'], values: [20, 5, 4] },
+      ];
+
+      function renderCards(data) {
+        const container = document.getElementById('card-container');
+        container.innerHTML = '';
+
+        data.forEach((district, index) => {
+          const card = document.createElement('div');
+          card.className = 'district-card card';
+          card.onclick = () => {
+            // 상세 대시보드로 이동
+            window.location.href = `WF-02-05_complaint-detail.html?district=${district.name}`;
+          };
+
+          const changeColor = district.change > 0 ? 'var(--color-danger)' : 'var(--color-success)';
+          const changeArrow = district.change > 0 ? '↑' : '↓';
+
+          card.innerHTML = `
+            <div class="card-header">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 4px;">${district.name}</h3>
+                  <p style="font-size: 24px; font-weight: bold; color: var(--color-primary);">${district.count}건</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom: 12px; padding: 8px; background: var(--bg-color-secondary); border-radius: 4px;">
+                <span style="color: ${changeColor}; font-weight: bold;">${changeArrow} ${Math.abs(district.change)}%</span>
+                <span style="color: var(--text-color-secondary); font-size: 12px; margin-left: 4px;">전주 대비</span>
+              </div>
+              <div style="position: relative; height: 100px; margin-top: 12px;">
+                <canvas id="chart-${index}" style="max-height: 80px;"></canvas>
+              </div>
+            </div>
+          `;
+
+          container.appendChild(card);
+
+          // 미니 파이 차트 생성
+          setTimeout(() => {
+            const canvasId = `chart-${index}`;
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+              createPieChart(canvasId, district.types, district.values, {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              });
+            }
+          }, 100);
+        });
+      }
+
+      // 초기 렌더링
+      renderCards(districts);
+
+      // 정렬 라디오 버튼 이벤트
+      document.querySelectorAll('input[name="sort"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          let sorted = [...districts];
+          if (e.target.value === 'count') {
+            sorted.sort((a, b) => b.count - a.count);
+          } else if (e.target.value === 'increase') {
+            sorted.sort((a, b) => b.change - a.change);
+          } else if (e.target.value === 'name') {
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+          }
+          renderCards(sorted);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

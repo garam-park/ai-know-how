@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIS 집중구역 시각화 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/map.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    #map { height: calc(100vh - 130px); flex: 1; }
+    .right-panel { width: 320px; background: white; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; }
+    .map-container { display: flex; flex: 1; }
+    .legend-section { padding: 16px; border-bottom: 1px solid var(--border-color); }
+    .zone-list { flex: 1; overflow-y: auto; padding: 16px; }
+    .zone-item { padding: 12px; background: var(--bg-color-secondary); border-radius: 4px; margin-bottom: 8px; cursor: pointer; border-left: 4px solid #2563EB; }
+    .zone-item:hover { background: var(--color-gray-100); }
+    .bottom-stats { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-color-secondary); }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content" style="flex-direction: row; padding: 0;">
+        <!-- Map Container -->
+        <div class="map-container">
+          <div id="map"></div>
+
+          <!-- Layer Toggle (Top Right) -->
+          <div style="position: absolute; top: 20px; right: 20px; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10;">
+            <h4 style="font-weight: bold; margin-bottom: 12px; font-size: 13px;">레이어</h4>
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+              <input type="checkbox" id="layer-concentration" checked>
+              <span style="font-size: 12px;">민원 집중구역</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+              <input type="checkbox" id="layer-enforcement" checked>
+              <span style="font-size: 12px;">집중단속구역</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="layer-demand">
+              <span style="font-size: 12px;">수요부족지역</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+          <!-- Legend Section -->
+          <div class="legend-section">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 13px;">범례</h3>
+            <div style="margin-bottom: 8px; font-size: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <div style="width: 16px; height: 16px; background: #DC2626; border-radius: 2px;"></div>
+                <span>민원 집중구역</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <div style="width: 16px; height: 16px; background: #2563EB; border-radius: 2px;"></div>
+                <span>집중단속구역</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; background: #EAB308; border-radius: 2px;"></div>
+                <span>수요부족지역</span>
+              </div>
+            </div>
+
+            <!-- Sorting -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px;">
+              <label style="font-weight: 600; font-size: 12px; display: block; margin-bottom: 8px;">정렬</label>
+              <select style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px;">
+                <option>민원건수순</option>
+                <option>주차면수순</option>
+                <option>가나다순</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Zone List -->
+          <div class="zone-list" id="zone-list">
+            <!-- Zones will be populated by JavaScript -->
+          </div>
+
+          <!-- Bottom Stats -->
+          <div class="bottom-stats">
+            <h4 style="font-weight: bold; margin-bottom: 12px; font-size: 13px;">선택 구역 상세</h4>
+            <div id="selected-zone-stats" style="font-size: 12px;">
+              <p style="color: var(--text-color-secondary); margin-bottom: 8px;">구역을 선택해주세요</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 지도 생성
+      const map = createJejuMap('map', { zoom: 10 });
+
+      // 더미 구역 데이터
+      const zones = [
+        {
+          name: '제주시 구도심',
+          type: 'concentration',
+          coordinates: [[33.5070, 126.5200], [33.5070, 126.5300], [33.5150, 126.5300], [33.5150, 126.5200]],
+          color: '#DC2626',
+          complaints: 245,
+          enforcement: 85,
+          parking: 450,
+          types: '불법주차(85%), 보행안전(10%), 시설불편(5%)'
+        },
+        {
+          name: '서귀포시 중심가',
+          type: 'concentration',
+          coordinates: [[33.2540, 126.5640], [33.2540, 126.5750], [33.2620, 126.5750], [33.2620, 126.5640]],
+          color: '#DC2626',
+          complaints: 187,
+          enforcement: 72,
+          parking: 380,
+          types: '불법주차(80%), 충전구역(15%), 보행안전(5%)'
+        },
+        {
+          name: '제주공항 주변',
+          type: 'concentration',
+          coordinates: [[33.5090, 126.4920], [33.5090, 126.5050], [33.5170, 126.5050], [33.5170, 126.4920]],
+          color: '#DC2626',
+          complaints: 156,
+          enforcement: 90,
+          parking: 320,
+          types: '불법주차(90%), 화재위험(10%)'
+        },
+        {
+          name: '제주시 도심도로',
+          type: 'enforcement',
+          coordinates: [[33.5110, 126.5260], [33.5110, 126.5320], [33.5160, 126.5320], [33.5160, 126.5260]],
+          color: '#2563EB',
+          complaints: 145,
+          enforcement: 88,
+          parking: 350,
+          types: '불법주차(95%), 기타(5%)'
+        },
+        {
+          name: '북제주군 외곽지역',
+          type: 'demand',
+          coordinates: [[33.3700, 126.5900], [33.3700, 126.6100], [33.3900, 126.6100], [33.3900, 126.5900]],
+          color: '#EAB308',
+          complaints: 18,
+          enforcement: 45,
+          parking: 50,
+          types: '불법주차(72%), 보행안전(15%)'
+        }
+      ];
+
+      const polygonLayers = {};
+
+      // 폴리곤 추가
+      zones.forEach((zone, index) => {
+        const polygon = L.polygon(zone.coordinates, {
+          color: zone.color,
+          fillColor: zone.color,
+          fillOpacity: 0.2,
+          weight: 2
+        }).addTo(map);
+
+        polygonLayers[index] = polygon;
+
+        polygon.on('click', () => {
+          // 선택된 구역 업데이트
+          updateSelectedZone(zone);
+          // 목록에서 하이라이트
+          document.querySelectorAll('.zone-item').forEach(item => item.style.background = 'var(--bg-color-secondary)');
+          document.getElementById(`zone-${index}`).style.background = 'var(--color-gray-100)';
+        });
+
+        polygon.on('mouseover', function() {
+          this.setStyle({ fillOpacity: 0.5, weight: 3 });
+        });
+        polygon.on('mouseout', function() {
+          this.setStyle({ fillOpacity: 0.2, weight: 2 });
+        });
+
+        polygon.bindPopup(`<strong>${zone.name}</strong><br/>민원: ${zone.complaints}건<br/>단속: ${zone.enforcement}%<br/><a href="WF-02-03_district-compare.html" style="color: #2563EB;">상세보기</a>`);
+      });
+
+      // 구역 목록 렌더링
+      const zoneList = document.getElementById('zone-list');
+      zones.forEach((zone, index) => {
+        const item = document.createElement('div');
+        item.className = 'zone-item';
+        item.id = `zone-${index}`;
+        item.innerHTML = `
+          <div style="font-weight: 600; font-size: 12px;">${zone.name}</div>
+          <div style="font-size: 11px; color: var(--text-color-secondary); margin-top: 4px;">
+            민원: ${zone.complaints}건 | 주차: ${zone.parking}면
+          </div>
+        `;
+        item.onclick = () => {
+          polygonLayers[index].fireEvent('click');
+        };
+        zoneList.appendChild(item);
+      });
+
+      // 선택된 구역 정보 업데이트
+      function updateSelectedZone(zone) {
+        const statsDiv = document.getElementById('selected-zone-stats');
+        statsDiv.innerHTML = `
+          <div style="margin-bottom: 8px;"><strong>${zone.name}</strong></div>
+          <div style="margin-bottom: 6px;">민원건수: <strong>${zone.complaints}건</strong></div>
+          <div style="margin-bottom: 6px;">주요유형: ${zone.types}</div>
+          <div style="margin-bottom: 6px;">단속현황: <strong>${zone.enforcement}%</strong></div>
+          <div style="margin-bottom: 6px;">주차면수: <strong>${zone.parking}면</strong></div>
+        `;
+      }
+
+      // 레이어 토글
+      document.getElementById('layer-concentration').addEventListener('change', function(e) {
+        zones.forEach((zone, index) => {
+          if (zone.type === 'concentration') {
+            if (e.target.checked) {
+              map.addLayer(polygonLayers[index]);
+            } else {
+              map.removeLayer(polygonLayers[index]);
+            }
+          }
+        });
+      });
+
+      document.getElementById('layer-enforcement').addEventListener('change', function(e) {
+        zones.forEach((zone, index) => {
+          if (zone.type === 'enforcement') {
+            if (e.target.checked) {
+              map.addLayer(polygonLayers[index]);
+            } else {
+              map.removeLayer(polygonLayers[index]);
+            }
+          }
+        });
+      });
+
+      document.getElementById('layer-demand').addEventListener('change', function(e) {
+        zones.forEach((zone, index) => {
+          if (zone.type === 'demand') {
+            if (e.target.checked) {
+              map.addLayer(polygonLayers[index]);
+            } else {
+              map.removeLayer(polygonLayers[index]);
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

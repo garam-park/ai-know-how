@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제주 스마트도시 데이터허브 - 와이어프레임 PoC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="./common/tokens.css">
+  <style>
+    body {
+      font-family: var(--font-family-base);
+      background-color: var(--bg-color-secondary);
+      color: var(--text-color);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      color: white;
+      padding: var(--spacing-3xl) var(--spacing-lg);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-title {
+      font-size: var(--font-display-md);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--spacing-md);
+      letter-spacing: -0.5px;
+    }
+
+    .header-subtitle {
+      font-size: var(--font-body-lg);
+      opacity: 0.9;
+    }
+
+    .header-description {
+      font-size: var(--font-body-md);
+      opacity: 0.8;
+      margin-top: var(--spacing-md);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .container {
+      max-width: 1920px;
+      margin: 0 auto;
+      padding: var(--spacing-2xl) var(--spacing-lg);
+    }
+
+    .section-title {
+      font-size: var(--font-heading-lg);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--spacing-xl);
+      color: var(--text-color);
+    }
+
+    .groups-grid {
+      display: grid;
+      gap: var(--spacing-xl);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    @media (min-width: 1920px) {
+      .groups-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1440px) and (max-width: 1919px) {
+      .groups-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .groups-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .groups-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .group-card {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .group-card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: var(--color-primary);
+      transform: translateY(-4px);
+    }
+
+    .group-card a {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .group-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: var(--font-weight-bold);
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .group-number {
+      display: inline-block;
+      background-color: var(--color-primary);
+      color: white;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-full);
+      font-size: var(--font-body-sm);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .group-info {
+      flex: 1;
+    }
+
+    .group-name {
+      font-size: var(--font-heading-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .group-meta {
+      display: flex;
+      gap: var(--spacing-md);
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+    }
+
+    .group-description {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .group-pages {
+      background-color: var(--color-gray-50);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .group-pages-title {
+      font-size: var(--font-body-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .group-pages-list {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      line-height: 1.8;
+    }
+
+    .group-link-button {
+      display: inline-block;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background-color: var(--color-primary);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-body-md);
+      transition: all 0.2s ease;
+      align-self: flex-start;
+      margin-top: auto;
+    }
+
+    .group-link-button:hover {
+      background-color: var(--color-primary-dark);
+      text-decoration: none;
+    }
+
+    .footer {
+      background-color: white;
+      border-top: 1px solid var(--border-color);
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      text-align: center;
+      color: var(--text-color-secondary);
+      font-size: var(--font-body-sm);
+    }
+
+    .footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: var(--font-weight-bold);
+      background-color: var(--color-success);
+      color: white;
+      margin-left: var(--spacing-sm);
+    }
+
+    .badge-phase {
+      display: inline-block;
+      padding: 4px 12px;
+      background-color: var(--color-gray-200);
+      color: var(--text-color);
+      border-radius: var(--spacing-sm);
+      font-size: 12px;
+      font-weight: var(--font-weight-medium);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="header-title">제주 스마트도시 데이터허브</h1>
+    <p class="header-subtitle">와이어프레임 PoC (Proof of Concept)</p>
+    <p class="header-description">
+      11개 그룹별 와이어프레임 페이지 그룹 관리 및 진입 허브
+    </p>
+  </div>
+
+  <div class="container">
+    <h2 class="section-title">전체 와이어프레임 페이지</h2>
+
+    <div class="groups-grid">
+      <!-- WF-00: 공통기반 -->
+      <div class="group-card">
+        <a href="./pages/login.html">
+          <div class="group-header">
+            <div class="group-icon">🔐</div>
+            <div class="group-info">
+              <span class="group-number">WF-00</span>
+            </div>
+          </div>
+
+          <div class="group-name">공통기반</div>
+
+          <div class="group-meta">
+            <span>📄 6개 페이지</span>
+            <span class="badge-phase">Phase 0</span>
+          </div>
+
+          <p class="group-description">
+            전체 시스템의 기초가 되는 공통 컴포넌트, 디자인 토큰, 로그인 및 레이아웃 쉘입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 디자인 토큰<br>
+              • 공통 레이아웃<br>
+              • 컴포넌트 라이브러리<br>
+              • 차트 컴포넌트<br>
+              • 지도 컴포넌트<br>
+              • 로그인·권한별 진입
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-01: 메인 대시보드 -->
+      <div class="group-card">
+        <a href="./01-main-dashboard/WF-01-01_kpi-dashboard.html">
+          <div class="group-header">
+            <div class="group-icon">📊</div>
+            <div class="group-info">
+              <span class="group-number">WF-01</span>
+            </div>
+          </div>
+
+          <div class="group-name">메인 대시보드</div>
+
+          <div class="group-meta">
+            <span>📄 6개 페이지</span>
+            <span class="badge-phase">Phase 1</span>
+          </div>
+
+          <p class="group-description">
+            종합 KPI, 실시간 현황, AI 성과, 알림 센터 등 핵심 지표를 한눈에 볼 수 있는 대시보드입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 종합 KPI<br>
+              • 실시간 현황<br>
+              • AI 성과<br>
+              • 알림 센터<br>
+              • 마이 대시보드<br>
+              • 시스템 상태
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-02: 민원분석 -->
+      <div class="group-card">
+        <a href="./02-complaint/WF-02-01_complaint-dashboard.html">
+          <div class="group-header">
+            <div class="group-icon">💬</div>
+            <div class="group-info">
+              <span class="group-number">WF-02</span>
+            </div>
+          </div>
+
+          <div class="group-name">민원분석</div>
+
+          <div class="group-meta">
+            <span>📄 9개 페이지</span>
+            <span class="badge-phase">Phase 1</span>
+          </div>
+
+          <p class="group-description">
+            민원 현황, 히트맵, 트렌드 분석, 감성 분석 등 민원 데이터 분석 및 시각화입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 민원 현황 • 히트맵<br>
+              • 읍면동 비교 • 트렌드<br>
+              • 민원 상세 • 분류 현황<br>
+              • 감성 분석 • GIS<br>
+              • 민원 목록
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-03: 정책시뮬레이션 -->
+      <div class="group-card">
+        <a href="./03-simulation/WF-03-01_simulation-config.html">
+          <div class="group-header">
+            <div class="group-icon">🧪</div>
+            <div class="group-info">
+              <span class="group-number">WF-03</span>
+            </div>
+          </div>
+
+          <div class="group-name">정책시뮬레이션</div>
+
+          <div class="group-meta">
+            <span>📄 6개 페이지</span>
+            <span class="badge-phase">Phase 2</span>
+          </div>
+
+          <p class="group-description">
+            정책 효과 예측, 시나리오 비교, 요금제 추천 등 시뮬레이션 기반 의사결정 지원입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 시뮬레이션 설정<br>
+              • 수요·공급 분석<br>
+              • 정책 효과 예측<br>
+              • 시나리오 비교<br>
+              • 요금제 추천<br>
+              • 투자 우선순위
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-04: 이벤트감시 -->
+      <div class="group-card">
+        <a href="./04-event/WF-04-01_realtime-console.html">
+          <div class="group-header">
+            <div class="group-icon">🚨</div>
+            <div class="group-info">
+              <span class="group-number">WF-04</span>
+            </div>
+          </div>
+
+          <div class="group-name">이벤트감시</div>
+
+          <div class="group-meta">
+            <span>📄 8개 페이지</span>
+            <span class="badge-phase">Phase 2</span>
+          </div>
+
+          <p class="group-description">
+            실시간 이벤트 콘솔, 경보 현황, 센서 상태, 인시던트 관리 등 실시간 감시 시스템입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 실시간 콘솔<br>
+              • 이벤트 상세<br>
+              • 경보 현황<br>
+              • 센서 상태<br>
+              • SOP 체크리스트<br>
+              • 인시던트 관리<br>
+              • EV 충전 이상<br>
+              • 통합관제 연계
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-05: LLM분석 -->
+      <div class="group-card">
+        <a href="./05-llm/WF-05-01_summary-viewer.html">
+          <div class="group-header">
+            <div class="group-icon">🧠</div>
+            <div class="group-info">
+              <span class="group-number">WF-05</span>
+            </div>
+          </div>
+
+          <div class="group-name">LLM분석</div>
+
+          <div class="group-meta">
+            <span>📄 8개 페이지</span>
+            <span class="badge-phase">Phase 2</span>
+          </div>
+
+          <p class="group-description">
+            요약 결과, 분류, 클러스터링, 답변문 생성 등 LLM 기반 자연어 처리 분석입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 요약 결과<br>
+              • 분류 현황<br>
+              • 클러스터링<br>
+              • 검색<br>
+              • 리포트 뷰어<br>
+              • 답변문 생성<br>
+              • 대량 요약<br>
+              • 모델 성능
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-06: AI어시스턴트 -->
+      <div class="group-card">
+        <a href="./06-assistant/WF-06-01_chat.html">
+          <div class="group-header">
+            <div class="group-icon">🤖</div>
+            <div class="group-info">
+              <span class="group-number">WF-06</span>
+            </div>
+          </div>
+
+          <div class="group-name">AI어시스턴트</div>
+
+          <div class="group-meta">
+            <span>📄 5개 페이지</span>
+            <span class="badge-phase">Phase 2</span>
+          </div>
+
+          <p class="group-description">
+            챗봇, RAG 검색, 추천 응답, 다국어, 상담 통계 등 AI 기반 대화형 어시스턴트입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 챗<br>
+              • RAG 검색<br>
+              • 추천 응답<br>
+              • 다국어<br>
+              • 상담 통계
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-07: 보고서 -->
+      <div class="group-card">
+        <a href="./07-report/WF-07-01_report-list.html">
+          <div class="group-header">
+            <div class="group-icon">📋</div>
+            <div class="group-info">
+              <span class="group-number">WF-07</span>
+            </div>
+          </div>
+
+          <div class="group-name">보고서</div>
+
+          <div class="group-meta">
+            <span>📄 4개 페이지</span>
+            <span class="badge-phase">Phase 3</span>
+          </div>
+
+          <p class="group-description">
+            보고서 목록, 미리보기, 편집·승인, 템플릿 관리 등 보고서 생성 및 관리입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 보고서 목록<br>
+              • 미리보기<br>
+              • 편집·승인<br>
+              • 템플릿 관리
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-08: 데이터수집 -->
+      <div class="group-card">
+        <a href="./08-pipeline/WF-08-01_collection-status.html">
+          <div class="group-header">
+            <div class="group-icon">📥</div>
+            <div class="group-info">
+              <span class="group-number">WF-08</span>
+            </div>
+          </div>
+
+          <div class="group-name">데이터수집</div>
+
+          <div class="group-meta">
+            <span>📄 6개 페이지</span>
+            <span class="badge-phase">Phase 3</span>
+          </div>
+
+          <p class="group-description">
+            데이터 수집 현황, OCR 처리, RPA, STT, 개체명 추출, 데이터 품질 등 ETL 파이프라인입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 수집 현황<br>
+              • OCR 처리<br>
+              • RPA 수집<br>
+              • STT 처리<br>
+              • 개체명 추출<br>
+              • 데이터 품질
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-09: 카탈로그 -->
+      <div class="group-card">
+        <a href="./09-catalog/WF-09-01_catalog-search.html">
+          <div class="group-header">
+            <div class="group-icon">📚</div>
+            <div class="group-info">
+              <span class="group-number">WF-09</span>
+            </div>
+          </div>
+
+          <div class="group-name">카탈로그</div>
+
+          <div class="group-meta">
+            <span>📄 6개 페이지</span>
+            <span class="badge-phase">Phase 3</span>
+          </div>
+
+          <p class="group-description">
+            데이터 검색, 메타데이터 관리, 용어 사전, 데이터 모델, DCAT 제공 등 데이터 카탈로그입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 검색<br>
+              • 데이터셋 상세<br>
+              • 메타데이터 편집<br>
+              • 용어 사전<br>
+              • 데이터 모델<br>
+              • DCAT 제공
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+
+      <!-- WF-10: 시스템관리 -->
+      <div class="group-card">
+        <a href="./10-admin/WF-10-01_user-management.html">
+          <div class="group-header">
+            <div class="group-icon">⚙️</div>
+            <div class="group-info">
+              <span class="group-number">WF-10</span>
+            </div>
+          </div>
+
+          <div class="group-name">시스템관리</div>
+
+          <div class="group-meta">
+            <span>📄 5개 페이지</span>
+            <span class="badge-phase">Phase 3</span>
+          </div>
+
+          <p class="group-description">
+            사용자 관리, 연계 설정, 감사 로그, 알림 설정, 시스템 설정 등 관리자 기능입니다.
+          </p>
+
+          <div class="group-pages">
+            <div class="group-pages-title">포함 페이지:</div>
+            <div class="group-pages-list">
+              • 사용자 관리<br>
+              • 연계 설정<br>
+              • 감사 로그<br>
+              • 알림 설정<br>
+              • 시스템 설정
+            </div>
+          </div>
+
+          <div class="group-link-button">진입 →</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>
+      <strong>제주 스마트도시 데이터허브 와이어프레임 PoC</strong><br>
+      이 페이지는 와이어프레임 프로토타입으로, 실제 기능 구현이 아닌 UI/UX 설계 목적으로 제작되었습니다.
+    </p>
+    <p style="margin-top: var(--spacing-md);">
+      <a href="./pages/login.html">로그인</a> |
+      <a href="#">도움말</a> |
+      <a href="#">문의</a>
+    </p>
+    <p style="margin-top: var(--spacing-md); font-size: 12px;">
+      Copyright 2024 Jeju Smart City Data Hub | v1.0
+    </p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    // 페이지 로드 시 아이콘 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+
+    // 로그인 상태 확인
+    window.addEventListener('load', () => {
+      // 로그인되어 있으면 로그인 페이지로 진입했을 때 대시보드로 리다이렉트
+      // (로그인 페이지의 JavaScript에서 처리)
+    });
+  </script>
+</body>
+</html>

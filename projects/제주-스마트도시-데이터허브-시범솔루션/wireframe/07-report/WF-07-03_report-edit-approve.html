@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보고서 편집·승인 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .page-content { padding: 20px; }
+    .workflow-bar { display: flex; gap: 0; margin-bottom: 24px; align-items: center; }
+    .workflow-step { display: flex; align-items: center; flex: 1; }
+    .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #6b7280; font-size: 13px; margin-right: 12px; flex-shrink: 0; transition: all 0.2s; }
+    .workflow-step.active .step-circle { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+    .workflow-step.completed .step-circle { background: #10b981; color: white; border-color: #10b981; }
+    .step-label { font-size: 13px; color: #6b7280; font-weight: 500; white-space: nowrap; }
+    .workflow-step.active .step-label { color: #3b82f6; font-weight: 600; }
+    .workflow-step.completed .step-label { color: #10b981; }
+    .step-connector { width: 30%; height: 2px; background: #d1d5db; margin-right: 12px; }
+    .workflow-step.completed .step-connector { background: #10b981; }
+    .workflow-step.active .step-connector { background: #d1d5db; }
+    .main-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+    .editor-section { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
+    .editor-title { font-size: 14px; font-weight: 600; color: #1f2937; }
+    .ai-regen-btn { background: #eff6ff; color: #3b82f6; border: 1px solid #3b82f6; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+    .ai-regen-btn:hover { background: #dbeafe; }
+    .auto-save { font-size: 12px; color: #10b981; display: flex; align-items: center; gap: 4px; }
+    .content-section { margin-bottom: 24px; }
+    .section-heading { font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 12px; }
+    .editor-content { border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; min-height: 120px; background: white; font-size: 13px; line-height: 1.6; color: #4b5563; white-space: pre-wrap; word-wrap: break-word; }
+    .comment-panel { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); max-height: 600px; overflow-y: auto; }
+    .comment-title { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 12px; }
+    .comment-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+    .comment-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .comment-name { font-size: 13px; font-weight: 600; color: #1f2937; }
+    .dept-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 500; }
+    .dept-traffic { background: #dbeafe; color: #0369a1; }
+    .dept-city { background: #d1fae5; color: #047857; }
+    .comment-time { font-size: 11px; color: #9ca3af; }
+    .comment-status { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 500; margin-left: 8px; }
+    .status-resolved { background: #d1fae5; color: #047857; }
+    .status-pending { background: #fee2e2; color: #dc2626; }
+    .comment-text { font-size: 12px; color: #4b5563; line-height: 1.5; margin-bottom: 8px; }
+    .comment-input { width: 100%; border: 1px solid #d1d5db; border-radius: 4px; padding: 8px; font-size: 12px; resize: none; margin-top: 12px; }
+    .comment-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .comment-btn { padding: 4px 8px; border: 1px solid #d1d5db; background: white; border-radius: 3px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
+    .comment-btn:hover { background: #f3f4f6; }
+    .comment-btn.submit { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .comment-btn.submit:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">보고서 편집·승인</h1>
+          <p class="page-subtitle">보고서 작성 및 검토 워크플로우</p>
+        </div>
+
+        <div class="page-content">
+          <!-- Workflow Bar -->
+          <div class="workflow-bar">
+            <div class="workflow-step completed">
+              <div class="step-circle">✓</div>
+              <div class="step-label">작성</div>
+              <div class="step-connector"></div>
+            </div>
+            <div class="workflow-step active">
+              <div class="step-circle">1</div>
+              <div class="step-label">1차검토</div>
+              <div class="step-connector"></div>
+            </div>
+            <div class="workflow-step">
+              <div class="step-circle">2</div>
+              <div class="step-label">수정</div>
+              <div class="step-connector"></div>
+            </div>
+            <div class="workflow-step">
+              <div class="step-circle">3</div>
+              <div class="step-label">2차검토</div>
+              <div class="step-connector"></div>
+            </div>
+            <div class="workflow-step">
+              <div class="step-circle">4</div>
+              <div class="step-label">최종승인</div>
+            </div>
+          </div>
+
+          <div class="main-container">
+            <!-- Editor -->
+            <div class="editor-section">
+              <div class="editor-header">
+                <div class="editor-title">보고서 내용 편집</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="auto-save">
+                    <i data-lucide="check-circle" style="width:14px;height:14px;color:#10b981;"></i>
+                    자동저장 완료
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section 1 -->
+              <div class="content-section">
+                <div class="section-heading">1. 요약</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <button class="ai-regen-btn">
+                    <i data-lucide="zap" style="width:14px;height:14px;"></i>
+                    AI 재생성
+                  </button>
+                </div>
+                <div class="editor-content" contenteditable="true">이 보고서는 2026년 4월 제주도의 교통 현황을 분석하고, 주요 정책 추진 현황을 정리한 문서입니다. 월별 교통량 변화, 주차장 이용률, 대중교통 이용 현황 등 주요 지표를 포함하고 있습니다.</div>
+              </div>
+
+              <!-- Section 2 -->
+              <div class="content-section">
+                <div class="section-heading">2. 교통 현황 분석</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <button class="ai-regen-btn">
+                    <i data-lucide="zap" style="width:14px;height:14px;"></i>
+                    AI 재생성
+                  </button>
+                </div>
+                <div class="editor-content" contenteditable="true">4월 제주도의 총 교통량은 전월 대비 12.3% 증가하였습니다. 이는 관광 시즌의 시작과 봄 시즌 여행 수요 증가에 기인합니다.
+
+주요 지역별 교통량:
+- 중앙지역: 일일 평균 42,850대 (전월 대비 +15.2%)
+- 서귀포지역: 일일 평균 28,430대 (전월 대비 +8.5%)
+- 신제주지역: 일일 평균 35,620대 (전월 대비 +12.1%)</div>
+              </div>
+
+              <!-- Section 3 -->
+              <div class="content-section">
+                <div class="section-heading">3. 주차장 현황</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <button class="ai-regen-btn">
+                    <i data-lucide="zap" style="width:14px;height:14px;"></i>
+                    AI 재생성
+                  </button>
+                </div>
+                <div class="editor-content" contenteditable="true">주차장 이용률이 전월 대비 소폭 상승했으며, 특히 중앙지역의 포화도가 높은 것으로 나타났습니다.
+
+지역별 이용률:
+- 중앙지역: 78% (포화)
+- 서귀포: 65% (여유)
+- 신제주: 72% (주의)</div>
+              </div>
+
+              <!-- Section 4 -->
+              <div class="content-section">
+                <div class="section-heading">4. 결론 및 제안</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <button class="ai-regen-btn">
+                    <i data-lucide="zap" style="width:14px;height:14px;"></i>
+                    AI 재생성
+                  </button>
+                </div>
+                <div class="editor-content" contenteditable="true">교통 현황은 관광 시즌의 시작과 함께 증가 추세를 보이고 있습니다. 특히 주차장 포화도가 높아지고 있으므로, 스마트 주차 시스템 도입과 노외 주차장 신규 조성이 필요한 상황입니다.
+
+향후 지속적인 모니터링과 정책 개선이 요구됩니다.</div>
+              </div>
+            </div>
+
+            <!-- Comment Panel -->
+            <div class="comment-panel">
+              <div class="comment-title">
+                <i data-lucide="message-circle" style="width:16px;height:16px;margin-right:6px;display:inline;"></i>
+                댓글 (3)
+              </div>
+
+              <div class="comment-item">
+                <div class="comment-header">
+                  <div class="comment-name">박준호</div>
+                  <span class="dept-badge dept-city">도시계획팀</span>
+                  <div class="comment-time">2026-04-02 14:30</div>
+                  <span class="comment-status status-resolved">해결됨</span>
+                </div>
+                <div class="comment-text">요약 부분이 좀 더 간결하게 정리되었으면 좋겠습니다. 핵심 내용만 1-2문장으로 요약해주세요.</div>
+              </div>
+
+              <div class="comment-item">
+                <div class="comment-header">
+                  <div class="comment-name">최민지</div>
+                  <span class="dept-badge dept-traffic">환경팀</span>
+                  <div class="comment-time">2026-04-02 13:15</div>
+                  <span class="comment-status status-pending">검토중</span>
+                </div>
+                <div class="comment-text">교통량 증가 원인에 대해 더 자세한 분석이 필요합니다. 계절 요인뿐 아니라 특정 이벤트의 영향도 포함해주세요.</div>
+              </div>
+
+              <div class="comment-item">
+                <div class="comment-header">
+                  <div class="comment-name">이지훈</div>
+                  <span class="dept-badge dept-traffic">교통팀</span>
+                  <div class="comment-time">2026-04-02 10:45</div>
+                  <span class="comment-status status-resolved">해결됨</span>
+                </div>
+                <div class="comment-text">데이터 출처와 분석 방법을 명시해주셔야 합니다. 부록에 상세 설명을 추가해주세요.</div>
+              </div>
+
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6;">
+                <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">댓글 추가</div>
+                <textarea class="comment-input" placeholder="의견을 입력하세요..." rows="3"></textarea>
+                <div class="comment-actions">
+                  <button class="comment-btn">취소</button>
+                  <button class="comment-btn submit">등록</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('report');
+
+      // AI Regenerate buttons
+      document.querySelectorAll('.ai-regen-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          alert('AI가 이 섹션의 내용을 재생성합니다.');
+          this.nextElementSibling.textContent = 'AI 재생성 중...';
+          setTimeout(() => {
+            this.nextElementSibling.textContent = 'AI 재생성 완료된 콘텐츠가 여기에 표시됩니다.';
+          }, 2000);
+        });
+      });
+
+      // Content editing
+      document.querySelectorAll('.editor-content').forEach(editor => {
+        editor.addEventListener('input', function() {
+          console.log('Content changed');
+        });
+      });
+
+      // Comment submit
+      document.querySelector('.comment-btn.submit').addEventListener('click', function() {
+        const textarea = document.querySelector('.comment-input');
+        if (textarea.value.trim()) {
+          alert('댓글이 등록되었습니다.');
+          textarea.value = '';
+        }
+      });
+
+      // Comment cancel
+      document.querySelectorAll('.comment-btn')[0].addEventListener('click', function() {
+        document.querySelector('.comment-input').value = '';
+      });
+    });
+  </script>
+</body>
+</html>

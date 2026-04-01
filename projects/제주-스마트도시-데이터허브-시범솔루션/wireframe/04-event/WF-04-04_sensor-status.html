@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>센서별 상태 모니터 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .map-container { width: 100%; height: 400px; border: 1px solid var(--border-color); border-radius: 8px; }
+    .sensor-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px; }
+    .sensor-type { display: flex; gap: 12px; align-items: center; }
+    .sensor-type-info { flex: 1; }
+    .sensor-type-name { font-size: 14px; font-weight: 600; }
+    .sensor-counts { display: flex; gap: 16px; }
+    .count { font-size: 12px; }
+    .count-value { font-weight: 600; }
+    .status-green { color: var(--color-success); }
+    .status-red { color: var(--color-danger); }
+    .status-yellow { color: var(--color-warning); }
+    .status-gray { color: var(--color-gray-400); }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    @media (max-width: 1024px) { .sensor-summary { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">센서별 상태 모니터</h1>
+          <p class="page-subtitle">제주도 전역 설치 센서의 실시간 상태 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 지도 영역 -->
+          <div class="map-container" id="sensorMap" style="margin-bottom: 24px;"></div>
+
+          <!-- 센서 유형별 요약 -->
+          <div class="sensor-summary">
+            <div class="sensor-type">
+              <div style="font-size: 24px;">📷</div>
+              <div class="sensor-type-info">
+                <div class="sensor-type-name">카메라</div>
+              </div>
+              <div class="sensor-counts">
+                <div class="count">총 <span class="count-value">40</span></div>
+                <div class="count"><span class="status-green">✓ 35</span></div>
+                <div class="count"><span class="status-red">⚠ 3</span></div>
+                <div class="count"><span class="status-yellow">🔧 2</span></div>
+              </div>
+            </div>
+            <div class="sensor-type">
+              <div style="font-size: 24px;">🎤</div>
+              <div class="sensor-type-info">
+                <div class="sensor-type-name">음향</div>
+              </div>
+              <div class="sensor-counts">
+                <div class="count">총 <span class="count-value">30</span></div>
+                <div class="count"><span class="status-green">✓ 28</span></div>
+                <div class="count"><span class="status-red">⚠ 2</span></div>
+                <div class="count"><span class="status-yellow">🔧 0</span></div>
+              </div>
+            </div>
+            <div class="sensor-type">
+              <div style="font-size: 24px;">🌡️</div>
+              <div class="sensor-type-info">
+                <div class="sensor-type-name">온도</div>
+              </div>
+              <div class="sensor-counts">
+                <div class="count">총 <span class="count-value">20</span></div>
+                <div class="count"><span class="status-green">✓ 20</span></div>
+                <div class="count"><span class="status-red">⚠ 0</span></div>
+                <div class="count"><span class="status-yellow">🔧 0</span></div>
+              </div>
+            </div>
+            <div class="sensor-type">
+              <div style="font-size: 24px;">🔥</div>
+              <div class="sensor-type-info">
+                <div class="sensor-type-name">화재</div>
+              </div>
+              <div class="sensor-counts">
+                <div class="count">총 <span class="count-value">10</span></div>
+                <div class="count"><span class="status-green">✓ 9</span></div>
+                <div class="count"><span class="status-red">⚠ 1</span></div>
+                <div class="count"><span class="status-yellow">🔧 0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 필터 -->
+          <div class="filter-bar">
+            <div class="filter-group">
+              <label class="filter-label">상태 필터</label>
+              <select class="filter-select" style="width: 120px;">
+                <option>모두</option>
+                <option>정상만</option>
+                <option>이상만</option>
+                <option>점검중</option>
+                <option>미연결</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">유형 필터</label>
+              <select class="filter-select" style="width: 120px;">
+                <option>모두</option>
+                <option>카메라</option>
+                <option>음향</option>
+                <option>온도</option>
+                <option>화재</option>
+              </select>
+            </div>
+            <button class="filter-button" style="margin-left: auto;">
+              <i data-lucide="filter" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+              필터 적용
+            </button>
+          </div>
+
+          <!-- 센서 목록 테이블 -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>센서ID</th>
+                <th>유형</th>
+                <th>주차장명</th>
+                <th>상태</th>
+                <th>최종통신시각</th>
+                <th>배터리</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background-color: #FFE0E0;">
+                <td>CAM-001-01</td>
+                <td>📷 카메라</td>
+                <td>신도심 A</td>
+                <td><span class="badge danger">이상</span></td>
+                <td>2024-04-01 14:25:30</td>
+                <td>-</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr style="background-color: #FFFFE0;">
+                <td>CAM-002-01</td>
+                <td>📷 카메라</td>
+                <td>이도 B</td>
+                <td><span class="badge warning">점검중</span></td>
+                <td>2024-03-31 22:10:00</td>
+                <td>-</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr>
+                <td>MIC-001-02</td>
+                <td>🎤 음향</td>
+                <td>신도심 A</td>
+                <td><span class="badge success">정상</span></td>
+                <td>2024-04-01 14:26:15</td>
+                <td>85%</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr style="background-color: #FFE0E0;">
+                <td>MIC-002-03</td>
+                <td>🎤 음향</td>
+                <td>이도 B</td>
+                <td><span class="badge danger">이상</span></td>
+                <td>2024-04-01 14:15:00</td>
+                <td>45%</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr>
+                <td>TEMP-001-01</td>
+                <td>🌡️ 온도</td>
+                <td>신도심 A</td>
+                <td><span class="badge success">정상</span></td>
+                <td>2024-04-01 14:26:45</td>
+                <td>92%</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr>
+                <td>TEMP-002-02</td>
+                <td>🌡️ 온도</td>
+                <td>이도 B</td>
+                <td><span class="badge success">정상</span></td>
+                <td>2024-04-01 14:26:30</td>
+                <td>88%</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr style="background-color: #FFE0E0;">
+                <td>FIRE-001-01</td>
+                <td>🔥 화재</td>
+                <td>동문 D</td>
+                <td><span class="badge danger">이상</span></td>
+                <td>2024-04-01 14:25:00</td>
+                <td>-</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+              <tr>
+                <td>FIRE-002-02</td>
+                <td>🔥 화재</td>
+                <td>신도심 A</td>
+                <td><span class="badge success">정상</span></td>
+                <td>2024-04-01 14:27:00</td>
+                <td>-</td>
+                <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">상세</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div style="display: flex; justify-content: center; margin-top: 16px;">
+            <div class="pagination">
+              <button class="pagination-button" data-action="prev">이전</button>
+              <button class="pagination-button active">1</button>
+              <button class="pagination-button">2</button>
+              <button class="pagination-button">3</button>
+              <button class="pagination-button" data-action="next">다음</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/map.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+
+      // 지도 초기화
+      const map = createJejuMap('sensorMap');
+      if (map) {
+        // 센서 마커 추가
+        const sensorMarkers = [
+          { lat: 33.5063, lng: 126.4929, title: 'CAM-001-01 (카메라-이상)', content: '상태: 이상' },
+          { lat: 33.3192, lng: 126.5289, title: 'MIC-001-02 (음향-정상)', content: '상태: 정상' },
+          { lat: 33.3156, lng: 126.5328, title: 'TEMP-001-01 (온도-정상)', content: '상태: 정상' },
+          { lat: 33.3182, lng: 126.5334, title: 'FIRE-001-01 (화재-이상)', content: '상태: 이상' }
+        ];
+        addMarkers(map, sensorMarkers);
+      }
+    });
+  </script>
+</body>
+</html>

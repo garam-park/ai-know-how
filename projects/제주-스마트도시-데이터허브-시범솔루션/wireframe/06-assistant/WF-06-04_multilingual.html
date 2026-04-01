@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다국어 대응 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .chat-container { display: flex; height: calc(100vh - 80px); flex-direction: column; }
+    .language-selector { position: absolute; top: 16px; right: 20px; }
+    .lang-dropdown { background: white; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+    .lang-dropdown:hover { border-color: #3b82f6; }
+    .lang-menu { position: absolute; top: 40px; right: 0; background: white; border: 1px solid #d1d5db; border-radius: 6px; shadow: 0 4px 6px rgba(0, 0, 0, 0.1); min-width: 140px; z-index: 100; display: none; }
+    .lang-menu.active { display: block; }
+    .lang-item { padding: 10px 12px; cursor: pointer; font-size: 13px; transition: all 0.2s; border-bottom: 1px solid #f3f4f6; }
+    .lang-item:last-child { border-bottom: none; }
+    .lang-item:hover { background: #f0f9ff; color: #3b82f6; }
+    .lang-item.selected { background: #eff6ff; color: #3b82f6; font-weight: 500; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .message { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
+    .message.user { align-self: flex-end; }
+    .message.ai { align-self: flex-start; }
+    .message-bubble { padding: 12px 16px; border-radius: 12px; line-height: 1.5; }
+    .message.user .message-bubble { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+    .message.ai .message-bubble { background: #e5e7eb; color: #1f2937; border-bottom-left-radius: 4px; }
+    .message-avatar { width: 32px; height: 32px; border-radius: 50%; background: #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .message.ai .message-avatar { background: #9ca3af; color: white; }
+    .translation-toggle { display: flex; gap: 8px; margin-top: 8px; }
+    .toggle-btn { font-size: 11px; padding: 4px 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .toggle-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .translated-text { font-size: 13px; color: #6b7280; font-style: italic; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
+    .chat-input-area { padding: 16px 20px; border-top: 1px solid #e5e7eb; background: white; }
+    .input-bar { display: flex; gap: 8px; }
+    .chat-input { flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: none; }
+    .input-button { width: 40px; height: 40px; border-radius: 8px; border: none; background: #f0f4f8; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .input-button:hover { background: #e0e8f0; }
+    .input-button.send { background: #3b82f6; color: white; }
+    .input-button.send:hover { background: #2563eb; }
+    .faq-section { margin-top: 20px; }
+    .faq-title { font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 12px; }
+    .faq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .faq-item { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; }
+    .faq-item:hover { border-color: #3b82f6; background: #f0f9ff; }
+    .faq-q { font-size: 13px; font-weight: 500; color: #1f2937; margin-bottom: 6px; }
+    .faq-a { font-size: 12px; color: #6b7280; line-height: 1.4; }
+    .rating-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+    .rating-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+    .rating-stars { display: flex; gap: 4px; }
+    .star { font-size: 20px; cursor: pointer; color: #d1d5db; transition: all 0.2s; }
+    .star:hover, .star.active { color: #fbbf24; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">AI 어시스턴트 - 다국어 지원</h1>
+          <p class="page-subtitle">다양한 언어로 제주 도시 정보 제공</p>
+          <div class="language-selector" style="position: relative; margin-top: 10px;">
+            <div class="lang-dropdown" id="lang-dropdown">
+              <i data-lucide="globe" style="width:16px;height:16px;"></i>
+              <span id="selected-lang">한국어</span>
+              <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+            </div>
+            <div class="lang-menu" id="lang-menu">
+              <div class="lang-item selected" data-lang="ko">한국어</div>
+              <div class="lang-item" data-lang="en">English</div>
+              <div class="lang-item" data-lang="zh">中文</div>
+              <div class="lang-item" data-lang="ja">日本語</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-container">
+          <div class="chat-messages">
+            <div class="message ai">
+              <div class="message-avatar">AI</div>
+              <div class="message-bubble">
+                <div class="message-text">제주도의 관광 명소와 편의시설에 대해 질문하실 수 있습니다.</div>
+              </div>
+            </div>
+
+            <div class="message user">
+              <div class="message-bubble">제주도의 가장 인기 있는 관광지는 어디입니까?</div>
+              <div class="message-avatar">사용자</div>
+            </div>
+
+            <div class="message ai">
+              <div class="message-avatar">AI</div>
+              <div class="message-bubble">
+                <div class="message-text">제주도의 인기 관광지는 다음과 같습니다:</div>
+                <ul style="margin-top: 8px; margin-left: 16px;">
+                  <li><strong>한라산</strong> - 제주도의 최고봉으로 등산객들이 많이 방문합니다</li>
+                  <li><strong>용머리 해안</strong> - 독특한 지질학적 구조와 해안 경관</li>
+                  <li><strong>신청 해수욕장</strong> - 아름다운 백사장과 투명한 물</li>
+                  <li><strong>중문 관광단지</strong> - 쇼핑, 식사, 숙박이 한 곳에</li>
+                </ul>
+                <div class="translation-toggle">
+                  <button class="toggle-btn active">원문</button>
+                  <button class="toggle-btn">번역</button>
+                  <button class="toggle-btn">둘다</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="message user">
+              <div class="message-bubble">교통편은 어떻게 이용하나요?</div>
+              <div class="message-avatar">사용자</div>
+            </div>
+
+            <div class="message ai">
+              <div class="message-avatar">AI</div>
+              <div class="message-bubble">
+                <div class="message-text">제주도 내 교통편은 다음과 같습니다:</div>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px;">
+                  <tr style="background: #f3f4f6;">
+                    <th style="padding: 6px; text-align: left; border: 1px solid #e5e7eb;">교통수단</th>
+                    <th style="padding: 6px; text-align: left; border: 1px solid #e5e7eb;">이용 시간</th>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">시내버스</td>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">06:00 - 23:00</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">택시</td>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">24시간</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">렌트카</td>
+                    <td style="padding: 6px; border: 1px solid #e5e7eb;">24시간</td>
+                  </tr>
+                </table>
+                <div class="translation-toggle">
+                  <button class="toggle-btn active">원문</button>
+                  <button class="toggle-btn">번역</button>
+                  <button class="toggle-btn">둘다</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 12px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">자주 묻는 질문 (FAQ)</div>
+              <div class="faq-grid">
+                <div class="faq-item">
+                  <div class="faq-q">❓ 제주도 최적 방문 시기는?</div>
+                  <div class="faq-a">봄(4-5월)과 가을(9-10월)이 날씨가 쾌적합니다</div>
+                </div>
+                <div class="faq-item">
+                  <div class="faq-q">❓ 공항에서 시내까지 거리는?</div>
+                  <div class="faq-a">약 16km, 시내버스/택시로 30-50분</div>
+                </div>
+                <div class="faq-item">
+                  <div class="faq-q">❓ 한라산 등산 난이도는?</div>
+                  <div class="faq-a">중상 난이도, 편도 약 4-5시간 소요</div>
+                </div>
+                <div class="faq-item">
+                  <div class="faq-q">❓ 신용카드 사용 가능한가?</div>
+                  <div class="faq-a">대부분 가능하나 현금 준비 권장</div>
+                </div>
+                <div class="faq-item">
+                  <div class="faq-q">❓ 인터넷/통신은 잘 되나?</div>
+                  <div class="faq-a">관광지 대부분 무료 WiFi 제공</div>
+                </div>
+                <div class="faq-item">
+                  <div class="faq-q">❓ 숙박 예약은 어디서?</div>
+                  <div class="faq-a">온라인 플랫폼 또는 관광 안내소</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rating-section">
+              <div class="rating-label">이 번역 품질은 어떠신가요?</div>
+              <div class="rating-stars">
+                <span class="star" data-rating="1">★</span>
+                <span class="star" data-rating="2">★</span>
+                <span class="star" data-rating="3">★</span>
+                <span class="star" data-rating="4">★</span>
+                <span class="star" data-rating="5">★</span>
+              </div>
+            </div>
+
+            <div class="input-bar" style="margin-top: 12px;">
+              <input type="text" class="chat-input" placeholder="질문을 입력하세요...">
+              <button class="input-button"><i data-lucide="mic" style="width:20px;height:20px;"></i></button>
+              <button class="input-button"><i data-lucide="paperclip" style="width:20px;height:20px;"></i></button>
+              <button class="input-button send"><i data-lucide="send" style="width:20px;height:20px;"></i></button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('assistant');
+
+      // Language selector toggle
+      const langDropdown = document.getElementById('lang-dropdown');
+      const langMenu = document.getElementById('lang-menu');
+
+      langDropdown.addEventListener('click', function() {
+        langMenu.classList.toggle('active');
+      });
+
+      // Language selection
+      document.querySelectorAll('.lang-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          const langName = this.textContent;
+
+          document.querySelectorAll('.lang-item').forEach(i => i.classList.remove('selected'));
+          this.classList.add('selected');
+          document.getElementById('selected-lang').textContent = langName;
+          langMenu.classList.remove('active');
+
+          // Simulate language change
+          console.log('Language changed to:', lang);
+        });
+      });
+
+      // Translation toggle buttons
+      document.querySelectorAll('.translation-toggle .toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const parent = this.parentElement;
+          parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Star rating
+      document.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', function() {
+          const rating = this.dataset.rating;
+          document.querySelectorAll('.star').forEach((s, i) => {
+            if (i < rating) {
+              s.classList.add('active');
+            } else {
+              s.classList.remove('active');
+            }
+          });
+        });
+      });
+
+      // FAQ interaction
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const question = this.querySelector('.faq-q').textContent.replace('❓ ', '');
+          const input = document.querySelector('.chat-input');
+          input.value = question;
+          input.focus();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

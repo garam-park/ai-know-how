@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>통합관제 연계 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .status-indicator { display: flex; align-items: center; gap: 16px; padding: 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; }
+    .status-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .status-circle.connected { background-color: var(--color-success); color: white; font-size: 20px; }
+    .status-circle.disconnected { background-color: var(--color-danger); color: white; font-size: 20px; }
+    .status-info { flex: 1; }
+    .status-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .status-detail { font-size: 13px; color: var(--text-color-secondary); }
+    .action-group { display: flex; gap: 8px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; }
+    .stat-card { text-align: center; }
+    .stat-number { font-size: 24px; font-weight: 700; color: var(--color-primary); }
+    .stat-label { font-size: 12px; color: var(--text-color-secondary); margin-top: 4px; }
+    .stat-subtext { font-size: 11px; color: var(--color-success); margin-top: 4px; }
+    .log-table tbody tr { transition: all 0.2s; }
+    .log-table tbody tr.success { background-color: #E8F5E9; }
+    .log-table tbody tr.error { background-color: #FFEBEE; }
+    .log-table tbody tr.retry { background-color: #FFF9C4; }
+    .error-list { padding: 12px; background-color: var(--color-gray-50); border-radius: 4px; margin-bottom: 16px; }
+    .error-item { font-size: 12px; padding: 4px 0; }
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-end; }
+    .chart-container { padding: 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; }
+    .progress-bar { height: 8px; background-color: var(--color-gray-200); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background-color: var(--color-primary); }
+    @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .status-indicator { flex-direction: column; } .stats-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" aria-label="네비게이션 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">통합관제 연계</h1>
+          <p class="page-subtitle">외부 통합관제 시스템 연동 상태 및 이벤트 전송 로그</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 연계 상태 표시 -->
+          <div class="status-indicator">
+            <div class="status-circle connected">✓</div>
+            <div class="status-info">
+              <div class="status-title">연결됨</div>
+              <div class="status-detail">마지막 동기화 시각: 2024-04-01 14:25:30</div>
+            </div>
+            <div class="action-group">
+              <button class="btn btn-primary">
+                <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                수동 동기화
+              </button>
+              <button class="btn btn-secondary">
+                <i data-lucide="rotate-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                상태 갱신
+              </button>
+            </div>
+          </div>
+
+          <!-- 통계 패널 -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 8px;">오늘 총 전송 건수</div>
+              <div class="stat-number">245</div>
+              <div class="stat-subtext">건</div>
+            </div>
+            <div class="stat-card">
+              <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 8px;">성공</div>
+              <div class="stat-number" style="color: var(--color-success);">238</div>
+              <div class="stat-subtext" style="color: var(--color-success);">97.1% 성공률</div>
+            </div>
+            <div class="stat-card">
+              <div style="font-size: 12px; color: var(--text-color-secondary); margin-bottom: 8px;">평균 응답시간</div>
+              <div class="stat-number" style="color: var(--color-primary);">0.5</div>
+              <div class="stat-subtext">초</div>
+            </div>
+          </div>
+
+          <!-- 오류 요약 -->
+          <div style="margin-bottom: 24px;">
+            <h3 class="heading-sm" style="margin-bottom: 8px;">최근 오류 (TOP 3)</h3>
+            <div class="error-list">
+              <div class="error-item">• 503 Service Unavailable: 3건</div>
+              <div class="error-item">• 504 Gateway Timeout: 2건</div>
+              <div class="error-item">• 000 No Response: 1건</div>
+            </div>
+          </div>
+
+          <!-- 필터 -->
+          <div class="filter-bar">
+            <div class="filter-group">
+              <label class="filter-label">조회 기간</label>
+              <select class="filter-select" style="width: 120px;">
+                <option>오늘</option>
+                <option>7일</option>
+                <option>30일</option>
+                <option>전체</option>
+              </select>
+            </div>
+            <button class="filter-button" style="margin-left: auto;">
+              <i data-lucide="filter" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+              필터 적용
+            </button>
+          </div>
+
+          <!-- 전송 로그 테이블 -->
+          <table class="data-table log-table">
+            <thead>
+              <tr>
+                <th>전송시각</th>
+                <th>이벤트ID</th>
+                <th>이벤트유형</th>
+                <th>전송상태</th>
+                <th>응답코드</th>
+                <th>응답메시지</th>
+                <th>재시도횟수</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="success">
+                <td>2024-04-01 14:25:30</td>
+                <td>INC-2024-04-001</td>
+                <td>화재경보</td>
+                <td><span class="badge success">성공</span></td>
+                <td>200</td>
+                <td>OK</td>
+                <td>0</td>
+              </tr>
+              <tr class="error">
+                <td>2024-04-01 14:24:15</td>
+                <td>INC-2024-04-002</td>
+                <td>무단주차</td>
+                <td><span class="badge danger">실패</span></td>
+                <td>503</td>
+                <td>Service Unavailable</td>
+                <td>2</td>
+              </tr>
+              <tr class="retry">
+                <td>2024-04-01 14:23:00</td>
+                <td>INC-2024-04-003</td>
+                <td>음향이상</td>
+                <td><span class="badge warning">재시도</span></td>
+                <td>000</td>
+                <td>No Response</td>
+                <td>1</td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 14:20:45</td>
+                <td>INC-2024-04-004</td>
+                <td>장기점유</td>
+                <td><span class="badge success">성공</span></td>
+                <td>200</td>
+                <td>OK</td>
+                <td>0</td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 14:15:30</td>
+                <td>INC-2024-04-005</td>
+                <td>센서오류</td>
+                <td><span class="badge success">성공</span></td>
+                <td>200</td>
+                <td>OK</td>
+                <td>0</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div style="display: flex; justify-content: center; margin-top: 16px;">
+            <div class="pagination">
+              <button class="pagination-button" data-action="prev">이전</button>
+              <button class="pagination-button active">1</button>
+              <button class="pagination-button">2</button>
+              <button class="pagination-button">3</button>
+              <button class="pagination-button" data-action="next">다음</button>
+            </div>
+          </div>
+
+          <!-- 차트 영역 -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 24px;">
+            <div class="chart-container">
+              <h3 class="heading-sm" style="margin-bottom: 16px;">일별 전송 건수 (최근 7일)</h3>
+              <canvas id="dailyChart" style="max-height: 250px;"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3 class="heading-sm" style="margin-bottom: 16px;">실패율 추이 (최근 7일)</h3>
+              <canvas id="failureRateChart" style="max-height: 250px;"></canvas>
+            </div>
+          </div>
+
+          <!-- 재전송 버튼 -->
+          <div style="margin-top: 24px; padding: 20px; background-color: white; border: 1px solid var(--border-color); border-radius: 8px; text-align: center;">
+            <button class="btn btn-primary" onclick="retransmit()">
+              <i data-lucide="send" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+              선택된 이벤트 재전송
+            </button>
+            <div id="retransmitResult" style="margin-top: 12px; font-size: 13px; display: none;"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-copyright">© 2024 Jeju Smart City Data Hub v1.0</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">서비스약관</a>
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">문의</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    function retransmit() {
+      const resultDiv = document.getElementById('retransmitResult');
+      resultDiv.textContent = '✓ 재전송 완료: 3건 (성공)';
+      resultDiv.style.color = 'var(--color-success)';
+      resultDiv.style.display = 'block';
+      showToast('선택된 이벤트가 재전송되었습니다.', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('event');
+
+      // 일별 전송 건수 차트
+      createBarChart('dailyChart',
+        ['2024-03-26', '2024-03-27', '2024-03-28', '2024-03-29', '2024-03-30', '2024-03-31', '2024-04-01'],
+        [{
+          label: '성공',
+          data: [190, 180, 195, 185, 198, 215, 238],
+          backgroundColor: 'rgba(34, 197, 94, 0.8)'
+        }, {
+          label: '실패',
+          data: [10, 12, 8, 15, 8, 5, 5],
+          backgroundColor: 'rgba(220, 38, 38, 0.8)'
+        }, {
+          label: '재시도',
+          data: [5, 3, 4, 2, 3, 2, 2],
+          backgroundColor: 'rgba(234, 179, 8, 0.8)'
+        }],
+        { plugins: { legend: { position: 'bottom' } } }
+      );
+
+      // 실패율 추이 차트
+      createLineChart('failureRateChart',
+        ['2024-03-26', '2024-03-27', '2024-03-28', '2024-03-29', '2024-03-30', '2024-03-31', '2024-04-01'],
+        [{
+          label: '실패율 (%)',
+          data: [5.0, 6.7, 4.1, 8.1, 4.0, 2.3, 2.0],
+          borderColor: 'rgba(220, 38, 38, 1)',
+          backgroundColor: 'rgba(220, 38, 38, 0.1)',
+          fill: true
+        }],
+        { plugins: { legend: { position: 'bottom' } } }
+      );
+    });
+  </script>
+</body>
+</html>

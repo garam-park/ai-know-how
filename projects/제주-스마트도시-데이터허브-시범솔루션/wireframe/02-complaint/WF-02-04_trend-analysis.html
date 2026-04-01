@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시계열 트렌드 분석 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">시계열 트렌드 분석</div>
+          <div class="page-subtitle">기간별 민원 추세 및 통계</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Period Selection -->
+          <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+            <button class="filter-button" data-period="daily">일</button>
+            <button class="filter-button secondary" data-period="weekly">주</button>
+            <button class="filter-button secondary" data-period="monthly">월</button>
+            <button class="filter-button secondary" data-period="quarterly">분기</button>
+            <button class="filter-button secondary" data-period="yearly">연</button>
+          </div>
+
+          <!-- Main Line Chart -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">기간별 민원 추세</div>
+            </div>
+            <div class="card-body">
+              <canvas id="trendChart" style="max-height: 350px;"></canvas>
+            </div>
+          </div>
+
+          <!-- Statistics and Comparison Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Comparison Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">전년 동기 대비</div>
+              </div>
+              <div class="card-body">
+                <canvas id="comparisonChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+
+            <!-- Heatmap -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">요일별/시간대별 분포</div>
+              </div>
+              <div class="card-body" id="heatmap-container" style="overflow-x: auto;">
+                <table style="font-size: 11px; border-collapse: collapse; width: 100%;">
+                  <thead>
+                    <tr>
+                      <th style="padding: 4px; border: 1px solid var(--border-color);">요일</th>
+                      <th colspan="24" style="text-align: center; color: var(--text-color-secondary); padding: 4px;">시간대 (0~23)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="heatmap-body">
+                    <!-- Heatmap cells will be inserted here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="kpi-card">
+              <div class="kpi-title">평균</div>
+              <div class="kpi-value" style="font-size: 28px;">18.7건</div>
+              <div style="font-size: 12px; color: var(--text-color-secondary);">일평균</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">최대</div>
+              <div class="kpi-value" style="font-size: 28px;">356건</div>
+              <div style="font-size: 12px; color: var(--text-color-secondary);">7월 1일경</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">최소</div>
+              <div class="kpi-value" style="font-size: 28px;">10건</div>
+              <div style="font-size: 12px; color: var(--text-color-secondary);">최저치</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">표준편차</div>
+              <div class="kpi-value" style="font-size: 28px;">42.3</div>
+              <div style="font-size: 12px; color: var(--text-color-secondary);">분포</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 월별 데이터
+      const monthlyLabels = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      const illegalParking = [234, 256, 245, 278, 312, 334, 356, 342, 298, 267, 245, 223];
+      const pedestrianSafety = [89, 92, 87, 98, 112, 125, 134, 128, 115, 102, 95, 88];
+      const facilityDiscomfort = [45, 48, 42, 54, 68, 72, 78, 71, 63, 56, 51, 47];
+      const chargingZone = [34, 36, 31, 42, 54, 61, 68, 63, 52, 45, 38, 32];
+      const fireRisk = [12, 14, 11, 15, 18, 22, 25, 23, 18, 15, 12, 10];
+      const parkingSafety = [23, 25, 22, 28, 35, 38, 42, 39, 33, 28, 24, 20];
+
+      // 트렌드 라인 차트
+      createLineChart('trendChart', monthlyLabels, [
+        { label: '불법주차', data: illegalParking, borderColor: '#DC2626' },
+        { label: '보행안전', data: pedestrianSafety, borderColor: '#16A34A' },
+        { label: '시설불편', data: facilityDiscomfort, borderColor: '#2563EB' },
+        { label: '충전구역', data: chargingZone, borderColor: '#EAB308' },
+        { label: '화재위험', data: fireRisk, borderColor: '#F97316' },
+        { label: '주차안전', data: parkingSafety, borderColor: '#7C3AED' }
+      ]);
+
+      // 전년 동기 대비 비교
+      const currentYear = illegalParking.map((v, i) => v + Math.floor(Math.random() * 30 - 15));
+      const previousYear = illegalParking.map(v => v - 25);
+
+      createBarChart('comparisonChart', monthlyLabels, [
+        { label: '금년', data: currentYear, backgroundColor: '#2563EB' },
+        { label: '전년', data: previousYear, backgroundColor: '#D1D5DB' }
+      ]);
+
+      // 요일별/시간대별 히트맵
+      const days = ['월', '화', '수', '목', '금', '토', '일'];
+      const heatmapBody = document.getElementById('heatmap-body');
+
+      days.forEach((day, dayIndex) => {
+        const row = document.createElement('tr');
+        const dayCell = document.createElement('td');
+        dayCell.textContent = day;
+        dayCell.style.cssText = 'padding: 4px; border: 1px solid var(--border-color); font-weight: 500;';
+        row.appendChild(dayCell);
+
+        for (let hour = 0; hour < 24; hour++) {
+          const cell = document.createElement('td');
+          const value = Math.floor(Math.random() * 30) + 5;
+          cell.textContent = value;
+          cell.style.cssText = `
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            background-color: ${value > 25 ? '#DC2626' : value > 15 ? '#EAB308' : '#16A34A'};
+            color: white;
+            font-size: 10px;
+          `;
+          row.appendChild(cell);
+        }
+        heatmapBody.appendChild(row);
+      });
+
+      // 기간 선택 버튼 이벤트
+      document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('[data-period]').forEach(b => {
+            b.classList.remove('filter-button');
+            b.classList.add('filter-button', 'secondary');
+          });
+          this.classList.remove('secondary');
+          // 차트 업데이트 로직 (더미)
+        });
+      });
+
+      // 첫 번째 버튼 활성화
+      document.querySelector('[data-period="daily"]').classList.remove('secondary');
+    });
+  </script>
+</body>
+</html>

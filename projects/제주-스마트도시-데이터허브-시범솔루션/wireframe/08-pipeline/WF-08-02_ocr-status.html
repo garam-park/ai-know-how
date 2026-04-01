@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR처리현황 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">Admin</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="사이드바 토글">
+          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+        </button>
+      </nav>
+
+      <div id="content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">데이터수집</span>
+          <span class="breadcrumb-item">OCR 처리</span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">OCR 처리 현황</h1>
+          <p class="page-subtitle">문서 이미지 인식 및 텍스트 추출 상태 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 KPI 카드 (4개) -->
+          <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">📄</div>
+                </div>
+                <div class="kpi-title">일간처리건수</div>
+                <div class="kpi-value">5,234</div>
+                <div class="kpi-change positive">
+                  <span>↑ 12.5%</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">✓</div>
+                </div>
+                <div class="kpi-title">평균신뢰도</div>
+                <div class="kpi-value" style="color: #16A34A;">94.2%</div>
+                <div class="kpi-change positive">
+                  <span>↑ 2.1%</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon">⏳</div>
+                </div>
+                <div class="kpi-title">수동검증대기</div>
+                <div class="kpi-value" style="color: #EAB308;">128</div>
+                <div class="kpi-change negative">
+                  <span>↑ 5건</span>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <div class="kpi-icon danger" style="background-color: #DC2626;">✕</div>
+                </div>
+                <div class="kpi-title">실패건수</div>
+                <div class="kpi-value" style="color: #DC2626;">42</div>
+                <div class="kpi-change negative">
+                  <span>↑ 3건</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 메인 처리 결과 테이블 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-4">처리 결과 목록</h2>
+            <div class="overflow-x-auto">
+              <table class="data-table" id="ocrTable">
+                <thead>
+                  <tr>
+                    <th>문서ID</th>
+                    <th>유형</th>
+                    <th>인식일시</th>
+                    <th>신뢰도</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showPreview(this)">
+                    <td>DOC-20260325-001234</td>
+                    <td><span class="badge default">스캔PDF</span></td>
+                    <td>2026-03-25 14:32:15</td>
+                    <td>
+                      <div class="progress-bar-container" style="width: 150px;">
+                        <div class="progress-bar" style="width: 94.2%;"></div>
+                      </div>
+                      <span class="text-xs">94.2%</span>
+                    </td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" style="background-color: #fef3c7;" onclick="showPreview(this)">
+                    <td>DOC-20260325-001235</td>
+                    <td><span class="badge default">이미지</span></td>
+                    <td>2026-03-25 14:31:45</td>
+                    <td>
+                      <div class="progress-bar-container" style="width: 150px;">
+                        <div class="progress-bar" style="width: 68.5%; background-color: #EAB308;"></div>
+                      </div>
+                      <span class="text-xs">68.5%</span>
+                    </td>
+                    <td><span class="badge warning">검증대기</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showPreview(this)">
+                    <td>DOC-20260325-001236</td>
+                    <td><span class="badge default">팩스</span></td>
+                    <td>2026-03-25 14:30:20</td>
+                    <td>
+                      <div class="progress-bar-container" style="width: 150px;">
+                        <div class="progress-bar" style="width: 96.8%;"></div>
+                      </div>
+                      <span class="text-xs">96.8%</span>
+                    </td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showPreview(this)">
+                    <td>DOC-20260325-001237</td>
+                    <td><span class="badge default">스캔PDF</span></td>
+                    <td>2026-03-25 14:29:55</td>
+                    <td>
+                      <div class="progress-bar-container" style="width: 150px;">
+                        <div class="progress-bar" style="width: 91.2%;"></div>
+                      </div>
+                      <span class="text-xs">91.2%</span>
+                    </td>
+                    <td><span class="badge success">완료</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" style="background-color: #f8d7da;" onclick="showPreview(this)">
+                    <td>DOC-20260325-001238</td>
+                    <td><span class="badge default">이미지</span></td>
+                    <td>2026-03-25 14:28:30</td>
+                    <td>
+                      <div class="progress-bar-container" style="width: 150px;">
+                        <div class="progress-bar" style="width: 0%; background-color: #DC2626;"></div>
+                      </div>
+                      <span class="text-xs">0%</span>
+                    </td>
+                    <td><span class="badge danger">실패</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 필드별 인식률 통계 -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">필드별 인식률</h2>
+              <canvas id="fieldChart"></canvas>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">처리 상태 분포</h2>
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('pipeline');
+
+      // 필드별 인식률 바차트
+      const fieldCtx = document.getElementById('fieldChart').getContext('2d');
+      new Chart(fieldCtx, {
+        type: 'bar',
+        data: {
+          labels: ['문서제목', '본문', '날짜', '서명', '도장', '번호'],
+          datasets: [{
+            label: '인식 성공률 (%)',
+            data: [98, 92, 88, 85, 80, 75],
+            backgroundColor: '#2563EB'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+
+      // 처리 상태 분포 파이차트
+      const statusCtx = document.getElementById('statusChart').getContext('2d');
+      new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['완료', '검증대기', '실패'],
+          datasets: [{
+            data: [4893, 128, 42],
+            backgroundColor: ['#16A34A', '#EAB308', '#DC2626'],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right'
+            }
+          }
+        }
+      });
+
+      // 테이블 정렬
+      initTableSort('ocrTable');
+    });
+
+    function showPreview(row) {
+      const docId = row.cells[0].textContent;
+      showModal(
+        'OCR 처리 결과 미리보기',
+        `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
+            <div>
+              <h3 style="font-weight: 600; margin-bottom: 10px;">원본 이미지</h3>
+              <div style="background: #e5e7eb; border-radius: 8px; padding: 40px; text-align: center; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                <div>
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <path d="m21 15-5-5L5 21"></path>
+                  </svg>
+                  <p style="margin-top: 10px; color: #6b7280; font-size: 12px;">이미지 미리보기</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 style="font-weight: 600; margin-bottom: 10px;">추출 텍스트</h3>
+              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; max-height: 300px; overflow-y: auto; font-size: 14px; line-height: 1.6;">
+                <p><mark style="background-color: #fef3c7;">문서 제목: 민원 처리 현황</mark></p>
+                <p>작성일: 2026년 3월 25일</p>
+                <p>담당자: 김영희</p>
+                <p>내용: 본 문서는 현재 진행 중인 민원 처리 상황을 보고하는 문서입니다...</p>
+                <p>신뢰도: 94.2%</p>
+              </div>
+            </div>
+          </div>
+        `,
+        { confirmText: '닫기', showCancel: false }
+      );
+    }
+  </script>
+</body>
+</html>

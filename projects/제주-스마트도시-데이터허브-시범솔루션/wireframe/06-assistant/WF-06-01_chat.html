@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>챗 인터페이스 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .chat-container { display: flex; height: calc(100vh - 80px); }
+    .session-sidebar { width: 250px; background: #f8f9fa; border-right: 1px solid #e5e7eb; overflow-y: auto; }
+    .chat-main { flex: 1; display: flex; flex-direction: column; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .message { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
+    .message.user { align-self: flex-end; }
+    .message.ai { align-self: flex-start; }
+    .message-bubble { padding: 12px 16px; border-radius: 12px; line-height: 1.5; }
+    .message.user .message-bubble { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+    .message.ai .message-bubble { background: #e5e7eb; color: #1f2937; border-bottom-left-radius: 4px; }
+    .message-avatar { width: 32px; height: 32px; border-radius: 50%; background: #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .message.ai .message-avatar { background: #9ca3af; color: white; }
+    .chat-input-area { padding: 16px 20px; border-top: 1px solid #e5e7eb; background: white; }
+    .suggested-questions { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .question-chip { background: #f0f4f8; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .question-chip:hover { background: #e0e8f0; }
+    .input-bar { display: flex; gap: 8px; }
+    .chat-input { flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: none; }
+    .input-button { width: 40px; height: 40px; border-radius: 8px; border: none; background: #f0f4f8; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .input-button:hover { background: #e0e8f0; }
+    .input-button.send { background: #3b82f6; color: white; }
+    .input-button.send:hover { background: #2563eb; }
+    .session-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
+    .session-item:hover { background: #eff6ff; }
+    .session-item.active { background: #dbeafe; }
+    .session-date { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .session-title { font-size: 13px; color: #1f2937; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .session-delete { opacity: 0; font-size: 12px; color: #9ca3af; cursor: pointer; }
+    .session-item:hover .session-delete { opacity: 1; }
+    .new-chat-btn { width: 100%; padding: 12px; margin: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .new-chat-btn:hover { background: #2563eb; }
+    .message-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .message-table th { background: #f3f4f6; padding: 8px; text-align: left; border: 1px solid #e5e7eb; }
+    .message-table td { padding: 8px; border: 1px solid #e5e7eb; }
+    .message-list { margin-top: 8px; padding-left: 20px; }
+    .message-list li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <header id="gnb">
+      <div class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </div>
+      <nav class="gnb-menus"></nav>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout-container">
+      <aside id="lnb"><ul class="lnb-menu-list"></ul><button class="lnb-toggle-btn"><i data-lucide="chevron-left"></i></button></aside>
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">AI 어시스턴트</h1>
+          <p class="page-subtitle">챗 기반 도시 데이터 분석 및 상담</p>
+        </div>
+        <div class="chat-container">
+          <div class="session-sidebar">
+            <button class="new-chat-btn">+ 새 대화</button>
+            <div class="session-item active">
+              <div class="session-date">오늘</div>
+              <div class="session-title">4월 주차 현황 분석</div>
+              <div class="session-delete">×</div>
+            </div>
+            <div class="session-item">
+              <div class="session-date">어제</div>
+              <div class="session-title">교통량 증감 추이</div>
+              <div class="session-delete">×</div>
+            </div>
+            <div class="session-item">
+              <div class="session-date">2일 전</div>
+              <div class="session-title">민원 유형별 분석</div>
+              <div class="session-delete">×</div>
+            </div>
+            <div class="session-item">
+              <div class="session-date">2026-03-25</div>
+              <div class="session-title">환경 오염도 리포트</div>
+              <div class="session-delete">×</div>
+            </div>
+            <div class="session-item">
+              <div class="session-date">2026-03-20</div>
+              <div class="session-title">이벤트별 인구 분석</div>
+              <div class="session-delete">×</div>
+            </div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-messages">
+              <div class="message ai">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">
+                  안녕하세요! 제주 스마트도시 데이터허브 AI 어시스턴트입니다. 도시 데이터 분석, 민원 상담, 정책 안내 등 다양한 질문에 도움을 드릴 수 있습니다. 무엇을 도와드릴까요?
+                </div>
+              </div>
+              <div class="message user">
+                <div class="message-bubble">4월 들어 주차장 이용률이 어떻게 변했나요?</div>
+                <div class="message-avatar">사용자</div>
+              </div>
+              <div class="message ai">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">
+                  <div>4월 주차장 이용률 현황입니다:</div>
+                  <table class="message-table">
+                    <tr><th>구역</th><th>평균 이용률</th><th>증감</th></tr>
+                    <tr><td>중앙지역</td><td>78%</td><td style="color: #ef4444;">↑ +12%</td></tr>
+                    <tr><td>서귀포</td><td>65%</td><td style="color: #10b981;">↓ -3%</td></tr>
+                    <tr><td>신제주</td><td>72%</td><td style="color: #ef4444;">↑ +8%</td></tr>
+                  </table>
+                </div>
+              </div>
+              <div class="message user">
+                <div class="message-bubble">더 자세한 시간대별 분석을 원합니다.</div>
+                <div class="message-avatar">사용자</div>
+              </div>
+              <div class="message ai">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">
+                  <div>시간대별 이용률 추이는 다음과 같습니다:</div>
+                  <ul class="message-list">
+                    <li><strong>06:00-09:00</strong> (출근시간): 평균 82% - 최고치</li>
+                    <li><strong>09:00-17:00</strong> (업무시간): 평균 58% - 안정적</li>
+                    <li><strong>17:00-20:00</strong> (퇴근시간): 평균 88% - 최고치</li>
+                    <li><strong>20:00-23:00</strong> (야간): 평균 45% - 저치</li>
+                    <li><strong>23:00-06:00</strong> (심야): 평균 12% - 최저치</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="message user">
+                <div class="message-bubble">이 자료를 리포트로 생성해 줄 수 있나요?</div>
+                <div class="message-avatar">사용자</div>
+              </div>
+              <div class="message ai">
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">물론입니다! 현재 대화 내용을 바탕으로 분석 리포트를 자동으로 생성할 수 있습니다. 보고서 자동생성 페이지로 이동하시겠습니까?</div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <div class="suggested-questions">
+                <div class="question-chip">교통 혼잡도는?</div>
+                <div class="question-chip">민원 통계</div>
+                <div class="question-chip">환경 현황</div>
+                <div class="question-chip">이벤트 효과분석</div>
+              </div>
+              <div class="input-bar">
+                <input type="text" class="chat-input" placeholder="질문을 입력하세요...">
+                <button class="input-button"><i data-lucide="mic" style="width:20px;height:20px;"></i></button>
+                <button class="input-button"><i data-lucide="paperclip" style="width:20px;height:20px;"></i></button>
+                <button class="input-button send"><i data-lucide="send" style="width:20px;height:20px;"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('assistant');
+      // Chat interactions
+      document.querySelectorAll('.question-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          const input = document.querySelector('.chat-input');
+          input.value = this.textContent;
+          input.focus();
+        });
+      });
+      document.querySelector('.input-button.send').addEventListener('click', function() {
+        const input = document.querySelector('.chat-input');
+        if (input.value.trim()) {
+          input.value = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

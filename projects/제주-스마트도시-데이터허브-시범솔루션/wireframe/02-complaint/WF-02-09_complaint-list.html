@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>민원 목록 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">J</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">시스템</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">민원 목록</div>
+          <div class="page-subtitle">민원 현황 목록 조회 및 관리</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- 필터 바 -->
+          <div class="filter-bar" style="flex-direction: row; flex-wrap: wrap;">
+            <div class="filter-group">
+              <label class="filter-label">기간</label>
+              <input type="date" class="filter-input" value="2025-01-01" style="width: 120px;">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">~</label>
+              <input type="date" class="filter-input" value="2025-01-31" style="width: 120px;">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">지역</label>
+              <select class="filter-select" style="min-width: 100px;">
+                <option>전체</option>
+                <option>제주시</option>
+                <option>서귀포시</option>
+                <option>북제주군</option>
+                <option>남제주군</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">유형</label>
+              <select class="filter-select" multiple style="min-width: 120px; min-height: 35px;">
+                <option selected>불법주차</option>
+                <option>보행안전</option>
+                <option>시설불편</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">상태</label>
+              <select class="filter-select" style="min-width: 100px;">
+                <option>전체</option>
+                <option>접수</option>
+                <option>처리중</option>
+                <option>완료</option>
+                <option>미처리</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">채널</label>
+              <select class="filter-select" multiple style="min-width: 100px; min-height: 35px;">
+                <option selected>모바일앱</option>
+                <option>웹</option>
+                <option>콜센터</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">검색</label>
+              <input type="text" class="filter-input" placeholder="제목/내용" style="width: 140px;">
+            </div>
+            <button class="filter-button" data-action="apply">조회</button>
+            <button class="filter-button secondary" data-action="reset">초기화</button>
+          </div>
+
+          <!-- Table Controls -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: white; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div>
+              <input type="checkbox" id="select-all" style="margin-right: 8px;">
+              <label for="select-all" style="font-weight: 500; cursor: pointer;">전체 선택</label>
+            </div>
+            <div>
+              <select class="filter-select" style="min-width: 120px;" id="batch-action">
+                <option value="">일괄 처리</option>
+                <option value="assign">배정</option>
+                <option value="status">상태변경</option>
+                <option value="export">내보내기</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div class="card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;"><input type="checkbox" id="select-header"></th>
+                  <th>#</th>
+                  <th>접수번호</th>
+                  <th>접수일</th>
+                  <th>채널</th>
+                  <th>지역</th>
+                  <th>유형</th>
+                  <th>제목</th>
+                  <th>상태</th>
+                  <th>감성</th>
+                  <th>담당자</th>
+                </tr>
+              </thead>
+              <tbody id="complaint-table-body">
+                <!-- Rows will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+            <div style="font-size: 12px; color: var(--text-color-secondary);">
+              <span id="pagination-info">1-50 / 총 123건</span>
+            </div>
+            <div class="pagination">
+              <button class="pagination-button" data-action="prev">이전</button>
+              <button class="pagination-button active" data-page="1">1</button>
+              <button class="pagination-button" data-page="2">2</button>
+              <button class="pagination-button" data-page="3">3</button>
+              <button class="pagination-button" data-action="next">다음</button>
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--text-color-secondary);">
+                페이지당
+                <select style="padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; margin: 0 4px;">
+                  <option>10</option>
+                  <option selected>25</option>
+                  <option>50</option>
+                  <option>100</option>
+                </select>
+                개
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('complaint');
+
+      // 더미 데이터
+      const complaints = [
+        { id: 'CMP-2025-0001', date: '2025-01-10', channel: '모바일앱', area: '제주시', type: '보행안전', title: '횡단보도 신호 오작동', status: '완료', sentiment: 8.5, officer: '김철수' },
+        { id: 'CMP-2025-0002', date: '2025-01-10', channel: '웹', area: '제주시', type: '불법주차', title: '상업지구 앞 불법주차', status: '처리중', sentiment: 5.2, officer: '이영희' },
+        { id: 'CMP-2025-0003', date: '2025-01-10', channel: '콜센터', area: '서귀포시', type: '충전구역점유', title: '충전구역 점유 문제', status: '접수', sentiment: 2.1, officer: '박준호' },
+        { id: 'CMP-2025-0004', date: '2025-01-10', channel: '방문', area: '북제주군', type: '시설불편', title: '가로등 손상', status: '완료', sentiment: 5.0, officer: '최수진' },
+        { id: 'CMP-2025-0005', date: '2025-01-11', channel: '모바일앱', area: '제주시', type: '불법주차', title: '공사장 앞 주차위반', status: '처리중', sentiment: 3.2, officer: '유동환' },
+        { id: 'CMP-2025-0006', date: '2025-01-11', channel: '웹', area: '서귀포시', type: '보행안전', title: '보행로 파손', status: '미처리', sentiment: 1.8, officer: '강민석' },
+        { id: 'CMP-2025-0007', date: '2025-01-11', channel: '콜센터', area: '남제주군', type: '화재위험', title: '불법 화물 방치', status: '처리중', sentiment: 2.5, officer: '정소영' },
+        { id: 'CMP-2025-0008', date: '2025-01-11', channel: '모바일앱', area: '제주시', type: '불법주차', title: '같은 지역 불법주차 심각', status: '완료', sentiment: 5.1, officer: '김철수' },
+        { id: 'CMP-2025-0009', date: '2025-01-12', channel: '웹', area: '제주시', type: '시설불편', title: '벤치 파손', status: '접수', sentiment: 4.8, officer: '이영희' },
+        { id: 'CMP-2025-0010', date: '2025-01-12', channel: '모바일앱', area: '서귀포시', type: '불법주차', title: '주택가 불법주차', status: '완료', sentiment: 7.9, officer: '박준호' },
+        // 추가 40개 항목 (더미)
+      ];
+
+      // 테이블 렌더링
+      function renderTable(data) {
+        const tbody = document.getElementById('complaint-table-body');
+        tbody.innerHTML = '';
+
+        data.forEach((complaint, index) => {
+          const row = document.createElement('tr');
+          row.style.cursor = 'pointer';
+          row.onclick = () => {
+            window.location.href = `WF-02-05_complaint-detail.html?id=${complaint.id}`;
+          };
+
+          const statusColor = {
+            '완료': 'success',
+            '처리중': 'warning',
+            '접수': 'default',
+            '미처리': 'danger'
+          };
+
+          const sentimentColor = complaint.sentiment >= 7 ? 'var(--color-success)' :
+                                 complaint.sentiment >= 4 ? 'var(--color-gray-500)' :
+                                 'var(--color-danger)';
+
+          row.innerHTML = `
+            <td style="width: 40px;"><input type="checkbox" class="complaint-checkbox"></td>
+            <td>${index + 1}</td>
+            <td><strong>${complaint.id}</strong></td>
+            <td>${complaint.date}</td>
+            <td><small>${complaint.channel}</small></td>
+            <td>${complaint.area}</td>
+            <td><small>${complaint.type}</small></td>
+            <td>${complaint.title.substring(0, 20)}...</td>
+            <td><span class="badge ${statusColor}">${complaint.status}</span></td>
+            <td>
+              <div style="width: 100%; height: 8px; background: var(--color-gray-200); border-radius: 4px;">
+                <div style="height: 100%; width: ${(complaint.sentiment / 10) * 100}%; background: ${sentimentColor}; border-radius: 4px;"></div>
+              </div>
+            </td>
+            <td><small>${complaint.officer}</small></td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      }
+
+      // 초기 렌더링
+      renderTable(complaints.slice(0, 25));
+
+      // 전체 선택 체크박스
+      document.getElementById('select-all').addEventListener('change', function(e) {
+        document.querySelectorAll('.complaint-checkbox').forEach(cb => {
+          cb.checked = e.target.checked;
+        });
+      });
+
+      // 페이지네이션
+      document.querySelectorAll('.pagination-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (this.dataset.action === 'prev') {
+            console.log('Previous page');
+          } else if (this.dataset.action === 'next') {
+            console.log('Next page');
+          } else if (this.dataset.page) {
+            document.querySelectorAll('.pagination-button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

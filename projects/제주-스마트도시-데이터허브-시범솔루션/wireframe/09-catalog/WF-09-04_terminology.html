@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>표준 용어 사전</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김수현</div>
+            <div class="user-role">운영자</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <aside id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="LNB 토글">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </aside>
+
+      <main id="content">
+        <div class="page-header">
+          <h1 class="page-title">표준 용어 사전</h1>
+          <p class="page-subtitle">데이터 표준화를 위한 용어 정의 및 관리</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 검색 및 필터 -->
+          <div style="margin-bottom: var(--spacing-2xl);">
+            <div class="filter-bar">
+              <div class="filter-group" style="flex: 1;">
+                <label class="filter-label">용어 검색</label>
+                <input type="text" class="filter-input" placeholder="용어명을 검색하세요..." style="flex: 1;">
+              </div>
+              <button class="filter-button" onclick="alert('신규 용어 등록')">
+                <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                신규 용어 후보 등록
+              </button>
+            </div>
+
+            <!-- 인덱스 -->
+            <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+              <span style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-right: var(--spacing-md);">알파벳:</span>
+              <span class="badge default" style="cursor: pointer;">A</span>
+              <span class="badge default" style="cursor: pointer;">B</span>
+              <span class="badge default" style="cursor: pointer;">C</span>
+              <span class="badge default" style="cursor: pointer;">...</span>
+              <span class="badge default" style="cursor: pointer;">Z</span>
+              <span style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-left: var(--spacing-lg); margin-right: var(--spacing-md);">가나다:</span>
+              <span class="badge default" style="cursor: pointer;">ㄱ</span>
+              <span class="badge default" style="cursor: pointer;">ㄴ</span>
+              <span class="badge default" style="cursor: pointer;">ㄷ</span>
+              <span class="badge default" style="cursor: pointer;">...</span>
+              <span class="badge default" style="cursor: pointer;">ㅎ</span>
+            </div>
+
+            <!-- 필터 -->
+            <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-md);">
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox" checked>
+                <span style="font-size: var(--font-body-sm);">승인된 용어</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox">
+                <span style="font-size: var(--font-body-sm);">후보 포함</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox">
+                <span style="font-size: var(--font-body-sm);">폐기된 용어</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 용어 목록 테이블 -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>용어명</th>
+                <th>영문명</th>
+                <th>정의</th>
+                <th>동의어</th>
+                <th>도메인</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="cursor: pointer;" onclick="alert('용어 상세 사이드패널')">
+                <td><span style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">도로 혼잡도</span></td>
+                <td>Road Congestion Level</td>
+                <td>특정 도로 구간에서의 교통 혼잡 정도</td>
+                <td><span class="badge default">혼잡도</span></td>
+                <td>교통</td>
+                <td><span class="badge success">승인</span></td>
+              </tr>
+              <tr style="cursor: pointer;" onclick="alert('용어 상세 사이드패널')">
+                <td><span style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">신호등 상태</span></td>
+                <td>Traffic Signal Status</td>
+                <td>신호등의 현재 상태 (적색, 황색, 녹색)</td>
+                <td><span class="badge default">신호</span></td>
+                <td>교통</td>
+                <td><span class="badge success">승인</span></td>
+              </tr>
+              <tr style="cursor: pointer;" onclick="alert('용어 상세 사이드패널')">
+                <td><span style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">통행속도</span></td>
+                <td>Average Speed</td>
+                <td>도로 구간의 평균 통행 속도</td>
+                <td><span class="badge default">속도</span></td>
+                <td>교통</td>
+                <td><span class="badge success">승인</span></td>
+              </tr>
+              <tr style="cursor: pointer;" onclick="alert('용어 상세 사이드패널')">
+                <td><span style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">사건사고</span></td>
+                <td>Traffic Accident</td>
+                <td>도로에서 발생한 교통 사건 또는 사고</td>
+                <td><span class="badge default">사고</span></td>
+                <td>안전</td>
+                <td><span class="badge warning">후보</span></td>
+              </tr>
+              <tr style="cursor: pointer;" onclick="alert('용어 상세 사이드패널')">
+                <td><span style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">민원</span></td>
+                <td>Civil Complaint</td>
+                <td>시민이 제기하는 불만, 건의, 신고</td>
+                <td><span class="badge default">불만</span></td>
+                <td>민원</td>
+                <td><span class="badge success">승인</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" style="margin-top: var(--spacing-lg);">
+            <button class="pagination-button" data-action="prev">이전</button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button">2</button>
+            <button class="pagination-button">3</button>
+            <button class="pagination-button" data-action="next">다음</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initLayout('catalog');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이 대시보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">사</div>
+          <div class="user-info">
+            <div class="user-name">사용자</div>
+            <div class="user-role">관리자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-container">
+      <!-- LNB -->
+      <div id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" onclick="toggleLnb()">☰</button>
+      </div>
+
+      <!-- Content -->
+      <div id="content">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="page-title">마이 대시보드</div>
+              <div class="page-subtitle">개인화된 대시보드를 설정하고 관리합니다</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" id="editModeBtn" onclick="toggleEditMode()" style="display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                <span>편집 모드</span>
+              </button>
+              <button class="btn btn-secondary" onclick="openSettings()">
+                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 편집 모드 안내 메시지 (숨김 상태) -->
+        <div id="editModeInfo" style="display: none; background-color: #FEF3C7; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="color: #92400E;">
+            <strong>편집 모드:</strong> 위젯을 드래그앤드롭으로 이동할 수 있습니다
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="saveDashboard()">저장</button>
+            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="cancelEdit()">취소</button>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <!-- 2열 레이아웃: 좌측 위젯 + 우측 추가 패널 -->
+          <div style="display: grid; grid-template-columns: 1fr 300px; gap: 16px;">
+            <!-- 좌측: 위젯 그리드 -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; grid-auto-rows: max-content;">
+              <!-- 위젯 1: 민원 요약 -->
+              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">민원 요약</div>
+                </div>
+                <div class="card-body" style="display: grid; gap: 12px;">
+                  <div style="text-align: center; padding: 12px; background-color: #EBF8FF; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 600; color: #2563EB;">156</div>
+                    <div style="font-size: 12px; color: #6B7280;">금일 접수</div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="text-align: center; padding: 8px; background-color: #FEE2E2; border-radius: 6px;">
+                      <div style="font-size: 16px; font-weight: 600; color: #DC2626;">23</div>
+                      <div style="font-size: 11px; color: #6B7280;">미처리</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background-color: #DCFCE7; border-radius: 6px;">
+                      <div style="font-size: 16px; font-weight: 600; color: #16A34A;">85.3%</div>
+                      <div style="font-size: 11px; color: #6B7280;">완료율</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 위젯 2: 이벤트 요약 -->
+              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">이벤트 요약</div>
+                </div>
+                <div class="card-body" style="display: grid; gap: 12px;">
+                  <div style="text-align: center; padding: 12px; background-color: #FEF3C7; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 600; color: #EAB308;">8</div>
+                    <div style="font-size: 12px; color: #6B7280;">발생</div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="text-align: center; padding: 8px; background-color: #DCFCE7; border-radius: 6px;">
+                      <div style="font-size: 16px; font-weight: 600; color: #16A34A;">6</div>
+                      <div style="font-size: 11px; color: #6B7280;">해결</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background-color: #FEF3C7; border-radius: 6px;">
+                      <div style="font-size: 16px; font-weight: 600; color: #EAB308;">2</div>
+                      <div style="font-size: 11px; color: #6B7280;">진행</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 위젯 3: 날씨 -->
+              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">제주 날씨</div>
+                </div>
+                <div class="card-body" style="text-align: center;">
+                  <div style="font-size: 48px; margin-bottom: 8px;">☀️</div>
+                  <div style="font-size: 14px; color: #6B7280; margin-bottom: 12px;">맑음</div>
+                  <div style="display: grid; gap: 8px; font-size: 12px; color: #6B7280;">
+                    <div>온도: <strong style="color: #1F2937;">15°C</strong></div>
+                    <div>습도: <strong style="color: #1F2937;">65%</strong></div>
+                    <div>풍속: <strong style="color: #1F2937;">남동풍 3m/s</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 위젯 4: 빠른 액세스 -->
+              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">빠른 액세스</div>
+                </div>
+                <div class="card-body" style="display: grid; gap: 8px;">
+                  <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start; padding: 6px 8px; font-size: 12px;">
+                    <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+                    민원 조회
+                  </button>
+                  <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start; padding: 6px 8px; font-size: 12px;">
+                    <i data-lucide="file" style="width: 14px; height: 14px;"></i>
+                    보고서
+                  </button>
+                  <button class="btn btn-secondary" style="width: 100%; justify-content: flex-start; padding: 6px 8px; font-size: 12px;">
+                    <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
+                    설정
+                  </button>
+                </div>
+              </div>
+
+              <!-- 위젯 5: 주간 트렌드 (2x1) -->
+              <div class="card widget-card" style="cursor: move; grid-column: span 2;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">주간 민원 트렌드</div>
+                </div>
+                <div class="card-body">
+                  <canvas id="weeklyTrendChart" style="max-height: 150px;"></canvas>
+                </div>
+              </div>
+
+              <!-- 위젯 6: 최근 알림 (2x1) -->
+              <div class="card widget-card" style="cursor: move; grid-column: span 2;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <div class="card-title" style="font-size: 14px;">최근 알림</div>
+                </div>
+                <div class="card-body" style="display: grid; gap: 8px;">
+                  <div style="padding: 8px; background-color: #F9FAFB; border-radius: 4px; border-left: 3px solid #DC2626;">
+                    <div style="font-size: 12px; color: #1F2937; font-weight: 500;">주차장 센서 오류</div>
+                    <div style="font-size: 11px; color: #9CA3AF;">12:32</div>
+                  </div>
+                  <div style="padding: 8px; background-color: #F9FAFB; border-radius: 4px; border-left: 3px solid #EAB308;">
+                    <div style="font-size: 12px; color: #1F2937; font-weight: 500;">LLM 응답 지연</div>
+                    <div style="font-size: 11px; color: #9CA3AF;">08:15</div>
+                  </div>
+                  <div style="padding: 8px; background-color: #F9FAFB; border-radius: 4px; border-left: 3px solid #16A34A;">
+                    <div style="font-size: 12px; color: #1F2937; font-weight: 500;">일일 목표 달성</div>
+                    <div style="font-size: 11px; color: #9CA3AF;">07:45</div>
+                  </div>
+                  <div style="padding: 8px; background-color: #F9FAFB; border-radius: 4px; border-left: 3px solid #3B82F6;">
+                    <div style="font-size: 12px; color: #1F2937; font-weight: 500;">시스템 백업 완료</div>
+                    <div style="font-size: 11px; color: #9CA3AF;">02:30</div>
+                  </div>
+                  <div style="padding: 8px; background-color: #F9FAFB; border-radius: 4px; border-left: 3px solid #6B7280;">
+                    <div style="font-size: 12px; color: #1F2937; font-weight: 500;">신규 이벤트 등록</div>
+                    <div style="font-size: 11px; color: #9CA3AF;">00:15</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측: 추가 가능한 위젯 패널 -->
+            <div style="display: flex; flex-direction: column;">
+              <div style="font-weight: 600; color: #1F2937; margin-bottom: 12px; padding: 12px; border-bottom: 1px solid #E5E7EB;">
+                추가 가능한 위젯
+              </div>
+              <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 0 12px;">
+                <!-- 위젯 옵션 1 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">📊</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">AI 성능 요약</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">AI 모델별 성능 지표</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('ai')">추가</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 위젯 옵션 2 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">🖥️</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">시스템 상태</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">서버/DB 상태 모니터링</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('system')">추가</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 위젯 옵션 3 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">📈</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">부서별 현황</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">부서별 처리 현황 차트</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('department')">추가</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 위젯 옵션 4 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">📋</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">나의 작업</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">할당된 민원 및 업무</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('tasks')">추가</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 위젯 옵션 5 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">📢</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">공지사항</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">최근 공지사항 피드</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('announcement')">추가</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 위젯 옵션 6 -->
+                <div class="card" style="padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='var(--shadow-sm)'">
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div style="font-size: 20px;">☁️</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 12px; font-weight: 600; color: #1F2937;">날씨 상세</div>
+                      <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">지역별 날씨 예보</div>
+                      <button class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 4px; font-size: 11px;" onclick="addWidget('weather')">추가</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    let editMode = false;
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('main');
+      initCharts();
+    });
+
+    // 차트 초기화
+    function initCharts() {
+      const weeklyData = {
+        labels: ['월', '화', '수', '목', '금', '토', '일'],
+        datasets: [{
+          label: '민원 접수',
+          data: [142, 168, 172, 155, 165, 148, 156],
+          borderColor: '#2563EB',
+          backgroundColor: '#DBEAFE'
+        }]
+      };
+      createLineChart('weeklyTrendChart', weeklyData.labels, weeklyData.datasets, {
+        plugins: { legend: { display: false } }
+      });
+    }
+
+    // 편집 모드 토글
+    function toggleEditMode() {
+      editMode = !editMode;
+      const infoBox = document.getElementById('editModeInfo');
+      const btn = document.getElementById('editModeBtn');
+
+      if (editMode) {
+        infoBox.style.display = 'flex';
+        btn.style.backgroundColor = '#16A34A';
+        btn.style.color = 'white';
+      } else {
+        infoBox.style.display = 'none';
+        btn.style.backgroundColor = '';
+        btn.style.color = '';
+      }
+
+      showToast(editMode ? '편집 모드가 활성화되었습니다.' : '편집 모드가 비활성화되었습니다.', 'info');
+    }
+
+    // 대시보드 저장
+    function saveDashboard() {
+      showToast('대시보드 레이아웃이 저장되었습니다.', 'success');
+      toggleEditMode();
+    }
+
+    // 편집 취소
+    function cancelEdit() {
+      toggleEditMode();
+      showToast('변경사항이 취소되었습니다.', 'info');
+    }
+
+    // 위젯 추가
+    function addWidget(type) {
+      showToast(`"${type}" 위젯이 추가되었습니다.`, 'success');
+    }
+
+    // 설정 열기
+    function openSettings() {
+      showToast('설정 기능은 준비 중입니다.', 'info');
+    }
+  </script>
+</body>
+</html>

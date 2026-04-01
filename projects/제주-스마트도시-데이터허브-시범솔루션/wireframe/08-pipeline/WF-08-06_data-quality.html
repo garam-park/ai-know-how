@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이터품질대시보드 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .gauge-chart {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #2563EB;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <nav id="gnb">
+      <a href="#" class="gnb-logo">
+        <div class="gnb-logo-icon">J</div>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <div class="gnb-notification">
+          <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+          <span class="notification-badge">3</span>
+        </div>
+        <div class="gnb-user">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">관리자</div>
+            <div class="user-role">Admin</div>
+          </div>
+          <i data-lucide="chevron-down" style="width: 20px; height: 20px;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout-container">
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn" title="사이드바 토글">
+          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+        </button>
+      </nav>
+
+      <div id="content">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">데이터수집</span>
+          <span class="breadcrumb-item">데이터 품질</span>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">데이터 품질 대시보드</h1>
+          <p class="page-subtitle">수집 데이터의 품질 지표 및 이슈 현황 모니터링</p>
+        </div>
+
+        <div class="page-content">
+          <!-- 상단 품질 지표 카드 (5개) -->
+          <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <!-- 완전성 -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="text-center">
+                  <div class="gauge-value">94.2%</div>
+                  <div style="color: #6B7280; font-size: 14px; margin-top: 8px;">완전성</div>
+                  <div style="color: #16A34A; font-size: 12px; margin-top: 4px;">↑ 2.1%</div>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+                  <div style="width: 94.2%; height: 100%; background: #2563EB; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <!-- 정확성 -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="text-center">
+                  <div class="gauge-value" style="color: #16A34A;">96.5%</div>
+                  <div style="color: #6B7280; font-size: 14px; margin-top: 8px;">정확성</div>
+                  <div style="color: #16A34A; font-size: 12px; margin-top: 4px;">↑ 1.2%</div>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+                  <div style="width: 96.5%; height: 100%; background: #16A34A; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <!-- 일관성 -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="text-center">
+                  <div class="gauge-value">92.1%</div>
+                  <div style="color: #6B7280; font-size: 14px; margin-top: 8px;">일관성</div>
+                  <div style="color: #16A34A; font-size: 12px; margin-top: 4px;">↑ 0.8%</div>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+                  <div style="width: 92.1%; height: 100%; background: #7C3AED; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <!-- 적시성 -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="text-center">
+                  <div class="gauge-value" style="color: #16A34A;">98.7%</div>
+                  <div style="color: #6B7280; font-size: 14px; margin-top: 8px;">적시성</div>
+                  <div style="color: #16A34A; font-size: 12px; margin-top: 4px;">↑ 0.3%</div>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+                  <div style="width: 98.7%; height: 100%; background: #EAB308; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <!-- 표준준수율 -->
+              <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div class="text-center">
+                  <div class="gauge-value" style="color: #10B981;">89.3%</div>
+                  <div style="color: #6B7280; font-size: 14px; margin-top: 8px;">표준준수율</div>
+                  <div style="color: #16A34A; font-size: 12px; margin-top: 4px;">↑ 3.2%</div>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin-top: 12px; overflow: hidden;">
+                  <div style="width: 89.3%; height: 100%; background: #10B981; border-radius: 4px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 중앙 일별 품질 추이 라인차트 -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
+            <h2 class="text-lg font-semibold mb-4">일별 품질 추이 (최근 30일)</h2>
+            <canvas id="qualityChart" class="max-h-96"></canvas>
+          </div>
+
+          <!-- 하단 좌측 품질 이슈 목록 + 우측 파이차트 -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">품질 이슈 목록</h2>
+              <div class="overflow-x-auto">
+                <table class="data-table" style="width: 100%; font-size: 13px;">
+                  <thead>
+                    <tr>
+                      <th>데이터소스</th>
+                      <th>이슈유형</th>
+                      <th>영향범위</th>
+                      <th>심각도</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="cursor-pointer hover:bg-blue-50">
+                      <td>민원포털</td>
+                      <td>누락</td>
+                      <td>234건</td>
+                      <td><span class="badge danger">높음</span></td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-blue-50">
+                      <td>만덕콜센터</td>
+                      <td>중복</td>
+                      <td>45건</td>
+                      <td><span class="badge warning">중간</span></td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-blue-50">
+                      <td>통합관제</td>
+                      <td>형식오류</td>
+                      <td>12건</td>
+                      <td><span class="badge success">낮음</span></td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-blue-50">
+                      <td>112/119</td>
+                      <td>오류값</td>
+                      <td>67건</td>
+                      <td><span class="badge warning">중간</span></td>
+                    </tr>
+                    <tr class="cursor-pointer hover:bg-blue-50">
+                      <td>기상청API</td>
+                      <td>범위초과</td>
+                      <td>8건</td>
+                      <td><span class="badge success">낮음</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 class="text-lg font-semibold mb-4">NGSI-LD 표준 준수율</h2>
+              <canvas id="complianceChart" class="max-h-96"></canvas>
+              <div style="margin-top: 16px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                  <span>준수</span>
+                  <span style="font-weight: 600; color: #16A34A;">89.3%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                  <span>미준수</span>
+                  <span style="font-weight: 600; color: #DC2626;">10.7%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLayout('pipeline');
+
+      // 일별 품질 추이 라인차트
+      const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+      new Chart(qualityCtx, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 30 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (29 - i));
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+          }),
+          datasets: [
+            {
+              label: '완전성',
+              data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 10) + 88),
+              borderColor: '#2563EB',
+              backgroundColor: '#2563EB20',
+              tension: 0.4,
+              fill: false
+            },
+            {
+              label: '정확성',
+              data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 8) + 92),
+              borderColor: '#16A34A',
+              backgroundColor: '#16A34A20',
+              tension: 0.4,
+              fill: false
+            },
+            {
+              label: '일관성',
+              data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 10) + 87),
+              borderColor: '#7C3AED',
+              backgroundColor: '#7C3AED20',
+              tension: 0.4,
+              fill: false
+            },
+            {
+              label: '적시성',
+              data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 5) + 96),
+              borderColor: '#EAB308',
+              backgroundColor: '#EAB30820',
+              tension: 0.4,
+              fill: false
+            },
+            {
+              label: '표준준수율',
+              data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 10) + 85),
+              borderColor: '#10B981',
+              backgroundColor: '#10B98120',
+              tension: 0.4,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 80,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          }
+        }
+      });
+
+      // NGSI-LD 표준 준수율 파이차트
+      const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+      new Chart(complianceCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['준수', '미준수'],
+          datasets: [{
+            data: [89.3, 10.7],
+            backgroundColor: ['#16A34A', '#DC2626'],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

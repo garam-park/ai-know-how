@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시나리오 비교 - 제주 스마트도시 데이터허브</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  <link rel="stylesheet" href="../common/tokens.css">
+  <link rel="stylesheet" href="../common/layout.css">
+  <link rel="stylesheet" href="../common/components.css">
+  <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
+  <script src="../common/components.js"></script>
+  <style>
+    .scenario-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .scenario-select {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .scenario-select label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-color-primary);
+    }
+    .scenario-select select {
+      padding: 10px;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--font-family-base);
+      background: white;
+      cursor: pointer;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+    }
+    .comparison-table thead {
+      background: var(--color-gray-100);
+      border-bottom: 1px solid var(--color-gray-300);
+    }
+    .comparison-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-color-primary);
+      border-right: 1px solid var(--color-gray-200);
+    }
+    .comparison-table th:last-child {
+      border-right: none;
+    }
+    .comparison-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--color-gray-200);
+      border-right: 1px solid var(--color-gray-200);
+    }
+    .comparison-table td:last-child {
+      border-right: none;
+    }
+    .comparison-table tbody tr:hover {
+      background: var(--color-gray-50);
+    }
+    .metric-name {
+      font-weight: 600;
+      color: var(--text-color-primary);
+      min-width: 120px;
+    }
+    .metric-cell {
+      text-align: center;
+      font-weight: 600;
+    }
+    .metric-cell.best {
+      background: #DCF4E8;
+      color: #047857;
+    }
+    .metric-cell.good {
+      background: #EDE9FE;
+      color: #5B21B6;
+    }
+    .metric-cell.normal {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 24px;
+      background: var(--color-gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+    }
+    .radar-container {
+      background: white;
+      border: 1px solid var(--color-gray-300);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+    .recommendation-card {
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+      border: 2px solid var(--color-warning);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .recommendation-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #78350F;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .recommendation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .recommendation-item {
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: white;
+      border-radius: 6px;
+    }
+    .recommendation-rank {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-align: center;
+    }
+    .recommendation-scenario {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .recommendation-name {
+      font-weight: 600;
+      color: var(--text-color-primary);
+      font-size: 12px;
+    }
+    .recommendation-reason {
+      font-size: 11px;
+      color: var(--text-color-secondary);
+    }
+    .confidence-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+    .confidence-fill {
+      flex: 1;
+      height: 6px;
+      background: var(--color-gray-200);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .confidence-progress {
+      height: 100%;
+      background: var(--color-success);
+    }
+    .confidence-value {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-success);
+      min-width: 35px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-shell">
+    <!-- GNB -->
+    <div id="gnb">
+      <a href="../01-main-dashboard/" class="gnb-logo">
+        <span class="gnb-logo-icon">J</span>
+        <span>제주 스마트도시 데이터허브</span>
+      </a>
+      <div class="gnb-menus"></div>
+      <div class="gnb-actions">
+        <span class="gnb-notification">
+          <i data-lucide="bell" width="20" height="20"></i>
+          <span class="notification-badge">3</span>
+        </span>
+        <div class="gnb-user">
+          <div class="user-avatar">K</div>
+          <div class="user-info">
+            <div class="user-name">김영희</div>
+            <div class="user-role">운영자</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout-container">
+      <!-- LNB -->
+      <nav id="lnb">
+        <ul class="lnb-menu-list"></ul>
+        <button class="lnb-toggle-btn">
+          <i data-lucide="chevron-left" width="20" height="20"></i>
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div id="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title">시나리오 비교</div>
+          <div class="page-subtitle">여러 주차정책 시나리오를 다각도로 비교 분석</div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Scenario Selectors -->
+          <div class="scenario-selector">
+            <div class="scenario-select">
+              <label>시나리오 1</label>
+              <select>
+                <option selected>주차장 확장 (250면)</option>
+                <option>요금제 적용 (₩3000)</option>
+                <option>공유주차 도입</option>
+                <option>노변정비 사업</option>
+              </select>
+            </div>
+            <div class="scenario-select">
+              <label>시나리오 2</label>
+              <select>
+                <option>주차장 확장 (250면)</option>
+                <option selected>요금제 적용 (₩3000)</option>
+                <option>공유주차 도입</option>
+                <option>노변정비 사업</option>
+              </select>
+            </div>
+            <div class="scenario-select">
+              <label>시나리오 3</label>
+              <select>
+                <option>주차장 확장 (250면)</option>
+                <option>요금제 적용 (₩3000)</option>
+                <option selected>공유주차 도입</option>
+                <option>노변정비 사업</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Comparison Table -->
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-color-primary);">정량 지표 비교</h3>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th style="width: 20%;">평가 지표</th>
+                  <th style="width: 26.67%;">시나리오 1<br/>(주차장 확장)</th>
+                  <th style="width: 26.67%;">시나리오 2<br/>(요금제 적용)</th>
+                  <th style="width: 26.67%;">시나리오 3<br/>(공유주차)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="metric-name">초기 투자비</span></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 75%;">₩4.5B</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 35%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">₩2.0B</div></div></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 50%; background: linear-gradient(90deg, var(--color-success), var(--color-success-light));">₩2.8B</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">연간 운영비</span></td>
+                  <td class="metric-cell best">₩1.2B</td>
+                  <td class="metric-cell normal">₩2.4B</td>
+                  <td class="metric-cell good">₩1.8B</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">혼잡도 감소율</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 85%;">-23%</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 65%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">-18%</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 55%;">-15%</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">민원 감소율</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 88%;">-28%</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 62%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">-16%</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 52%;">-12%</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">주차 가용률</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 92%;">+15%p</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 68%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">+11%p</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 58%;">+9%p</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">시민 만족도</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 86%;">+34%</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 58%;">+18%</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 72%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">+22%</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">환경 영향</span></td>
+                  <td class="metric-cell normal">중립</td>
+                  <td class="metric-cell good">긍정적</td>
+                  <td class="metric-cell best">매우 긍정적</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">구현 난이도</span></td>
+                  <td class="metric-cell normal">높음</td>
+                  <td class="metric-cell best">낮음</td>
+                  <td class="metric-cell good">중간</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">시간대별 효율</span></td>
+                  <td class="metric-cell best">야간/휴일 우수</td>
+                  <td class="metric-cell good">오전 우수</td>
+                  <td class="metric-cell normal">전시간대 평균</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">재정자립도</span></td>
+                  <td class="metric-cell good">중기 흑자</td>
+                  <td class="metric-cell best">즉시 흑자</td>
+                  <td class="metric-cell normal">장기 흑자</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">확장성</span></td>
+                  <td class="metric-cell normal">제한적</td>
+                  <td class="metric-cell good">높음</td>
+                  <td class="metric-cell best">매우 높음</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">위험요소</span></td>
+                  <td class="metric-cell normal">중간</td>
+                  <td class="metric-cell good">낮음</td>
+                  <td class="metric-cell good">낮음</td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">12개월 ROI</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 90%;">312%</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">268%</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 58%;">195%</div></div></td>
+                </tr>
+                <tr>
+                  <td><span class="metric-name">전체 효율성 점수</span></td>
+                  <td class="metric-cell best"><div class="progress-bar"><div class="progress-fill" style="width: 95%;">8.8/10</div></div></td>
+                  <td class="metric-cell normal"><div class="progress-bar"><div class="progress-fill" style="width: 72%;">7.2/10</div></div></td>
+                  <td class="metric-cell good"><div class="progress-bar"><div class="progress-fill" style="width: 80%; background: linear-gradient(90deg, var(--color-secondary), var(--color-secondary-light));">8.0/10</div></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Radar Chart -->
+          <div class="radar-container">
+            <canvas id="radarChart" style="max-width: 400px; max-height: 400px;"></canvas>
+          </div>
+
+          <!-- AI Recommendation Card -->
+          <div class="recommendation-card">
+            <div class="recommendation-title">
+              <i data-lucide="sparkles" width="20" height="20"></i>
+              AI 추천 분석
+            </div>
+            <div class="recommendation-list">
+              <div class="recommendation-item">
+                <div class="recommendation-rank">1위</div>
+                <div class="recommendation-scenario">
+                  <div class="recommendation-name">주차장 확장 (250면)</div>
+                  <div class="recommendation-reason">효율성·경제성·민원감소 모두 우수. 장기 지속 가능</div>
+                </div>
+                <div class="confidence-bar">
+                  <div class="confidence-fill">
+                    <div class="confidence-progress" style="width: 92%;"></div>
+                  </div>
+                  <div class="confidence-value">92%</div>
+                </div>
+              </div>
+              <div class="recommendation-item">
+                <div class="recommendation-rank">2위</div>
+                <div class="recommendation-scenario">
+                  <div class="recommendation-name">공유주차 도입</div>
+                  <div class="recommendation-reason">확장성·환경영향 우수. 추가 투자 확대 가능</div>
+                </div>
+                <div class="confidence-bar">
+                  <div class="confidence-fill">
+                    <div class="confidence-progress" style="width: 78%;"></div>
+                  </div>
+                  <div class="confidence-value">78%</div>
+                </div>
+              </div>
+              <div class="recommendation-item">
+                <div class="recommendation-rank">3위</div>
+                <div class="recommendation-scenario">
+                  <div class="recommendation-name">요금제 적용 (₩3000)</div>
+                  <div class="recommendation-reason">단기 현금 흐름 우수. 추가 정책과 병행 권장</div>
+                </div>
+                <div class="confidence-bar">
+                  <div class="confidence-fill">
+                    <div class="confidence-progress" style="width: 65%;"></div>
+                  </div>
+                  <div class="confidence-value">65%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout('simulation');
+
+      // Radar Chart
+      const radarCtx = document.getElementById('radarChart').getContext('2d');
+      new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: ['비용 효율', '혼잡도 개선', '민원 감소', '시민 만족', '환경 영향', '확장성'],
+          datasets: [
+            {
+              label: '주차장 확장',
+              data: [85, 92, 88, 86, 60, 65],
+              borderColor: '#2563EB',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              borderWidth: 2,
+              pointBackgroundColor: '#2563EB'
+            },
+            {
+              label: '요금제 적용',
+              data: [95, 72, 64, 58, 75, 80],
+              borderColor: '#7C3AED',
+              backgroundColor: 'rgba(124, 58, 237, 0.1)',
+              borderWidth: 2,
+              pointBackgroundColor: '#7C3AED'
+            },
+            {
+              label: '공유주차',
+              data: [72, 60, 48, 70, 90, 95],
+              borderColor: '#16A34A',
+              backgroundColor: 'rgba(22, 163, 74, 0.1)',
+              borderWidth: 2,
+              pointBackgroundColor: '#16A34A'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                stepSize: 20
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
