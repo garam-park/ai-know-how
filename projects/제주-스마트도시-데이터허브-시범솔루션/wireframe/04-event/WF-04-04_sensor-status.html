@@ -70,54 +70,42 @@
           <!-- 지도 영역 -->
           <div class="map-container" id="sensorMap" style="margin-bottom: 24px;"></div>
 
-          <!-- 센서 유형별 요약 -->
+          <!-- 센서 상태별 KPI 카드 -->
           <div class="sensor-summary">
             <div class="sensor-type">
-              <div style="font-size: 24px;">📷</div>
+              <div style="font-size: 24px; color: #10B981;">●</div>
               <div class="sensor-type-info">
-                <div class="sensor-type-name">카메라</div>
+                <div class="sensor-type-name">정상</div>
               </div>
               <div class="sensor-counts">
-                <div class="count">총 <span class="count-value">40</span></div>
-                <div class="count"><span class="status-green">✓ 35</span></div>
-                <div class="count"><span class="status-red">⚠ 3</span></div>
-                <div class="count"><span class="status-yellow">🔧 2</span></div>
+                <div class="count"><span class="status-green status-counter" data-status="normal">42</span></div>
               </div>
             </div>
             <div class="sensor-type">
-              <div style="font-size: 24px;">🎤</div>
+              <div style="font-size: 24px; color: #F59E0B;">●</div>
               <div class="sensor-type-info">
-                <div class="sensor-type-name">음향</div>
+                <div class="sensor-type-name">점검중</div>
               </div>
               <div class="sensor-counts">
-                <div class="count">총 <span class="count-value">30</span></div>
-                <div class="count"><span class="status-green">✓ 28</span></div>
-                <div class="count"><span class="status-red">⚠ 2</span></div>
-                <div class="count"><span class="status-yellow">🔧 0</span></div>
+                <div class="count"><span class="status-yellow status-counter" data-status="maintenance">3</span></div>
               </div>
             </div>
             <div class="sensor-type">
-              <div style="font-size: 24px;">🌡️</div>
+              <div style="font-size: 24px; color: #EF4444;">●</div>
               <div class="sensor-type-info">
-                <div class="sensor-type-name">온도</div>
+                <div class="sensor-type-name">이상</div>
               </div>
               <div class="sensor-counts">
-                <div class="count">총 <span class="count-value">20</span></div>
-                <div class="count"><span class="status-green">✓ 20</span></div>
-                <div class="count"><span class="status-red">⚠ 0</span></div>
-                <div class="count"><span class="status-yellow">🔧 0</span></div>
+                <div class="count"><span class="status-red status-counter" data-status="abnormal">1</span></div>
               </div>
             </div>
             <div class="sensor-type">
-              <div style="font-size: 24px;">🔥</div>
+              <div style="font-size: 24px; color: #9CA3AF;">●</div>
               <div class="sensor-type-info">
-                <div class="sensor-type-name">화재</div>
+                <div class="sensor-type-name">오프라인</div>
               </div>
               <div class="sensor-counts">
-                <div class="count">총 <span class="count-value">10</span></div>
-                <div class="count"><span class="status-green">✓ 9</span></div>
-                <div class="count"><span class="status-red">⚠ 1</span></div>
-                <div class="count"><span class="status-yellow">🔧 0</span></div>
+                <div class="count"><span class="status-gray status-counter" data-status="offline">2</span></div>
               </div>
             </div>
           </div>
@@ -267,20 +255,193 @@
   <script src="../common/components.js"></script>
   <script src="../common/map.js"></script>
   <script>
+    // 센서 데이터 (48개 센서: 정상42, 점검3, 이상1, 오프라인2)
+    let sensorData = [
+      // 정상 센서 (42개)
+      { id: 'CAM-001-02', name: '카메라 001-02', lat: 33.3192, lng: 126.5289, status: 'normal', lastValue: '98%', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'CAM-001-03', name: '카메라 001-03', lat: 33.3156, lng: 126.5328, status: 'normal', lastValue: '95%', lastCheck: '2024-04-01 14:26:15' },
+      { id: 'CAM-002-01', name: '카메라 002-01', lat: 33.3182, lng: 126.5334, status: 'normal', lastValue: '96%', lastCheck: '2024-04-01 14:27:00' },
+      { id: 'CAM-002-02', name: '카메라 002-02', lat: 33.3214, lng: 126.5385, status: 'normal', lastValue: '97%', lastCheck: '2024-04-01 14:26:30' },
+      { id: 'CAM-003-01', name: '카메라 003-01', lat: 33.3297, lng: 126.5416, status: 'normal', lastValue: '94%', lastCheck: '2024-04-01 14:25:45' },
+      { id: 'CAM-003-02', name: '카메라 003-02', lat: 33.3084, lng: 126.5125, status: 'normal', lastValue: '99%', lastCheck: '2024-04-01 14:27:15' },
+      { id: 'CAM-004-01', name: '카메라 004-01', lat: 33.3245, lng: 126.5245, status: 'normal', lastValue: '92%', lastCheck: '2024-04-01 14:26:00' },
+      { id: 'CAM-004-02', name: '카메라 004-02', lat: 33.3120, lng: 126.5198, status: 'normal', lastValue: '93%', lastCheck: '2024-04-01 14:25:30' },
+      { id: 'MIC-001-01', name: '음향 001-01', lat: 33.5063, lng: 126.4929, status: 'normal', lastValue: '85dB', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'MIC-001-03', name: '음향 001-03', lat: 33.3192, lng: 126.5289, status: 'normal', lastValue: '82dB', lastCheck: '2024-04-01 14:26:15' },
+      { id: 'MIC-002-01', name: '음향 002-01', lat: 33.3156, lng: 126.5328, status: 'normal', lastValue: '80dB', lastCheck: '2024-04-01 14:27:00' },
+      { id: 'MIC-002-02', name: '음향 002-02', lat: 33.3182, lng: 126.5334, status: 'normal', lastValue: '84dB', lastCheck: '2024-04-01 14:26:30' },
+      { id: 'MIC-003-01', name: '음향 003-01', lat: 33.3214, lng: 126.5385, status: 'normal', lastValue: '81dB', lastCheck: '2024-04-01 14:25:45' },
+      { id: 'MIC-003-02', name: '음향 003-02', lat: 33.3297, lng: 126.5416, status: 'normal', lastValue: '79dB', lastCheck: '2024-04-01 14:27:15' },
+      { id: 'TEMP-001-02', name: '온도 001-02', lat: 33.3084, lng: 126.5125, status: 'normal', lastValue: '22.5℃', lastCheck: '2024-04-01 14:26:00' },
+      { id: 'TEMP-001-03', name: '온도 001-03', lat: 33.3245, lng: 126.5245, status: 'normal', lastValue: '21.8℃', lastCheck: '2024-04-01 14:25:30' },
+      { id: 'TEMP-002-01', name: '온도 002-01', lat: 33.3120, lng: 126.5198, status: 'normal', lastValue: '23.1℃', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'TEMP-002-02', name: '온도 002-02', lat: 33.5063, lng: 126.4929, status: 'normal', lastValue: '20.9℃', lastCheck: '2024-04-01 14:26:15' },
+      { id: 'TEMP-003-01', name: '온도 003-01', lat: 33.3192, lng: 126.5289, status: 'normal', lastValue: '22.3℃', lastCheck: '2024-04-01 14:27:00' },
+      { id: 'TEMP-003-02', name: '온도 003-02', lat: 33.3156, lng: 126.5328, status: 'normal', lastValue: '21.6℃', lastCheck: '2024-04-01 14:26:30' },
+      { id: 'FIRE-001-02', name: '화재 001-02', lat: 33.3182, lng: 126.5334, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:25:45' },
+      { id: 'FIRE-002-01', name: '화재 002-01', lat: 33.3214, lng: 126.5385, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:27:15' },
+      { id: 'FIRE-003-01', name: '화재 003-01', lat: 33.3297, lng: 126.5416, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:26:00' },
+      { id: 'FIRE-003-02', name: '화재 003-02', lat: 33.3084, lng: 126.5125, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:25:30' },
+      { id: 'CAM-005-01', name: '카메라 005-01', lat: 33.3245, lng: 126.5245, status: 'normal', lastValue: '91%', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'CAM-005-02', name: '카메라 005-02', lat: 33.3120, lng: 126.5198, status: 'normal', lastValue: '94%', lastCheck: '2024-04-01 14:26:15' },
+      { id: 'CAM-006-01', name: '카메라 006-01', lat: 33.5063, lng: 126.4929, status: 'normal', lastValue: '97%', lastCheck: '2024-04-01 14:27:00' },
+      { id: 'CAM-006-02', name: '카메라 006-02', lat: 33.3192, lng: 126.5289, status: 'normal', lastValue: '95%', lastCheck: '2024-04-01 14:26:30' },
+      { id: 'MIC-004-01', name: '음향 004-01', lat: 33.3156, lng: 126.5328, status: 'normal', lastValue: '83dB', lastCheck: '2024-04-01 14:25:45' },
+      { id: 'MIC-004-02', name: '음향 004-02', lat: 33.3182, lng: 126.5334, status: 'normal', lastValue: '80dB', lastCheck: '2024-04-01 14:27:15' },
+      { id: 'TEMP-004-01', name: '온도 004-01', lat: 33.3214, lng: 126.5385, status: 'normal', lastValue: '22.8℃', lastCheck: '2024-04-01 14:26:00' },
+      { id: 'TEMP-004-02', name: '온도 004-02', lat: 33.3297, lng: 126.5416, status: 'normal', lastValue: '21.2℃', lastCheck: '2024-04-01 14:25:30' },
+      { id: 'FIRE-004-01', name: '화재 004-01', lat: 33.3084, lng: 126.5125, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'CAM-007-01', name: '카메라 007-01', lat: 33.3245, lng: 126.5245, status: 'normal', lastValue: '96%', lastCheck: '2024-04-01 14:26:15' },
+      { id: 'CAM-007-02', name: '카메라 007-02', lat: 33.3120, lng: 126.5198, status: 'normal', lastValue: '93%', lastCheck: '2024-04-01 14:27:00' },
+      { id: 'MIC-005-01', name: '음향 005-01', lat: 33.5063, lng: 126.4929, status: 'normal', lastValue: '81dB', lastCheck: '2024-04-01 14:26:30' },
+      { id: 'MIC-005-02', name: '음향 005-02', lat: 33.3192, lng: 126.5289, status: 'normal', lastValue: '82dB', lastCheck: '2024-04-01 14:25:45' },
+      { id: 'TEMP-005-01', name: '온도 005-01', lat: 33.3156, lng: 126.5328, status: 'normal', lastValue: '23.4℃', lastCheck: '2024-04-01 14:27:15' },
+      { id: 'TEMP-005-02', name: '온도 005-02', lat: 33.3182, lng: 126.5334, status: 'normal', lastValue: '20.5℃', lastCheck: '2024-04-01 14:26:00' },
+      { id: 'FIRE-005-01', name: '화재 005-01', lat: 33.3214, lng: 126.5385, status: 'normal', lastValue: '정상', lastCheck: '2024-04-01 14:25:30' },
+      { id: 'CAM-008-01', name: '카메라 008-01', lat: 33.3297, lng: 126.5416, status: 'normal', lastValue: '98%', lastCheck: '2024-04-01 14:26:45' },
+      { id: 'CAM-008-02', name: '카메라 008-02', lat: 33.3084, lng: 126.5125, status: 'normal', lastValue: '92%', lastCheck: '2024-04-01 14:26:15' },
+      // 점검 센서 (3개)
+      { id: 'CAM-002-01', name: '카메라 002-01', lat: 33.3245, lng: 126.5245, status: 'maintenance', lastValue: '-', lastCheck: '2024-03-31 22:10:00' },
+      { id: 'MIC-002-03', name: '음향 002-03', lat: 33.3120, lng: 126.5198, status: 'maintenance', lastValue: '-', lastCheck: '2024-03-31 18:30:00' },
+      { id: 'TEMP-002-03', name: '온도 002-03', lat: 33.5063, lng: 126.4929, status: 'maintenance', lastValue: '-', lastCheck: '2024-03-30 10:15:00' },
+      // 이상 센서 (1개)
+      { id: 'CAM-001-01', name: '카메라 001-01', lat: 33.3192, lng: 126.5289, status: 'abnormal', lastValue: '0%', lastCheck: '2024-04-01 14:25:30' },
+      // 오프라인 센서 (2개)
+      { id: 'FIRE-002-02', name: '화재 002-02', lat: 33.3156, lng: 126.5328, status: 'offline', lastValue: '신호없음', lastCheck: '2024-04-01 10:00:00' },
+      { id: 'MIC-003-03', name: '음향 003-03', lat: 33.3182, lng: 126.5334, status: 'offline', lastValue: '신호없음', lastCheck: '2024-04-01 08:45:00' }
+    ];
+
+    // 상태별 카운터
+    let statusCounter = {
+      normal: 42,
+      maintenance: 3,
+      abnormal: 1,
+      offline: 2
+    };
+
+    function getMarkerColor(status) {
+      const colors = {
+        'normal': '#10B981',    // 초록
+        'maintenance': '#F59E0B',  // 노랑
+        'abnormal': '#EF4444',     // 빨강
+        'offline': '#9CA3AF'       // 회색
+      };
+      return colors[status] || '#9CA3AF';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('event');
 
       // 지도 초기화
-      const map = createJejuMap('sensorMap');
-      if (map) {
-        // 센서 마커 추가
-        const sensorMarkers = [
-          { lat: 33.5063, lng: 126.4929, title: 'CAM-001-01 (카메라-이상)', content: '상태: 이상' },
-          { lat: 33.3192, lng: 126.5289, title: 'MIC-001-02 (음향-정상)', content: '상태: 정상' },
-          { lat: 33.3156, lng: 126.5328, title: 'TEMP-001-01 (온도-정상)', content: '상태: 정상' },
-          { lat: 33.3182, lng: 126.5334, title: 'FIRE-001-01 (화재-이상)', content: '상태: 이상' }
-        ];
-        addMarkers(map, sensorMarkers);
+      const mapContainer = document.getElementById('sensorMap');
+      if (mapContainer) {
+        // 클러스터된 마커 추가 (DOM 기반 시뮬레이션)
+        const markers = sensorData.map(sensor => ({
+          id: sensor.id,
+          name: sensor.name,
+          x: (sensor.lng - 126.4) * 100,  // 경도를 백분율로 변환
+          y: (33.6 - sensor.lat) * 100,   // 위도를 백분율로 변환
+          status: sensor.status,
+          color: getMarkerColor(sensor.status),
+          sensor: sensor
+        }));
+
+        const clusterGroup = addClusteredMarkers(mapContainer, markers, { gridSize: 3, clusterSize: 10 });
+
+        // 마커 클릭 이벤트 처리 (개별 마커 클릭 시 상세 팝업)
+        const originalAddClusteredMarkers = window.addClusteredMarkers;
+
+        // 개별 마커 클릭 후 팝업 표시를 위한 함수 오버라이드
+        const markerLayerContainer = mapContainer.querySelector('.clustered-markers-container');
+        if (markerLayerContainer) {
+          const originalShowMarkerPopup = markerLayerContainer.__showMarkerPopup;
+
+          // 마커 클릭 이벤트를 캡처하여 상세 정보 표시
+          mapContainer.addEventListener('click', function(e) {
+            const markerDiv = e.target.closest('[class*="marker-"]');
+            if (markerDiv) {
+              // 마커 위치 정보 추출
+              const x = parseFloat(markerDiv.style.left);
+              const y = parseFloat(markerDiv.style.top);
+
+              // 마커 위치로부터 해당 센서 찾기
+              let closestSensor = null;
+              let closestDistance = Infinity;
+
+              sensorData.forEach(sensor => {
+                const sensorX = (sensor.lng - 126.4) * 100;
+                const sensorY = (33.6 - sensor.lat) * 100;
+                const distance = Math.sqrt(Math.pow(sensorX - x, 2) + Math.pow(sensorY - y, 2));
+
+                if (distance < closestDistance) {
+                  closestDistance = distance;
+                  closestSensor = sensor;
+                }
+              });
+
+              if (closestSensor) {
+                const statusText = {
+                  'normal': '정상',
+                  'maintenance': '점검중',
+                  'abnormal': '이상',
+                  'offline': '오프라인'
+                };
+                showModal(`${closestSensor.name} 상세정보`, `
+                  <div style="font-size: 13px;">
+                    <p><strong>센서ID:</strong> ${closestSensor.id}</p>
+                    <p><strong>위치:</strong> 위도 ${closestSensor.lat.toFixed(4)}, 경도 ${closestSensor.lng.toFixed(4)}</p>
+                    <p><strong>최근값:</strong> ${closestSensor.lastValue}</p>
+                    <p><strong>최종점검일:</strong> ${closestSensor.lastCheck}</p>
+                    <p><strong>상태:</strong> <span style="color: ${getMarkerColor(closestSensor.status)};">● ${statusText[closestSensor.status]}</span></p>
+                  </div>
+                `, { showCancel: false, confirmText: '닫기' });
+              }
+            }
+          });
+        }
+
+        // 상태별 카운터 업데이트 함수
+        function updateStatusCounter() {
+          document.querySelectorAll('.status-counter').forEach(el => {
+            const status = el.dataset.status;
+            el.textContent = statusCounter[status] || 0;
+          });
+        }
+
+        // 실시간 상태 업데이트 (20초 간격, 랜덤 1~2개 센서 상태 변경)
+        setInterval(() => {
+          const changeCount = Math.random() < 0.5 ? 1 : 2;
+          for (let i = 0; i < changeCount; i++) {
+            const randomIdx = Math.floor(Math.random() * sensorData.length);
+            const sensor = sensorData[randomIdx];
+
+            // 이전 상태 카운터 감소
+            statusCounter[sensor.status]--;
+
+            // 새로운 상태로 변경 (0~3 중 랜덤)
+            const statuses = ['normal', 'maintenance', 'abnormal', 'offline'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            sensor.status = randomStatus;
+            sensor.lastCheck = new Date().toLocaleString('ko-KR');
+
+            // 새로운 상태 카운터 증가
+            statusCounter[randomStatus]++;
+          }
+
+          // UI 업데이트
+          updateStatusCounter();
+
+          // 마커 색상 재계산 (간단한 재렌더링)
+          const markerElements = mapContainer.querySelectorAll('[class*="marker-"]');
+          markerElements.forEach((el, idx) => {
+            if (idx < sensorData.length) {
+              el.style.backgroundColor = getMarkerColor(sensorData[idx].status);
+            }
+          });
+        }, 20000);
+
+        // 초기 상태 카운터 표시
+        updateStatusCounter();
       }
     });
   </script>

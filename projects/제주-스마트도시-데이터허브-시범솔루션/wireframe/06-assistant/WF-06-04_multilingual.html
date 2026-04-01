@@ -169,31 +169,8 @@
           <div class="chat-input-area">
             <div style="margin-bottom: 12px;">
               <div style="font-size: 12px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">자주 묻는 질문 (FAQ)</div>
-              <div class="faq-grid">
-                <div class="faq-item">
-                  <div class="faq-q">❓ 제주도 최적 방문 시기는?</div>
-                  <div class="faq-a">봄(4-5월)과 가을(9-10월)이 날씨가 쾌적합니다</div>
-                </div>
-                <div class="faq-item">
-                  <div class="faq-q">❓ 공항에서 시내까지 거리는?</div>
-                  <div class="faq-a">약 16km, 시내버스/택시로 30-50분</div>
-                </div>
-                <div class="faq-item">
-                  <div class="faq-q">❓ 한라산 등산 난이도는?</div>
-                  <div class="faq-a">중상 난이도, 편도 약 4-5시간 소요</div>
-                </div>
-                <div class="faq-item">
-                  <div class="faq-q">❓ 신용카드 사용 가능한가?</div>
-                  <div class="faq-a">대부분 가능하나 현금 준비 권장</div>
-                </div>
-                <div class="faq-item">
-                  <div class="faq-q">❓ 인터넷/통신은 잘 되나?</div>
-                  <div class="faq-a">관광지 대부분 무료 WiFi 제공</div>
-                </div>
-                <div class="faq-item">
-                  <div class="faq-q">❓ 숙박 예약은 어디서?</div>
-                  <div class="faq-a">온라인 플랫폼 또는 관광 안내소</div>
-                </div>
+              <div class="faq-grid" id="faq-grid">
+                <!-- FAQ items will be dynamically loaded -->
               </div>
             </div>
 
@@ -222,8 +199,85 @@
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    // FAQ data in multiple languages
+    const faqData = {
+      ko: [
+        { q: '❓ 제주도 최적 방문 시기는?', a: '봄(4-5월)과 가을(9-10월)이 날씨가 쾌적합니다' },
+        { q: '❓ 공항에서 시내까지 거리는?', a: '약 16km, 시내버스/택시로 30-50분' },
+        { q: '❓ 한라산 등산 난이도는?', a: '중상 난이도, 편도 약 4-5시간 소요' },
+        { q: '❓ 신용카드 사용 가능한가?', a: '대부분 가능하나 현금 준비 권장' },
+        { q: '❓ 인터넷/통신은 잘 되나?', a: '관광지 대부분 무료 WiFi 제공' },
+        { q: '❓ 주차장 이용료는?', a: '지역별로 상이하며 시간당 500-1,000원' },
+        { q: '❓ 버스 운행 시간은?', a: '일반적으로 06:00-23:00, 야간버스도 운행' },
+        { q: '❓ 환경 보호 수칙은?', a: '자연유산 훼손 금지, 쓰레기 분류 배출' },
+        { q: '❓ 복지 지원 대상은?', a: '주민등록 기준 3개월 이상 거주자' },
+        { q: '❓ 민원 신청 절차는?', a: '온라인 신청 또는 주민센터 방문' }
+      ],
+      en: [
+        { q: '❓ Best time to visit Jeju?', a: 'Spring (Apr-May) and Autumn (Sep-Oct) have pleasant weather' },
+        { q: '❓ Distance from airport to city?', a: 'About 16km, 30-50 minutes by bus/taxi' },
+        { q: '❓ Hiking difficulty for Halla Mountain?', a: 'Moderate-Hard, about 4-5 hours one-way' },
+        { q: '❓ Can I use credit cards?', a: 'Mostly available, but cash is recommended' },
+        { q: '❓ Is internet/communication available?', a: 'Free WiFi provided at most tourist spots' },
+        { q: '❓ What is the parking fee?', a: 'Varies by area, 500-1,000 won per hour' },
+        { q: '❓ What are the bus operation hours?', a: 'Generally 06:00-23:00, night buses also available' },
+        { q: '❓ Environmental protection rules?', a: 'No damage to natural heritage, proper waste disposal' },
+        { q: '❓ Who is eligible for welfare support?', a: 'Residents registered for 3+ months' },
+        { q: '❓ How to apply for public services?', a: 'Online application or visit citizen center' }
+      ],
+      zh: [
+        { q: '❓ 访问济州岛的最佳时间？', a: '春季（4-5月）和秋季（9-10月）天气宜人' },
+        { q: '❓ 机场到市区的距离？', a: '约16公里，乘坐公交车/出租车30-50分钟' },
+        { q: '❓ 汉拿山登山难度？', a: '中等难度，单程约4-5小时' },
+        { q: '❓ 可以使用信用卡吗？', a: '大多数地方接受，但建议准备现金' },
+        { q: '❓ 网络通信情况如何？', a: '大多数旅游景点提供免费WiFi' },
+        { q: '❓ 停车费是多少？', a: '因地区而异，每小时500-1,000韩元' },
+        { q: '❓ 公交车运营时间？', a: '通常06:00-23:00，也有夜间公交' },
+        { q: '❓ 环境保护规则？', a: '禁止破坏自然遗产，进行垃圾分类' },
+        { q: '❓ 福利支持对象？', a: '在济州居住3个月以上的居民' },
+        { q: '❓ 如何申请公共服务？', a: '在线申请或访问市民中心' }
+      ],
+      ja: [
+        { q: '❓ 済州島の最適な訪問時期？', a: '春（4～5月）と秋（9～10月）が過ごしやすいです' },
+        { q: '❓ 空港から市街地までの距離？', a: '約16km、バス/タクシーで30～50分' },
+        { q: '❓ 漢拏山登山の難易度？', a: '中上程度、片道約4～5時間かかります' },
+        { q: '❓ クレジットカードは使えますか？', a: 'ほとんどのカードが使えますが現金推奨' },
+        { q: '❓ インターネット通信は良いですか？', a: 'ほとんどの観光地で無料WiFi利用可能' },
+        { q: '❓ 駐車料金は？', a: '地域によって異なり、時間当たり500～1,000ウォン' },
+        { q: '❓ バス運行時間は？', a: '一般的に06:00～23:00、夜間バスも運行' },
+        { q: '❓ 環境保全ルール？', a: '自然遺産の破損禁止、ゴミの分別排出' },
+        { q: '❓ 福祉支援の対象者？', a: '3ヶ月以上居住する住民登録者' },
+        { q: '❓ 公共サービスの申請方法？', a: 'オンライン申請または住民センター訪問' }
+      ]
+    };
+
+    function renderFAQ(language = 'ko') {
+      const faqGrid = document.getElementById('faq-grid');
+      const faqs = faqData[language] || faqData['ko'];
+
+      faqGrid.innerHTML = '';
+      faqs.forEach(faq => {
+        const item = document.createElement('div');
+        item.className = 'faq-item';
+        item.innerHTML = `
+          <div class="faq-q">${faq.q}</div>
+          <div class="faq-a">${faq.a}</div>
+        `;
+        item.addEventListener('click', function() {
+          const question = this.querySelector('.faq-q').textContent.replace('❓ ', '');
+          const input = document.querySelector('.chat-input');
+          input.value = question;
+          input.focus();
+        });
+        faqGrid.appendChild(item);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('assistant');
+
+      // Initialize FAQ
+      renderFAQ('ko');
 
       // Language selector toggle
       const langDropdown = document.getElementById('lang-dropdown');
@@ -244,7 +298,9 @@
           document.getElementById('selected-lang').textContent = langName;
           langMenu.classList.remove('active');
 
-          // Simulate language change
+          // Update FAQ content for selected language
+          renderFAQ(lang);
+
           console.log('Language changed to:', lang);
         });
       });
@@ -258,7 +314,7 @@
         });
       });
 
-      // Star rating
+      // Star rating with feedback toast
       document.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', function() {
           const rating = this.dataset.rating;
@@ -269,16 +325,8 @@
               s.classList.remove('active');
             }
           });
-        });
-      });
-
-      // FAQ interaction
-      document.querySelectorAll('.faq-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const question = this.querySelector('.faq-q').textContent.replace('❓ ', '');
-          const input = document.querySelector('.chat-input');
-          input.value = question;
-          input.focus();
+          // Show toast notification
+          showToast('평가 감사합니다', 'success', 3000);
         });
       });
     });

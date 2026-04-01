@@ -106,6 +106,35 @@
       background: #F9FAFB;
       border-radius: 6px;
     }
+    .comparison-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .comparison-column {
+      display: flex;
+      flex-direction: column;
+    }
+    .comparison-column-header {
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 12px;
+      font-size: 13px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E5E7EB;
+    }
+    .comparison-column-content {
+      flex: 1;
+      font-size: 13px;
+      color: #4B5563;
+      line-height: 1.6;
+      padding: 12px;
+      background: #F9FAFB;
+      border-radius: 6px;
+      overflow-y: auto;
+      max-height: 400px;
+    }
   </style>
 </head>
 <body>
@@ -161,19 +190,39 @@
             </div>
           </div>
 
-          <!-- 탭 메뉴 -->
-          <div style="display: flex; border-bottom: 1px solid #E5E7EB; margin-bottom: 24px;">
+          <!-- 탭 메뉴 (12개 타입) -->
+          <div style="display: flex; flex-wrap: wrap; border-bottom: 1px solid #E5E7EB; margin-bottom: 24px; gap: 2px;">
             <button class="summary-tab-button active" onclick="switchTab(this, 'all')">전체</button>
             <button class="summary-tab-button" onclick="switchTab(this, 'complaint')">민원요약</button>
             <button class="summary-tab-button" onclick="switchTab(this, 'policy')">정책요약</button>
             <button class="summary-tab-button" onclick="switchTab(this, 'meeting')">회의록</button>
             <button class="summary-tab-button" onclick="switchTab(this, 'report')">보고서</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'ordinance')">조례</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'letter')">공문</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'news')">뉴스</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'sns')">SNS</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'call')">전화녹취</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'field')">현장보고</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'audit')">감사자료</button>
+            <button class="summary-tab-button" onclick="switchTab(this, 'other')">기타</button>
+          </div>
+
+          <!-- 정렬 옵션 -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B7280;">
+              정렬:
+              <select id="sortSelect" onchange="sortCards(this.value)" style="padding: 6px 8px; border: 1px solid #E5E7EB; border-radius: 4px; font-size: 13px; cursor: pointer;">
+                <option value="date">최신순</option>
+                <option value="confidence">신뢰도순</option>
+                <option value="length">길이순</option>
+              </select>
+            </label>
           </div>
 
           <!-- 카드 그리드 -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-            <!-- 카드 1 -->
-            <div class="summary-card" onclick="openPanel(this)">
+          <div id="cardGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- 민원요약 카드들 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="complaint" data-confidence="92">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
                   <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">민원요약</div>
@@ -189,8 +238,8 @@
               <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 92% | 2026-04-02 14:30</div>
             </div>
 
-            <!-- 카드 2 -->
-            <div class="summary-card" onclick="openPanel(this)">
+            <!-- 정책요약 카드들 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="policy" data-confidence="88">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
                   <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">정책요약</div>
@@ -206,8 +255,8 @@
               <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 88% | 2026-04-02 13:15</div>
             </div>
 
-            <!-- 카드 3 -->
-            <div class="summary-card" onclick="openPanel(this)">
+            <!-- 회의록 카드들 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="meeting" data-confidence="75">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
                   <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">회의록</div>
@@ -223,8 +272,8 @@
               <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 75% | 2026-04-02 11:45</div>
             </div>
 
-            <!-- 카드 4 -->
-            <div class="summary-card" onclick="openPanel(this)">
+            <!-- 보고서 카드들 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="report" data-confidence="95">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
                   <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">보고서</div>
@@ -240,8 +289,8 @@
               <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 95% | 2026-04-02 10:20</div>
             </div>
 
-            <!-- 카드 5 -->
-            <div class="summary-card" onclick="openPanel(this)">
+            <!-- 환경 민원 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="complaint" data-confidence="81">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
                   <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">민원요약</div>
@@ -257,21 +306,140 @@
               <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 81% | 2026-04-01 16:05</div>
             </div>
 
-            <!-- 카드 6 -->
-            <div class="summary-card" onclick="openPanel(this)">
+            <!-- 조례 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="ordinance" data-confidence="97">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
-                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">정책요약</div>
-                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">도시 재정비 종합 계획안</div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">조례</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">제주시 공영주차장 관리 조례 개정안</div>
                 </div>
-                <span style="background: #FEE2E2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 12px;">도시계획</span>
+                <span style="background: #E0E7FF; color: #4F46E5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">조례</span>
               </div>
-              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">제주도 구도심 지역의 도시 재정비 및 현대화 추진 계획...</div>
-              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 2,834자 → 요약: 421자</div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">공영주차장 요금체계 개선 및 위반 차량 처리 절차 규정...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 4,562자 → 요약: 678자</div>
               <div class="confidence-bar">
-                <div class="confidence-fill high" style="width: 90%;"></div>
+                <div class="confidence-fill high" style="width: 97%;"></div>
               </div>
-              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 90% | 2026-04-01 14:32</div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 97% | 2026-04-01 09:15</div>
+            </div>
+
+            <!-- 공문 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="letter" data-confidence="86">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">공문</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">도로 안전 점검 시행 공문</div>
+                </div>
+                <span style="background: #DDD6FE; color: #5B21B6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">공문</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">전국 일관된 도로 안전 점검 기준 및 정기 실시 안내...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 2,134자 → 요약: 312자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 86%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 86% | 2026-03-31 10:50</div>
+            </div>
+
+            <!-- 뉴스 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="news" data-confidence="79">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">뉴스</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">제주도 관광객 증가세 지속</div>
+                </div>
+                <span style="background: #FCE7F3; color: #BE185D; padding: 4px 8px; border-radius: 4px; font-size: 12px;">뉴스</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">지난해 대비 30% 증가한 관광객 방문으로 인한 도시 혼잡 심화...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 1,456자 → 요약: 198자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill medium" style="width: 79%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 79% | 2026-03-30 15:20</div>
+            </div>
+
+            <!-- SNS 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="sns" data-confidence="72">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">SNS</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">소셜미디어 시민 의견 수집</div>
+                </div>
+                <span style="background: #FEF08A; color: #854D0E; padding: 4px 8px; border-radius: 4px; font-size: 12px;">SNS</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">트위터, 페이스북 시민의견 분석 및 만족도 평가...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 856자 → 요약: 156자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill medium" style="width: 72%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 72% | 2026-03-29 11:30</div>
+            </div>
+
+            <!-- 전화녹취 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="call" data-confidence="68">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">전화녹취</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">고객 만족도 조사 통화 기록</div>
+                </div>
+                <span style="background: #F3E8FF; color: #7E22CE; padding: 4px 8px; border-radius: 4px; font-size: 12px;">통화</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">민원 처리 후 고객 만족도 전화 조사 결과 분석...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 1,234자 → 요약: 201자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill medium" style="width: 68%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 68% | 2026-03-28 14:00</div>
+            </div>
+
+            <!-- 현장보고 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="field" data-confidence="89">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">현장보고</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">도로 점검 현장 보고서</div>
+                </div>
+                <span style="background: #CFFAFE; color: #0891B2; padding: 4px 8px; border-radius: 4px; font-size: 12px;">현장</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">신도심 지역 도로 포트홀 및 포장 상태 점검 결과...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 1,678자 → 요약: 267자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 89%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 89% | 2026-03-27 16:45</div>
+            </div>
+
+            <!-- 감사자료 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="audit" data-confidence="93">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">감사자료</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">2026년 1분기 감사 결과</div>
+                </div>
+                <span style="background: #FECACA; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-size: 12px;">감사</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">민원 처리 절차 및 예산 운영 현황 종합 감사 보고...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 3,892자 → 요약: 587자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 93%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 93% | 2026-03-26 13:10</div>
+            </div>
+
+            <!-- 기타 카드 -->
+            <div class="summary-card" onclick="openPanel(this)" data-type="other" data-confidence="84">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">기타</div>
+                  <div style="font-weight: 600; color: #1F2937; font-size: 14px; line-height: 1.4;">관광객 피드백 분석 보고</div>
+                </div>
+                <span style="background: #E5E7EB; color: #4B5563; padding: 4px 8px; border-radius: 4px; font-size: 12px;">기타</span>
+              </div>
+              <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px; line-height: 1.5;">제주 방문 관광객의 경험 및 개선 요청사항 종합 분석...</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 8px;">원문 길이: 2,345자 → 요약: 398자</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill high" style="width: 84%;"></div>
+              </div>
+              <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">신뢰도: 84% | 2026-03-25 10:25</div>
             </div>
           </div>
 
@@ -300,24 +468,33 @@
         </button>
       </div>
       <div class="side-panel-body">
-        <div class="comparison-section">
-          <div class="comparison-title">원본 텍스트</div>
-          <div class="comparison-text">
-            제주도 신도심 지역의 주차장 부족으로 인해 최근 교통 혼잡이 심화되고 있습니다. 특히 주말의 경우 관광객과 지역 주민들의 차량으로 인해 도로 혼잡이 가중되고 있으며, 이로 인한 주민 민원이 지속적으로 증가하고 있는 상황입니다. 해당 지역에 추가 주차장 조성 및 대중교통 활성화가 필요합니다.
+        <!-- 원문/요약 비교 뷰 -->
+        <div class="comparison-view">
+          <div class="comparison-column">
+            <div class="comparison-column-header">원본 텍스트</div>
+            <div class="comparison-column-content">
+              제주도 신도심 지역의 주차장 부족으로 인해 최근 교통 혼잡이 심화되고 있습니다. 특히 주말의 경우 관광객과 지역 주민들의 차량으로 인해 도로 혼잡이 가중되고 있으며, 이로 인한 주민 민원이 지속적으로 증가하고 있는 상황입니다. 해당 지역에 추가 주차장 조성 및 대중교통 활성화가 필요합니다.
+            </div>
+          </div>
+
+          <div class="comparison-column">
+            <div class="comparison-column-header">요약 결과</div>
+            <div class="comparison-column-content">
+              <div>제주 신도심 주차장 부족으로 교통 혼잡 심화, 특히 주말 관광객 증가로 민원 지속 증가. 추가 주차장 조성 및 대중교통 활성화 필요.</div>
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E7EB;">
+                <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px; font-size: 12px;">신뢰도</div>
+                <div class="confidence-bar" style="margin-bottom: 4px;">
+                  <div class="confidence-fill high" style="width: 92%;"></div>
+                </div>
+                <div style="font-size: 11px; color: #6B7280;">92%</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="comparison-section">
-          <div class="comparison-title">요약 결과</div>
-          <div class="comparison-text">
-            제주 신도심 주차장 부족으로 교통 혼잡 심화, 특히 주말 관광객 증가로 민원 지속 증가. 추가 주차장 조성 및 대중교통 활성화 필요.
-          </div>
-        </div>
-
-        <div class="comparison-section">
-          <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px; font-size: 14px;">메타데이터</div>
-          <div style="font-size: 13px; color: #4B5563; line-height: 1.8;">
-            <div><strong>신뢰도:</strong> 92%</div>
+        <div class="comparison-section" style="margin-top: 16px;">
+          <div style="font-weight: 600; color: #1F2937; margin-bottom: 8px; font-size: 13px;">메타데이터</div>
+          <div style="font-size: 12px; color: #4B5563; line-height: 1.7;">
             <div><strong>모델:</strong> GPT-4 Turbo</div>
             <div><strong>처리시간:</strong> 2.3초</div>
             <div><strong>원문길이:</strong> 1,245자</div>
@@ -353,7 +530,37 @@
         btn.classList.remove('active');
       });
       el.classList.add('active');
-      showToast(tab + ' 탭으로 필터링되었습니다.', 'info');
+
+      const cards = document.querySelectorAll('.summary-card');
+      cards.forEach(card => {
+        if (tab === 'all') {
+          card.style.display = '';
+        } else {
+          card.style.display = card.dataset.type === tab ? '' : 'none';
+        }
+      });
+
+      showToast(tab === 'all' ? '전체 탭으로 필터링되었습니다.' : tab + ' 탭으로 필터링되었습니다.', 'info');
+    }
+
+    function sortCards(sortType) {
+      const grid = document.getElementById('cardGrid');
+      const cards = Array.from(document.querySelectorAll('.summary-card'));
+
+      cards.sort((a, b) => {
+        if (sortType === 'confidence') {
+          return parseInt(b.dataset.confidence) - parseInt(a.dataset.confidence);
+        } else if (sortType === 'length') {
+          const aLength = parseInt(a.querySelector('.confidence-bar').parentElement.textContent.match(/\d+/)[0]);
+          const bLength = parseInt(b.querySelector('.confidence-bar').parentElement.textContent.match(/\d+/)[0]);
+          return bLength - aLength;
+        } else { // date (기본값)
+          return 0; // 원래 순서 유지
+        }
+      });
+
+      cards.forEach(card => grid.appendChild(card));
+      showToast(sortType === 'confidence' ? '신뢰도순으로 정렬되었습니다.' : sortType === 'length' ? '길이순으로 정렬되었습니다.' : '최신순으로 정렬되었습니다.', 'info');
     }
 
     function openPanel(el) {

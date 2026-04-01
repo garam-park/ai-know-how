@@ -110,7 +110,10 @@
 
           <!-- 메인 추출 결과 테이블 -->
           <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
-            <h2 class="text-lg font-semibold mb-4">추출 결과 목록</h2>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold">추출 결과 목록</h2>
+              <input type="text" placeholder="검색..." class="filter-input" id="nerSearchInput" style="width: 200px;">
+            </div>
             <div class="overflow-x-auto">
               <table class="data-table" id="nerTable">
                 <thead>
@@ -166,6 +169,97 @@
                     <td>
                       <span class="badge danger">[교통키워드]고속도로</span>
                       <span class="badge danger">[교통키워드]대란</span>
+                    </td>
+                    <td><span class="badge default">미검증</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5683</td>
+                    <td>김영희 주민이 제주시청에 신청...</td>
+                    <td>
+                      <span class="badge" style="background-color: #E9D5FF; color: #6B21A8;">[인명]김영희</span>
+                      <span class="badge info">[지명]제주시</span>
+                      <span class="badge success">[기관명]제주시청</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5684</td>
+                    <td>서울에서 온 이종무 박사가...</td>
+                    <td>
+                      <span class="badge info">[지명]서울</span>
+                      <span class="badge" style="background-color: #E9D5FF; color: #6B21A8;">[인명]이종무</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5685</td>
+                    <td>2026년 4월 1일에 환경부에서...</td>
+                    <td>
+                      <span class="badge" style="background-color: #FACC15; color: black;">[날짜]2026년 4월 1일</span>
+                      <span class="badge success">[기관명]환경부</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5686</td>
+                    <td>중앙일보에서 김민수 기자가 보도...</td>
+                    <td>
+                      <span class="badge success">[기관명]중앙일보</span>
+                      <span class="badge" style="background-color: #E9D5FF; color: #6B21A8;">[인명]김민수</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5687</td>
+                    <td>부산시 강서구청에서 발표...</td>
+                    <td>
+                      <span class="badge info">[지명]부산시</span>
+                      <span class="badge info">[지명]강서구</span>
+                      <span class="badge success">[기관명]강서구청</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5688</td>
+                    <td>이사장 박은희가 3월 28일에...</td>
+                    <td>
+                      <span class="badge" style="background-color: #E9D5FF; color: #6B21A8;">[인명]박은희</span>
+                      <span class="badge" style="background-color: #FACC15; color: black;">[날짜]3월 28일</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5689</td>
+                    <td>5,000만원의 예산이 필요하다...</td>
+                    <td>
+                      <span class="badge" style="background-color: #FCD34D; color: #78350F;">[금액]5,000만원</span>
+                    </td>
+                    <td><span class="badge default">미검증</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5690</td>
+                    <td>강원도 인제군의 1004번 도로...</td>
+                    <td>
+                      <span class="badge info">[지명]강원도</span>
+                      <span class="badge info">[지명]인제군</span>
+                      <span class="badge" style="background-color: #F59E0B; color: white;">[도로명]1004번 도로</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5691</td>
+                    <td>대통령실에서 이준석 소장이...</td>
+                    <td>
+                      <span class="badge success">[기관명]대통령실</span>
+                      <span class="badge" style="background-color: #E9D5FF; color: #6B21A8;">[인명]이준석</span>
+                    </td>
+                    <td><span class="badge success">승인</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-blue-50" onclick="showHighlightView(this)">
+                    <td>DOC-20260325-5692</td>
+                    <td>10억 원대의 손실이 예상된다...</td>
+                    <td>
+                      <span class="badge" style="background-color: #FCD34D; color: #78350F;">[금액]10억 원</span>
                     </td>
                     <td><span class="badge default">미검증</span></td>
                   </tr>
@@ -257,6 +351,9 @@
 
       // 테이블 정렬
       initTableSort('nerTable');
+
+      // 테이블 필터
+      initTableFilter('nerTable', 'nerSearchInput');
     });
 
     function showHighlightView(row) {

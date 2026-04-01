@@ -52,6 +52,10 @@
     .action-btn:hover { background: #f3f4f6; border-color: #3b82f6; color: #3b82f6; }
     .action-btn.primary { background: #3b82f6; color: white; border-color: #3b82f6; }
     .action-btn.primary:hover { background: #2563eb; border-color: #2563eb; }
+    .preview-container { transform-origin: top center; transition: transform 0.2s; }
+    .metadata-list { list-style: none; padding: 0; margin: 0; }
+    .metadata-list li { padding: 4px 0; font-size: 12px; color: #4b5563; }
+    .metadata-list li strong { color: #1f2937; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -298,11 +302,25 @@
               </div>
               <div class="metadata-item">
                 <div class="metadata-label">포함 차트</div>
-                <div class="metadata-value">5개</div>
+                <div class="metadata-value">3개</div>
               </div>
               <div class="metadata-item">
                 <div class="metadata-label">포함 표</div>
-                <div class="metadata-value">7개</div>
+                <div class="metadata-value">2개</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-label">총 페이지</div>
+                <div class="metadata-value">12</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-label">데이터 소스</div>
+                <div class="metadata-value">
+                  <ul class="metadata-list">
+                    <li>• 교통량 DB</li>
+                    <li>• 주차장 시스템</li>
+                    <li>• 버스 운영 데이터</li>
+                  </ul>
+                </div>
               </div>
               <div class="metadata-item">
                 <div class="metadata-label">상태</div>
@@ -322,12 +340,92 @@
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('report');
 
+      const previewContainer = document.querySelector('.preview-container');
+      const zoomSlider = document.querySelector('.zoom-slider');
+      const zoomPercentText = document.querySelector('.zoom-control span:last-child');
+      const pageInput = document.querySelector('.page-nav input');
+      const prevPageBtn = document.querySelectorAll('.page-nav .zoom-btn')[0];
+      const nextPageBtn = document.querySelectorAll('.page-nav .zoom-btn')[1];
+      const zoomOutBtn = document.querySelectorAll('.zoom-control .zoom-btn')[0];
+      const zoomInBtn = document.querySelectorAll('.zoom-control .zoom-btn')[1];
+
+      const TOTAL_PAGES = 12;
+      let currentPage = 1;
+
+      // Zoom functionality
+      function updateZoom(value) {
+        const zoomPercent = parseInt(value);
+        const scale = zoomPercent / 100;
+        previewContainer.style.transform = `scale(${scale})`;
+        zoomPercentText.textContent = `${zoomPercent}%`;
+        zoomSlider.value = zoomPercent;
+      }
+
+      zoomSlider.addEventListener('input', function() {
+        updateZoom(this.value);
+      });
+
+      zoomOutBtn.addEventListener('click', function() {
+        let currentZoom = parseInt(zoomSlider.value);
+        if (currentZoom > 50) {
+          currentZoom = Math.max(50, currentZoom - 10);
+          updateZoom(currentZoom);
+        }
+      });
+
+      zoomInBtn.addEventListener('click', function() {
+        let currentZoom = parseInt(zoomSlider.value);
+        if (currentZoom < 200) {
+          currentZoom = Math.min(200, currentZoom + 10);
+          updateZoom(currentZoom);
+        }
+      });
+
+      // Page navigation
+      function updatePageNavigation() {
+        pageInput.value = currentPage;
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === TOTAL_PAGES;
+      }
+
+      prevPageBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          updatePageNavigation();
+        }
+      });
+
+      nextPageBtn.addEventListener('click', function() {
+        if (currentPage < TOTAL_PAGES) {
+          currentPage++;
+          updatePageNavigation();
+        }
+      });
+
+      pageInput.addEventListener('change', function() {
+        const pageNum = parseInt(this.value);
+        if (pageNum >= 1 && pageNum <= TOTAL_PAGES) {
+          currentPage = pageNum;
+          updatePageNavigation();
+        } else {
+          updatePageNavigation();
+        }
+      });
+
+      updatePageNavigation();
+
       // TOC Links
       document.querySelectorAll('.toc-link').forEach(link => {
         link.addEventListener('click', function(e) {
           e.preventDefault();
           document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
           this.classList.add('active');
+
+          const targetId = this.getAttribute('href').substring(1);
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         });
       });
 

@@ -181,6 +181,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('assistant');
+
       // Chat interactions
       document.querySelectorAll('.question-chip').forEach(chip => {
         chip.addEventListener('click', function() {
@@ -189,11 +190,70 @@
           input.focus();
         });
       });
+
       document.querySelector('.input-button.send').addEventListener('click', function() {
         const input = document.querySelector('.chat-input');
         if (input.value.trim()) {
           input.value = '';
         }
+      });
+
+      // Voice input button functionality
+      const voiceButton = document.querySelectorAll('.input-button')[0];
+      const fileButton = document.querySelectorAll('.input-button')[1];
+      let isRecording = false;
+      let recordingTimer;
+
+      voiceButton.addEventListener('click', function() {
+        isRecording = !isRecording;
+
+        if (isRecording) {
+          // Start recording
+          voiceButton.style.backgroundColor = '#dc2626';
+          voiceButton.style.color = 'white';
+          voiceButton.innerHTML = '<span style="font-size:12px;font-weight:500;">녹음 중...</span>';
+
+          // Auto-stop after 3 seconds
+          recordingTimer = setTimeout(() => {
+            isRecording = false;
+            voiceButton.style.backgroundColor = '#f0f4f8';
+            voiceButton.style.color = 'inherit';
+            voiceButton.innerHTML = '<i data-lucide="mic" style="width:20px;height:20px;"></i>';
+
+            // Show toast notification
+            showToast('음성이 텍스트로 변환되었습니다', 'success', 3000);
+
+            if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
+            }
+          }, 3000);
+        } else {
+          clearTimeout(recordingTimer);
+          voiceButton.style.backgroundColor = '#f0f4f8';
+          voiceButton.style.color = 'inherit';
+          voiceButton.innerHTML = '<i data-lucide="mic" style="width:20px;height:20px;"></i>';
+          if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+          }
+        }
+      });
+
+      // File attachment button functionality
+      fileButton.addEventListener('click', function() {
+        // Create a hidden file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '*/*';
+        fileInput.style.display = 'none';
+
+        fileInput.addEventListener('change', function(e) {
+          if (e.target.files.length > 0) {
+            const fileName = e.target.files[0].name;
+            showToast(`파일 "${fileName}"이(가) 첨부되었습니다`, 'success', 3000);
+          }
+        });
+
+        fileInput.click();
       });
     });
   </script>

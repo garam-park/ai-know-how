@@ -191,9 +191,13 @@
           <div class="chart-container">
             <div class="chart-title">
               <i data-lucide="bar-chart-2" style="width:16px;height:16px;display:inline;margin-right:8px;"></i>
-              만족도 분포
+              만족도 분포 (평균: 4.2점)
             </div>
-            <div style="display: flex; gap: 20px; align-items: flex-end; height: 160px;">
+            <div style="position: relative; display: flex; gap: 20px; align-items: flex-end; height: 160px;">
+              <!-- Average line overlay -->
+              <div style="position: absolute; left: 0; right: 0; bottom: calc(42% * 1); height: 2px; background: #ef4444; opacity: 0.5;"></div>
+              <div style="position: absolute; left: 0; bottom: calc(42% * 1); padding-left: 8px; font-size: 11px; color: #ef4444; font-weight: 600; margin-top: -12px;">평균</div>
+
               <div style="flex: 1; text-align: center;">
                 <div class="hist-bar">
                   <div class="hist-column" style="height: 8%; background: #ef4444;">
@@ -234,6 +238,31 @@
                 </div>
                 <div class="hist-label">5점</div>
               </div>
+            </div>
+          </div>
+
+          <!-- Unanswered Queries Filter -->
+          <div style="margin-top: 20px; margin-bottom: 12px;">
+            <div style="font-size: 13px; font-weight: 600; color: #1f2937; margin-bottom: 12px;">미답변 목록 필터</div>
+            <div class="filter-bar">
+              <div class="filter-item">
+                <span class="filter-label">날짜 범위:</span>
+                <input type="date" id="filter-date-from" class="filter-select" style="padding: 8px; font-size: 13px;">
+                <span style="margin: 0 4px; color: #6b7280;">~</span>
+                <input type="date" id="filter-date-to" class="filter-select" style="padding: 8px; font-size: 13px;">
+              </div>
+              <div class="filter-item">
+                <span class="filter-label">유형:</span>
+                <select class="filter-select" id="filter-type">
+                  <option>전체</option>
+                  <option>정책상 답변 불가</option>
+                  <option>데이터 부족</option>
+                  <option>개인정보 보호</option>
+                  <option>시스템 통합 필요</option>
+                  <option>기능 미지원</option>
+                </select>
+              </div>
+              <button class="filter-select" style="background: #3b82f6; color: white; cursor: pointer; border: none; padding: 8px 16px; font-size: 13px;">적용</button>
             </div>
           </div>
 
@@ -289,62 +318,66 @@
                 Top 10 FAQ
               </div>
               <div class="table-container">
-                <table class="data-table">
-                  <tr>
-                    <th>순위</th>
-                    <th>질문</th>
-                    <th>횟수</th>
-                  </tr>
-                  <tr>
-                    <td>1</td>
-                    <td>주차장 위치는?</td>
-                    <td><strong>287</strong></td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>버스 운행시간</td>
-                    <td><strong>264</strong></td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td>관광지 추천</td>
-                    <td><strong>198</strong></td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td>식당 추천</td>
-                    <td><strong>156</strong></td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td>날씨 정보</td>
-                    <td><strong>143</strong></td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td>공항 이동 방법</td>
-                    <td><strong>128</strong></td>
-                  </tr>
-                  <tr>
-                    <td>7</td>
-                    <td>숙박 정보</td>
-                    <td><strong>112</strong></td>
-                  </tr>
-                  <tr>
-                    <td>8</td>
-                    <td>민원 신청 방법</td>
-                    <td><strong>98</strong></td>
-                  </tr>
-                  <tr>
-                    <td>9</td>
-                    <td>교통 카드 충전</td>
-                    <td><strong>87</strong></td>
-                  </tr>
-                  <tr>
-                    <td>10</td>
-                    <td>환경 정보</td>
-                    <td><strong>76</strong></td>
-                  </tr>
+                <table class="data-table" id="faq-table">
+                  <thead>
+                    <tr>
+                      <th>순위</th>
+                      <th>질문</th>
+                      <th>횟수</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>주차장 위치는?</td>
+                      <td><strong>287</strong></td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>버스 운행시간</td>
+                      <td><strong>264</strong></td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td>관광지 추천</td>
+                      <td><strong>198</strong></td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td>식당 추천</td>
+                      <td><strong>156</strong></td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <td>날씨 정보</td>
+                      <td><strong>143</strong></td>
+                    </tr>
+                    <tr>
+                      <td>6</td>
+                      <td>공항 이동 방법</td>
+                      <td><strong>128</strong></td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td>숙박 정보</td>
+                      <td><strong>112</strong></td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td>민원 신청 방법</td>
+                      <td><strong>98</strong></td>
+                    </tr>
+                    <tr>
+                      <td>9</td>
+                      <td>교통 카드 충전</td>
+                      <td><strong>87</strong></td>
+                    </tr>
+                    <tr>
+                      <td>10</td>
+                      <td>환경 정보</td>
+                      <td><strong>76</strong></td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -427,12 +460,31 @@
         }
       });
 
+      // Initialize table sorting
+      initTableSort('faq-table');
+
       // Filter interactions
       document.querySelectorAll('.filter-select').forEach(select => {
         select.addEventListener('change', function() {
           console.log('Filter changed:', this.value);
         });
       });
+
+      // Unanswered queries filter button
+      const filterApplyBtn = document.querySelector('.filter-bar .filter-select[style*="background"]');
+      if (filterApplyBtn) {
+        filterApplyBtn.addEventListener('click', function() {
+          const dateFrom = document.getElementById('filter-date-from').value;
+          const dateTo = document.getElementById('filter-date-to').value;
+          const type = document.getElementById('filter-type').value;
+
+          let message = '필터 적용됨';
+          if (dateFrom || dateTo || type !== '전체') {
+            message = `필터 적용됨: ${dateFrom || '시작'} ~ ${dateTo || '종료'}${type !== '전체' ? ', ' + type : ''}`;
+          }
+          showToast(message, 'success', 3000);
+        });
+      }
     });
   </script>
 </body>

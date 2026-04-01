@@ -171,6 +171,13 @@
 
             <!-- 탭 2: 역할 관리 -->
             <div class="tab-content">
+              <div style="margin-bottom: var(--spacing-lg);">
+                <button class="btn btn-primary" onclick="showRoleModal()">
+                  <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                  역할 생성
+                </button>
+              </div>
+
               <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">권한 매트릭스</h3>
 
               <div style="overflow-x: auto;">
@@ -299,6 +306,46 @@
 
       headers.forEach((header, i) => {
         header.classList.toggle('active', i === index);
+      });
+    }
+
+    function showRoleModal() {
+      const content = `
+        <div style="padding: 10px 0;">
+          <div class="form-group">
+            <label class="form-label">역할명</label>
+            <input type="text" class="form-input" placeholder="예: 데이터분석가">
+          </div>
+          <div class="form-group">
+            <label class="form-label">설명</label>
+            <textarea class="form-textarea" style="min-height: 80px;" placeholder="역할 설명..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom: 10px;">메뉴 권한</label>
+            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px;"><input type="checkbox" checked> 대시보드</td>
+                <td style="padding: 8px;"><input type="checkbox" checked> 데이터수집</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px;"><input type="checkbox" checked> 카탈로그</td>
+                <td style="padding: 8px;"><input type="checkbox"> 보고서</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px;"><input type="checkbox"> 시스템 관리</td>
+                <td style="padding: 8px;"><input type="checkbox"> 사용자 관리</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      showModal('역할 생성', content, {
+        confirmText: '생성',
+        cancelText: '취소',
+        onConfirm: () => {
+          showToast('새 역할이 생성되었습니다', 'success');
+        }
       });
     }
 

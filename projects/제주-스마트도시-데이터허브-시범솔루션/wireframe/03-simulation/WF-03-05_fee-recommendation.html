@@ -230,6 +230,138 @@
       color: white;
       font-weight: 600;
     }
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--color-gray-200);
+      padding-bottom: 12px;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-color-primary);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color-secondary);
+      transition: color 0.2s ease;
+    }
+    .modal-close:hover {
+      color: var(--text-color-primary);
+    }
+    .modal-section {
+      margin-bottom: 16px;
+    }
+    .modal-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-color-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .modal-section-content {
+      font-size: 13px;
+      color: var(--text-color-primary);
+      line-height: 1.5;
+    }
+    .modal-reason {
+      background: var(--color-gray-50);
+      border-left: 4px solid var(--color-primary);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .modal-effects {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .modal-effect-item {
+      background: var(--color-gray-50);
+      padding: 12px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .modal-effect-label {
+      font-size: 11px;
+      color: var(--text-color-secondary);
+      margin-bottom: 4px;
+    }
+    .modal-effect-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .modal-effect-value.positive {
+      color: var(--color-success);
+    }
+    .modal-effect-value.negative {
+      color: var(--color-danger);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-gray-200);
+    }
+    .modal-button {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .modal-button-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+    .modal-button-primary:hover {
+      background: var(--color-primary-dark);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .modal-button-secondary {
+      background: var(--color-gray-200);
+      color: var(--text-color-primary);
+    }
+    .modal-button-secondary:hover {
+      background: var(--color-gray-300);
+    }
   </style>
 </head>
 <body>
@@ -465,28 +597,172 @@
     </div>
   </div>
 
+  <!-- Recommendation Details Modal -->
+  <div class="modal-overlay" id="recommendationModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">추천 정책 상세</div>
+        <button class="modal-close" onclick="closeRecommendationModal()">&times;</button>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">추천 근거</div>
+        <div class="modal-reason" id="modalReason">
+          이 지역의 높은 혼잡도와 민원 수를 고려하여 고요금 요금제를 추천합니다.
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">예상 효과</div>
+        <div class="modal-effects" id="modalEffects">
+          <div class="modal-effect-item">
+            <div class="modal-effect-label">민원 감소</div>
+            <div class="modal-effect-value negative">↓28%</div>
+          </div>
+          <div class="modal-effect-item">
+            <div class="modal-effect-label">수익증대</div>
+            <div class="modal-effect-value positive">↑85%</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">세부 정보</div>
+        <div class="modal-section-content" id="modalDetails">
+          <p><strong>추천 요금:</strong> ₩3,500/시간</p>
+          <p><strong>대상 시간:</strong> 09:00~18:00</p>
+          <p><strong>예상 추가 수익:</strong> 월 ₩45,000,000</p>
+          <p><strong>시행 난이도:</strong> 낮음</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-button modal-button-secondary" onclick="closeRecommendationModal()">닫기</button>
+        <button class="modal-button modal-button-primary">상세 분석 보기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../common/map.js"></script>
   <script>
+    // Recommendation data for modal
+    const recommendationData = {
+      'A1': {
+        title: '제주시 중1구 (고요금)',
+        reason: '높은 혼잡도(85%)와 민원(280건/월)을 감안하여 고요금 요금제를 추천합니다. 주차장 확장이 불가능한 상황에서 가격 정책을 통한 수요 관리가 효과적입니다.',
+        effects: { complaints: '-28%', revenue: '+85%', efficiency: '+22%', satisfaction: '+18%' },
+        details: '<p><strong>추천 요금:</strong> ₩3,500/시간</p><p><strong>대상 시간:</strong> 09:00~18:00</p><p><strong>예상 추가 수익:</strong> 월 ₩45,000,000</p><p><strong>시행 난이도:</strong> 낮음</p>'
+      },
+      'A2': {
+        title: '제주시 중2구 (고요금)',
+        reason: '높은 혼잡도(78%)로 인해 고요금 정책이 효과적입니다. 인근 A1구역과 함께 시행하면 시너지 효과를 기대할 수 있습니다.',
+        effects: { complaints: '-24%', revenue: '+72%', efficiency: '+19%', satisfaction: '+15%' },
+        details: '<p><strong>추천 요금:</strong> ₩3,500/시간</p><p><strong>대상 시간:</strong> 09:00~18:00</p><p><strong>예상 추가 수익:</strong> 월 ₩38,000,000</p><p><strong>시행 난이도:</strong> 낮음</p>'
+      },
+      'B1': {
+        title: '제주시 동2구 (공유주차 40%)',
+        reason: '중간 정도의 혼잡도와 공지주차 시설의 가용성을 고려하여 공유주차 40% 확대를 추천합니다. 이는 기존 민간 주차장을 활용한 효율적인 솔루션입니다.',
+        effects: { efficiency: '+22%', expansion: '+40%', revenue: '+65%', satisfaction: '+20%' },
+        details: '<p><strong>추천 방식:</strong> 기존 민간주차장 공유 네트워크 확대</p><p><strong>확대 규모:</strong> 40% 증가</p><p><strong>예상 추가 수익:</strong> 월 ₩32,000,000</p><p><strong>시행 난이도:</strong> 중간</p>'
+      },
+      'C2': {
+        title: '제주시 서1구 (공유주차 30%)',
+        reason: '상대적으로 낮은 혼잡도이지만, 공유주차 네트워크를 통한 효율성 증대가 가능합니다. 환경친화적인 솔루션을 선호하는 지역입니다.',
+        effects: { efficiency: '+18%', expansion: '+30%', environmental: '+35%', satisfaction: '+16%' },
+        details: '<p><strong>추천 방식:</strong> 지역 주차장 공유 협약</p><p><strong>확대 규모:</strong> 30% 증가</p><p><strong>예상 추가 수익:</strong> 월 ₩24,000,000</p><p><strong>시행 난이도:</strong> 중간</p>'
+      }
+    };
+
+    function openRecommendationModal(zone) {
+      const data = recommendationData[zone] || recommendationData['A1'];
+
+      document.getElementById('modalTitle').textContent = data.title;
+      document.getElementById('modalReason').textContent = data.reason;
+      document.getElementById('modalDetails').innerHTML = data.details;
+
+      // Update effects
+      const effectsHtml = Object.entries(data.effects).map(([key, value]) => {
+        const isPositive = value.includes('+');
+        const isNegative = value.includes('-');
+        const className = isNegative ? 'negative' : isPositive ? 'positive' : '';
+        const labels = {
+          'complaints': '민원 감소',
+          'revenue': '수익증대',
+          'efficiency': '효율성',
+          'expansion': '확장성',
+          'satisfaction': '만족도',
+          'environmental': '환경영향'
+        };
+        return `<div class="modal-effect-item">
+          <div class="modal-effect-label">${labels[key] || key}</div>
+          <div class="modal-effect-value ${className}">${value}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('modalEffects').innerHTML = effectsHtml;
+
+      document.getElementById('recommendationModal').classList.add('active');
+    }
+
+    function closeRecommendationModal() {
+      document.getElementById('recommendationModal').classList.remove('active');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('simulation');
 
-      // Toggle switches
+      // Toggle switches with layer visibility
       const feeToggle = document.getElementById('feeToggle');
       const sharedToggle = document.getElementById('sharedToggle');
 
       feeToggle.addEventListener('click', function() {
         this.classList.toggle('active');
+        const feeZones = document.querySelectorAll('[class*="fee-"]');
+        feeZones.forEach(zone => {
+          zone.style.display = this.classList.contains('active') ? 'flex' : 'none';
+        });
       });
 
       sharedToggle.addEventListener('click', function() {
         this.classList.toggle('active');
+        const sharedZones = document.querySelectorAll('[class*="shared-"]');
+        sharedZones.forEach(zone => {
+          zone.style.display = this.classList.contains('active') ? 'flex' : 'none';
+        });
       });
 
-      // Map zone selection
+      // Map zone selection - open modal
       const mapZones = document.querySelectorAll('.map-zone');
       mapZones.forEach(zone => {
         zone.addEventListener('click', function() {
-          console.log('Selected zone:', this.dataset.zone);
+          const zoneId = this.dataset.zone;
+          openRecommendationModal(zoneId);
         });
+      });
+
+      // Recommendation table row click - open modal
+      const tableRows = document.querySelectorAll('.recommendation-table tbody tr');
+      tableRows.forEach((row, index) => {
+        row.addEventListener('click', function() {
+          // Map row index to zone
+          const zoneMap = ['A1', 'A2', 'A3', 'B2', 'B3', 'C1', 'C2', 'C3'];
+          const zoneId = zoneMap[index] || 'A1';
+          openRecommendationModal(zoneId);
+        });
+        row.style.cursor = 'pointer';
+      });
+
+      // Close modal when clicking overlay
+      document.getElementById('recommendationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeRecommendationModal();
+        }
+      });
+
+      // Animate strength bars on load
+      const strengthBars = document.querySelectorAll('.strength-fill');
+      strengthBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+          bar.style.transition = 'width 0.6s ease-out';
+          bar.style.width = width;
+        }, 100 + index * 80);
       });
     });
   </script>

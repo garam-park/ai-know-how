@@ -77,22 +77,58 @@
         </div>
 
         <div class="page-content">
-          <!-- 연계 상태 표시 -->
-          <div class="status-indicator">
-            <div class="status-circle connected">✓</div>
-            <div class="status-info">
-              <div class="status-title">연결됨</div>
-              <div class="status-detail">마지막 동기화 시각: 2024-04-01 14:25:30</div>
+          <!-- 연계 시스템 상태 패널 (4개 시스템) -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- CCTV 관제 -->
+            <div class="status-indicator">
+              <div class="status-circle connected" id="cctv-status-circle">✓</div>
+              <div class="status-info">
+                <div class="status-title">CCTV 관제</div>
+                <div class="status-detail" id="cctv-sync-time">최근 동기화: 2024-04-01 14:25:30</div>
+                <div class="status-detail" style="font-size: 12px; color: #666; margin-top: 4px;">데이터 건수: <span id="cctv-count">128</span>건</div>
+              </div>
             </div>
-            <div class="action-group">
-              <button class="btn btn-primary">
-                <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
-                수동 동기화
-              </button>
-              <button class="btn btn-secondary">
-                <i data-lucide="rotate-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
-                상태 갱신
-              </button>
+
+            <!-- 소방서 -->
+            <div class="status-indicator">
+              <div class="status-circle connected" id="fire-status-circle">✓</div>
+              <div class="status-info">
+                <div class="status-title">소방서</div>
+                <div class="status-detail" id="fire-sync-time">최근 동기화: 2024-04-01 14:20:15</div>
+                <div class="status-detail" style="font-size: 12px; color: #666; margin-top: 4px;">데이터 건수: <span id="fire-count">45</span>건</div>
+              </div>
+            </div>
+
+            <!-- 경찰서 -->
+            <div class="status-indicator">
+              <div class="status-circle disconnected" id="police-status-circle">✕</div>
+              <div class="status-info">
+                <div class="status-title">경찰서</div>
+                <div class="status-detail" id="police-sync-time">마지막 연결: 2024-04-01 12:30:00</div>
+                <div class="status-detail" style="font-size: 12px; color: #666; margin-top: 4px;">데이터 건수: <span id="police-count">32</span>건</div>
+              </div>
+            </div>
+
+            <!-- 제주시청 -->
+            <div class="status-indicator">
+              <div class="status-circle connected" id="city-status-circle">✓</div>
+              <div class="status-info">
+                <div class="status-title">제주시청</div>
+                <div class="status-detail" id="city-sync-time">최근 동기화: 2024-04-01 14:23:45</div>
+                <div class="status-detail" style="font-size: 12px; color: #666; margin-top: 4px;">데이터 건수: <span id="city-count">67</span>건</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 수동 동기화 버튼 -->
+          <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+            <button class="btn btn-primary" id="sync-btn" onclick="performManualSync()">
+              <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+              <span id="sync-btn-text">지금 동기화</span>
+            </button>
+            <div id="sync-spinner" style="display: none; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 20px; border: 3px solid #2563EB; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <span>동기화 중...</span>
             </div>
           </div>
 
@@ -125,81 +161,77 @@
             </div>
           </div>
 
-          <!-- 필터 -->
-          <div class="filter-bar">
-            <div class="filter-group">
-              <label class="filter-label">조회 기간</label>
-              <select class="filter-select" style="width: 120px;">
-                <option>오늘</option>
-                <option>7일</option>
-                <option>30일</option>
-                <option>전체</option>
-              </select>
-            </div>
-            <button class="filter-button" style="margin-left: auto;">
-              <i data-lucide="filter" style="width: 16px; height: 16px; margin-right: 4px;"></i>
-              필터 적용
-            </button>
-          </div>
-
-          <!-- 전송 로그 테이블 -->
+          <!-- 연계 이벤트 로그 (최근 10건) -->
+          <h3 class="heading-sm" style="margin-bottom: 16px;">연계 이벤트 로그 (최근 10건)</h3>
           <table class="data-table log-table">
             <thead>
               <tr>
-                <th>전송시각</th>
-                <th>이벤트ID</th>
+                <th>시점</th>
+                <th>시스템명</th>
                 <th>이벤트유형</th>
-                <th>전송상태</th>
-                <th>응답코드</th>
-                <th>응답메시지</th>
-                <th>재시도횟수</th>
+                <th>상태</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="integration-log-tbody">
               <tr class="success">
                 <td>2024-04-01 14:25:30</td>
-                <td>INC-2024-04-001</td>
-                <td>화재경보</td>
-                <td><span class="badge success">성공</span></td>
-                <td>200</td>
-                <td>OK</td>
-                <td>0</td>
+                <td>CCTV 관제</td>
+                <td>데이터 동기화</td>
+                <td><span class="badge success">완료</span></td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 14:23:45</td>
+                <td>제주시청</td>
+                <td>이벤트 전송</td>
+                <td><span class="badge success">완료</span></td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 14:20:15</td>
+                <td>소방서</td>
+                <td>상태 조회</td>
+                <td><span class="badge success">완료</span></td>
               </tr>
               <tr class="error">
-                <td>2024-04-01 14:24:15</td>
-                <td>INC-2024-04-002</td>
-                <td>무단주차</td>
+                <td>2024-04-01 12:30:00</td>
+                <td>경찰서</td>
+                <td>연결 시도</td>
                 <td><span class="badge danger">실패</span></td>
-                <td>503</td>
-                <td>Service Unavailable</td>
-                <td>2</td>
-              </tr>
-              <tr class="retry">
-                <td>2024-04-01 14:23:00</td>
-                <td>INC-2024-04-003</td>
-                <td>음향이상</td>
-                <td><span class="badge warning">재시도</span></td>
-                <td>000</td>
-                <td>No Response</td>
-                <td>1</td>
               </tr>
               <tr class="success">
-                <td>2024-04-01 14:20:45</td>
-                <td>INC-2024-04-004</td>
-                <td>장기점유</td>
-                <td><span class="badge success">성공</span></td>
-                <td>200</td>
-                <td>OK</td>
-                <td>0</td>
+                <td>2024-04-01 12:00:30</td>
+                <td>CCTV 관제</td>
+                <td>데이터 동기화</td>
+                <td><span class="badge success">완료</span></td>
               </tr>
               <tr class="success">
-                <td>2024-04-01 14:15:30</td>
-                <td>INC-2024-04-005</td>
-                <td>센서오류</td>
-                <td><span class="badge success">성공</span></td>
-                <td>200</td>
-                <td>OK</td>
-                <td>0</td>
+                <td>2024-04-01 11:30:15</td>
+                <td>제주시청</td>
+                <td>이벤트 전송</td>
+                <td><span class="badge success">완료</span></td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 11:00:00</td>
+                <td>소방서</td>
+                <td>상태 조회</td>
+                <td><span class="badge success">완료</span></td>
+              </tr>
+              <tr class="error">
+                <td>2024-04-01 10:15:45</td>
+                <td>경찰서</td>
+                <td>데이터 동기화</td>
+                <td><span class="badge danger">실패</span></td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 10:00:30</td>
+                <td>CCTV 관제</td>
+                <td>상태 갱신</td>
+                <td><span class="badge success">완료</span></td>
+              </tr>
+              <tr class="success">
+                <td>2024-04-01 09:30:00</td>
+                <td>제주시청</td>
+                <td>연결 확인</td>
+                <td><span class="badge success">완료</span></td>
               </tr>
             </tbody>
           </table>
@@ -253,6 +285,91 @@
   <script src="../common/components.js"></script>
   <script src="../common/charts.js"></script>
   <script>
+    // 연계 시스템 상태 데이터
+    let systemStatus = {
+      'cctv': { connected: true, syncTime: '2024-04-01 14:25:30', count: 128 },
+      'fire': { connected: true, syncTime: '2024-04-01 14:20:15', count: 45 },
+      'police': { connected: false, syncTime: '2024-04-01 12:30:00', count: 32 },
+      'city': { connected: true, syncTime: '2024-04-01 14:23:45', count: 67 }
+    };
+
+    const systems = [
+      { id: 'cctv', name: 'CCTV 관제' },
+      { id: 'fire', name: '소방서' },
+      { id: 'police', name: '경찰서' },
+      { id: 'city', name: '제주시청' }
+    ];
+
+    function performManualSync() {
+      const syncBtn = document.getElementById('sync-btn');
+      const syncSpinner = document.getElementById('sync-spinner');
+      const syncBtnText = document.getElementById('sync-btn-text');
+
+      // 버튼 비활성화 및 로딩 표시
+      syncBtn.style.display = 'none';
+      syncSpinner.style.display = 'flex';
+
+      // 3초 후 완료
+      setTimeout(() => {
+        // 동기화 시간 업데이트
+        const now = new Date();
+        const timeStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' +
+                       String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+
+        systems.forEach(sys => {
+          systemStatus[sys.id].syncTime = timeStr;
+          systemStatus[sys.id].count = Math.floor(Math.random() * 100) + 30;
+        });
+
+        updateSystemStatus();
+
+        // 로딩 표시 제거 및 버튼 복원
+        syncSpinner.style.display = 'none';
+        syncBtn.style.display = 'inline-flex';
+        syncBtnText.textContent = '지금 동기화';
+
+        // 토스트 메시지 표시
+        showToast('모든 시스템 동기화 완료되었습니다.', 'success');
+
+        // 로그에 새 항목 추가
+        const tbody = document.getElementById('integration-log-tbody');
+        const newRow = document.createElement('tr');
+        newRow.className = 'success';
+        newRow.innerHTML = `
+          <td>${timeStr}</td>
+          <td>전체 시스템</td>
+          <td>일괄 동기화</td>
+          <td><span class="badge success">완료</span></td>
+        `;
+        tbody.insertBefore(newRow, tbody.firstChild);
+
+        // 최근 10건만 유지
+        while (tbody.rows.length > 10) {
+          tbody.removeChild(tbody.lastChild);
+        }
+      }, 3000);
+    }
+
+    function updateSystemStatus() {
+      systems.forEach(sys => {
+        const status = systemStatus[sys.id];
+
+        // 상태 원형 업데이트
+        const statusCircle = document.getElementById(`${sys.id}-status-circle`);
+        statusCircle.className = status.connected ? 'status-circle connected' : 'status-circle disconnected';
+        statusCircle.textContent = status.connected ? '✓' : '✕';
+
+        // 동기화 시간 업데이트
+        const syncTimeEl = document.getElementById(`${sys.id}-sync-time`);
+        const timeLabel = status.connected ? '최근 동기화' : '마지막 연결';
+        syncTimeEl.textContent = `${timeLabel}: ${status.syncTime}`;
+
+        // 데이터 건수 업데이트
+        const countEl = document.getElementById(`${sys.id}-count`);
+        countEl.textContent = status.count;
+      });
+    }
+
     function retransmit() {
       const resultDiv = document.getElementById('retransmitResult');
       resultDiv.textContent = '✓ 재전송 완료: 3건 (성공)';
@@ -263,6 +380,16 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('event');
+
+      // 스타일 추가 (스핀 애니메이션)
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
 
       // 일별 전송 건수 차트
       createBarChart('dailyChart',
@@ -295,6 +422,29 @@
         }],
         { plugins: { legend: { position: 'bottom' } } }
       );
+
+      // 실시간 모니터링 (30초 간격 동기화 시점 갱신)
+      setInterval(() => {
+        systems.forEach(sys => {
+          // 일부 시스템만 랜덤하게 업데이트 (연결 상태 변경 가능)
+          if (Math.random() < 0.3) {
+            const status = systemStatus[sys.id];
+            status.connected = Math.random() < 0.8; // 80% 확률로 연결
+
+            if (status.connected) {
+              const now = new Date();
+              status.syncTime = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' +
+                               String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+              status.count = Math.floor(Math.random() * 100) + 30;
+            }
+          }
+        });
+
+        updateSystemStatus();
+      }, 30000);
+
+      // 초기 상태 표시
+      updateSystemStatus();
     });
   </script>
 </body>

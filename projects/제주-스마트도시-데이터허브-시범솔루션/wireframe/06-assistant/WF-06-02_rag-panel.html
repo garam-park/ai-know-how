@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../common/layout.css">
   <link rel="stylesheet" href="../common/components.css">
   <style>
-    .chat-container { display: flex; height: calc(100vh - 80px); }
+    .chat-container { display: flex; height: calc(100vh - 80px); position: relative; }
     .chat-main { flex: 1; display: flex; flex-direction: column; }
     .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
     .message { display: flex; align-items: flex-end; gap: 8px; max-width: 75%; }
@@ -29,7 +29,13 @@
     .input-button:hover { background: #e0e8f0; }
     .input-button.send { background: #3b82f6; color: white; }
     .input-button.send:hover { background: #2563eb; }
-    .rag-panel { width: 320px; border-left: 1px solid #e5e7eb; background: white; overflow-y: auto; }
+    .rag-panel { width: 320px; border-left: 1px solid #e5e7eb; background: white; overflow-y: auto; display: flex; flex-direction: column; transition: width 0.3s ease; }
+    .rag-panel.collapsed { width: 0; overflow: hidden; }
+    .rag-resize-handle { position: absolute; right: 320px; top: 0; width: 4px; height: 100%; cursor: col-resize; background: transparent; transition: background 0.2s; z-index: 50; }
+    .rag-resize-handle:hover { background: #3b82f6; }
+    .rag-toggle-btn { position: absolute; right: 320px; top: 10px; width: 32px; height: 32px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 51; }
+    .rag-toggle-btn:hover { background: #f0f9ff; border-color: #3b82f6; }
+    .rag-panel.collapsed ~ .rag-toggle-btn { right: 0; }
     .rag-header { padding: 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; font-size: 14px; color: #1f2937; }
     .doc-card { border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; }
     .doc-card:hover { border-color: #3b82f6; background: #f0f9ff; }
@@ -134,7 +140,10 @@
             </div>
           </div>
 
-          <div class="rag-panel">
+          <div class="rag-resize-handle" id="rag-resize-handle"></div>
+          <button class="rag-toggle-btn" id="rag-toggle-btn" title="패널 접기/펼치기">◀</button>
+
+          <div class="rag-panel" id="rag-panel">
             <div class="rag-header">
               <i data-lucide="file-text" style="width:16px;height:16px;margin-right:8px;display:inline;"></i>
               참고 문서 (5)
@@ -259,7 +268,7 @@
         });
       });
 
-      // Feedback buttons
+      // Feedback buttons with toast notification
       document.querySelectorAll('.feedback-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -272,7 +281,58 @@
           } else {
             this.classList.add('unhelpful');
           }
+          // Show toast notification
+          showToast('피드백 반영됨', 'success', 3000);
         });
+      });
+
+      // RAG Panel Toggle functionality
+      const ragPanel = document.getElementById('rag-panel');
+      const toggleBtn = document.getElementById('rag-toggle-btn');
+      let isPanelCollapsed = false;
+
+      toggleBtn.addEventListener('click', function() {
+        isPanelCollapsed = !isPanelCollapsed;
+        if (isPanelCollapsed) {
+          ragPanel.classList.add('collapsed');
+          toggleBtn.textContent = '▶';
+        } else {
+          ragPanel.classList.remove('collapsed');
+          toggleBtn.textContent = '◀';
+        }
+      });
+
+      // RAG Panel Resize functionality
+      const resizeHandle = document.getElementById('rag-resize-handle');
+      let isResizing = false;
+      let startX;
+      let startWidth;
+
+      resizeHandle.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = ragPanel.offsetWidth;
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+
+        const deltaX = e.clientX - startX;
+        const newWidth = startWidth - deltaX;
+
+        // Set minimum width of 250px
+        if (newWidth >= 250) {
+          ragPanel.style.width = newWidth + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', function() {
+        if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = 'auto';
+        }
       });
     });
   </script>

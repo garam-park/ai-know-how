@@ -106,7 +106,10 @@
 
           <!-- 메인 변환 결과 테이블 -->
           <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
-            <h2 class="text-lg font-semibold mb-4">변환 결과 목록</h2>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold">변환 결과 목록</h2>
+              <input type="text" placeholder="검색..." class="filter-input" id="sttSearchInput" style="width: 200px;">
+            </div>
             <div class="overflow-x-auto">
               <table class="data-table" id="sttTable">
                 <thead>
@@ -197,7 +200,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('pipeline');
 
-      // 지역별 인식 정확도 바차트
+      // 지역별 인식 정확도 바차트 (기준선 80% 포함)
       const dialectCtx = document.getElementById('dialectChart').getContext('2d');
       new Chart(dialectCtx, {
         type: 'bar',
@@ -224,7 +227,31 @@
               display: false
             }
           }
-        }
+        },
+        plugins: [{
+          id: 'baselinePlugin',
+          afterDraw: (chart) => {
+            const ctx = chart.ctx;
+            const xScale = chart.scales.x;
+            const xPos = xScale.getPixelForValue(80);
+            const topY = chart.chartArea.top;
+            const bottomY = chart.chartArea.bottom;
+
+            ctx.save();
+            ctx.strokeStyle = '#EAB308';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(xPos, topY);
+            ctx.lineTo(xPos, bottomY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#EAB308';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('기준 (80%)', xPos + 5, topY + 15);
+            ctx.restore();
+          }
+        }]
       });
 
       // 처리 상태 분포 파이차트
@@ -254,6 +281,9 @@
 
       // 테이블 정렬
       initTableSort('sttTable');
+
+      // 테이블 필터
+      initTableFilter('sttTable', 'sttSearchInput');
     });
 
     function showSpeechDetail(row) {

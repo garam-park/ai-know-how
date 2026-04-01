@@ -71,6 +71,21 @@
             </div>
           </div>
 
+          <!-- 시간대별 필터 슬라이더 -->
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">시간대</h3>
+            <div style="margin-bottom: 8px;">
+              <label style="font-size: 12px; color: var(--text-color-secondary);">범위</label>
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <input type="number" id="hour-start" min="0" max="23" value="0" style="width: 50px; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px;">
+                <span style="padding: 6px 0;">~</span>
+                <input type="number" id="hour-end" min="0" max="23" value="23" style="width: 50px; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px;">
+              </div>
+            </div>
+            <input type="range" id="time-range-slider" min="0" max="24" value="24" style="width: 100%; margin-top: 8px;">
+            <div style="font-size: 12px; color: var(--text-color-secondary); margin-top: 8px;">선택: <span id="time-display">00시~23시</span></div>
+          </div>
+
           <div style="margin-bottom: 24px;">
             <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">민원유형</h3>
             <select class="filter-select" multiple style="min-height: 80px;">
@@ -79,6 +94,13 @@
               <option>시설불편</option>
               <option>화재위험</option>
             </select>
+          </div>
+
+          <!-- 투명도 조절 슬라이더 -->
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-weight: bold; margin-bottom: 12px; font-size: 14px;">투명도</h3>
+            <input type="range" id="opacity-slider" min="0" max="100" value="100" style="width: 100%;">
+            <div style="font-size: 12px; color: var(--text-color-secondary); margin-top: 8px;"><span id="opacity-display">100</span>%</div>
           </div>
 
           <div style="margin-bottom: 24px;">
@@ -100,6 +122,18 @@
           <!-- 범례 (지도 우측) -->
           <div style="position: absolute; top: 20px; right: 20px; background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; font-size: 12px;">
             <h4 style="font-weight: bold; margin-bottom: 12px;">히트맵 범례</h4>
+
+            <!-- 그라데이션 바 -->
+            <div style="margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; height: 20px; background: linear-gradient(to right, #0000FF, #00FFFF, #FFFF00, #FF8800, #FF0000); border-radius: 4px; margin-bottom: 8px;"></div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-color-secondary);">
+                <span>낮음</span>
+                <span>높음</span>
+              </div>
+            </div>
+
+            <hr style="margin: 12px 0; border: none; border-top: 1px solid var(--border-color);">
+
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
               <div style="width: 16px; height: 16px; background: #0000FF; margin-right: 8px; border-radius: 2px;"></div>
               <span>매우 낮음 (0~10건)</span>
@@ -135,11 +169,69 @@
 
       // 히트맵 데이터 생성 및 추가
       const heatmapData = generateHeatmapData(150);
-      addHeatmapLayer(map, heatmapData, {
+      let heatmapLayer = addHeatmapLayer(map, heatmapData, {
         radius: 20,
         blur: 20,
         max: 1.0,
         minOpacity: 0.4
+      });
+
+      // 시간대 필터 슬라이더 이벤트
+      const timeRangeSlider = document.getElementById('time-range-slider');
+      const hourStart = document.getElementById('hour-start');
+      const hourEnd = document.getElementById('hour-end');
+      const timeDisplay = document.getElementById('time-display');
+
+      function updateTimeDisplay() {
+        const start = parseInt(hourStart.value);
+        const end = parseInt(hourEnd.value);
+        timeDisplay.textContent = `${String(start).padStart(2, '0')}시~${String(end).padStart(2, '0')}시`;
+      }
+
+      hourStart.addEventListener('change', function(e) {
+        const start = parseInt(this.value);
+        const end = parseInt(hourEnd.value);
+        if (start > end) {
+          hourEnd.value = start;
+        }
+        updateTimeDisplay();
+      });
+
+      hourEnd.addEventListener('change', function(e) {
+        const start = parseInt(hourStart.value);
+        const end = parseInt(this.value);
+        if (end < start) {
+          hourStart.value = end;
+        }
+        updateTimeDisplay();
+      });
+
+      timeRangeSlider.addEventListener('input', function(e) {
+        const value = parseInt(this.value);
+        if (value === 24) {
+          hourStart.value = 0;
+          hourEnd.value = 23;
+        } else {
+          const start = Math.max(0, Math.floor(value / 2) - 4);
+          const end = Math.min(23, start + 8);
+          hourStart.value = start;
+          hourEnd.value = end;
+        }
+        updateTimeDisplay();
+      });
+
+      // 투명도 슬라이더 이벤트
+      const opacitySlider = document.getElementById('opacity-slider');
+      const opacityDisplay = document.getElementById('opacity-display');
+
+      opacitySlider.addEventListener('input', function(e) {
+        const opacity = parseInt(this.value);
+        opacityDisplay.textContent = opacity;
+
+        // 히트맵 레이어의 투명도 업데이트
+        if (heatmapLayer && heatmapLayer._container) {
+          heatmapLayer._container.style.opacity = opacity / 100;
+        }
       });
 
       // 주요 집중구역 폴리곤 추가
@@ -199,8 +291,12 @@
       });
 
       // 심각도 슬라이더 업데이트
-      document.querySelector('input[type="range"]').addEventListener('change', function(e) {
-        document.getElementById('severity-level').textContent = e.target.value;
+      document.querySelectorAll('input[type="range"]').forEach(slider => {
+        if (slider.id !== 'time-range-slider' && slider.id !== 'opacity-slider') {
+          slider.addEventListener('change', function(e) {
+            document.getElementById('severity-level').textContent = e.target.value;
+          });
+        }
       });
     });
   </script>

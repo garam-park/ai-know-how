@@ -49,16 +49,17 @@
         </div>
 
         <div class="page-content">
-          <!-- 규칙 추가 버튼 -->
-          <div style="margin-bottom: var(--spacing-lg);">
-            <button class="btn btn-primary" onclick="alert('규칙 추가 모달')">
+          <!-- 규칙 추가 버튼 및 필터 -->
+          <div style="margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-primary" onclick="showAddAlertRule()">
               <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
               규칙 추가
             </button>
+            <input type="text" id="alertTableFilter" class="filter-input" placeholder="테이블 검색..." style="width: 200px;">
           </div>
 
           <!-- 알림 규칙 테이블 -->
-          <table class="data-table">
+          <table class="data-table" id="alertRuleTable">
             <thead>
               <tr>
                 <th>규칙명</th>
@@ -140,7 +141,7 @@
           <!-- 하단: 알림 발송 이력 -->
           <h3 style="font-size: var(--font-heading-sm); margin: var(--spacing-2xl) 0 var(--spacing-lg); color: var(--text-color);">알림 발송 이력</h3>
 
-          <table class="data-table">
+          <table class="data-table" id="alertHistoryTable">
             <thead>
               <tr>
                 <th>시각</th>
@@ -211,8 +212,120 @@
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    /**
+     * 알림 규칙 추가 모달 표시
+     */
+    function showAddAlertRule() {
+      const content = `
+        <div style="display: grid; gap: var(--spacing-lg);">
+          <div class="form-group">
+            <label class="form-label">규칙명</label>
+            <input type="text" class="form-input" id="ruleName" placeholder="예: 높은 CPU 사용률">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">조건 설정</label>
+            <div style="background-color: var(--color-gray-50); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+              <div style="display: grid; gap: var(--spacing-md);">
+                <div style="display: grid; grid-template-columns: 1fr 150px 150px; gap: var(--spacing-md); align-items: center;">
+                  <select class="form-select" id="metric">
+                    <option>CPU 사용률</option>
+                    <option>메모리 사용률</option>
+                    <option>디스크 공간</option>
+                    <option>데이터 수집 실패</option>
+                    <option>데이터 품질</option>
+                  </select>
+
+                  <select class="form-select" id="operator">
+                    <option>></option>
+                    <option>>=</option>
+                    <option><</option>
+                    <option><=</option>
+                    <option>=</option>
+                  </select>
+
+                  <input type="number" class="form-input" id="threshold" placeholder="임계값" value="80">
+                </div>
+
+                <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                  <span style="font-size: var(--font-body-sm);">조합 방식</span>
+                  <label style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <input type="radio" name="combineOp" value="AND" checked>
+                    <span>AND</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <input type="radio" name="combineOp" value="OR">
+                    <span>OR</span>
+                  </label>
+                  <button class="btn btn-secondary" style="margin-left: auto; padding: 4px 12px; font-size: 12px;" onclick="addCondition()">
+                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                    조건 추가
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">알림 채널</label>
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox" id="channel_email" checked>
+                <span>이메일</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox" id="channel_sms">
+                <span>SMS</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox" id="channel_push">
+                <span>앱 푸시</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                <input type="checkbox" id="channel_webhook">
+                <span>웹훅</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">수신 그룹</label>
+            <select class="form-select" id="recipientGroup">
+              <option selected>관리자</option>
+              <option>기술팀</option>
+              <option>운영팀</option>
+              <option>전체</option>
+            </select>
+          </div>
+        </div>
+      `;
+
+      showModal('알림 규칙 추가', content, {
+        confirmText: '추가',
+        cancelText: '취소',
+        onConfirm: () => {
+          const ruleName = document.getElementById('ruleName').value;
+          if (!ruleName) {
+            showToast('규칙명을 입력해주세요', 'warning');
+            return;
+          }
+          showToast(`"${ruleName}" 규칙이 추가되었습니다`, 'success');
+        }
+      });
+    }
+
+    /**
+     * 조건 추가 함수 (모달 내에서 호출)
+     */
+    function addCondition() {
+      showToast('조건이 추가되었습니다', 'info');
+    }
+
     window.addEventListener('load', () => {
       initLayout('admin');
+      initTableSort('alertRuleTable');
+      initTableFilter('alertRuleTable', 'alertTableFilter');
+      initTableSort('alertHistoryTable');
       lucide.createIcons();
     });
   </script>

@@ -237,6 +237,95 @@
             </div>
           </div>
 
+          <!-- Attachments Section -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">첨부파일</div>
+            </div>
+            <div class="card-body">
+              <div id="attachments-list" style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-color-secondary); border-radius: 4px;">
+                  <i data-lucide="file-image" width="20" height="20" style="color: #2563EB; margin-right: 12px;"></i>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 13px;">불법주차_20250115_001.jpg</div>
+                    <div style="font-size: 11px; color: var(--text-color-secondary);">1.2 MB</div>
+                  </div>
+                  <button style="padding: 6px 12px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">다운로드</button>
+                </div>
+
+                <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-color-secondary); border-radius: 4px;">
+                  <i data-lucide="file-image" width="20" height="20" style="color: #2563EB; margin-right: 12px;"></i>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 13px;">불법주차_20250115_002.jpg</div>
+                    <div style="font-size: 11px; color: var(--text-color-secondary);">1.5 MB</div>
+                  </div>
+                  <button style="padding: 6px 12px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">다운로드</button>
+                </div>
+              </div>
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--color-primary); font-size: 13px;">
+                  <i data-lucide="upload" width="16" height="16"></i>
+                  <span>파일 추가</span>
+                  <input type="file" multiple style="display: none;" id="file-upload">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">댓글 (2개)</div>
+            </div>
+            <div class="card-body">
+              <!-- Existing Comments -->
+              <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">김</div>
+                  <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <div style="font-weight: 600; font-size: 13px;">김철수 <span style="background: var(--color-primary); color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 8px;">담당자</span></div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">2025-01-16 10:00</div>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-color-secondary);">현장 점검을 완료했습니다. 불법주차 차량 2대를 적발하였으며, 소유자 확인 후 적절한 조치를 취하겠습니다.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-secondary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">홍</div>
+                  <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <div style="font-weight: 600; font-size: 13px;">홍길동</div>
+                      <div style="font-size: 11px; color: var(--text-color-secondary);">2025-01-15 16:00</div>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-color-secondary);">긴급한 상황입니다. 최대한 빨리 조치 부탁드립니다.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comment Input Form -->
+              <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                <div style="display: flex; gap: 12px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-gray-300); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0;">관</div>
+                  <div style="flex: 1;">
+                    <textarea id="comment-input" placeholder="댓글을 입력하세요..." style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; font-size: 13px; resize: vertical; min-height: 80px;"></textarea>
+                    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+                      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <label style="cursor: pointer;">
+                          <i data-lucide="image" width="16" height="16" style="color: var(--text-color-secondary); cursor: pointer;"></i>
+                          <input type="file" accept="image/*" style="display: none;">
+                        </label>
+                      </div>
+                      <button id="comment-submit" style="padding: 8px 16px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">등록</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Map -->
           <div class="card">
             <div class="card-header">
@@ -265,6 +354,97 @@
       L.marker([33.5085, 126.5240]).addTo(map)
         .bindPopup('상업지구 앞 불법주차 발생지')
         .openPopup();
+
+      // 댓글 등록 기능
+      const commentInput = document.getElementById('comment-input');
+      const commentSubmit = document.getElementById('comment-submit');
+      const attachmentsList = document.getElementById('attachments-list');
+
+      commentSubmit.addEventListener('click', function() {
+        const comment = commentInput.value.trim();
+        if (!comment) {
+          showToast('댓글을 입력해주세요.', 'warning');
+          return;
+        }
+
+        // 새 댓글 추가 (더미 구현)
+        const newCommentDiv = document.createElement('div');
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        newCommentDiv.style.cssText = 'margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);';
+        newCommentDiv.innerHTML = `
+          <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-gray-300); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">관</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <div style="font-weight: 600; font-size: 13px;">관리자</div>
+                <div style="font-size: 11px; color: var(--text-color-secondary);">${timeStr}</div>
+              </div>
+              <div style="font-size: 13px; color: var(--text-color-secondary);">${comment}</div>
+            </div>
+          </div>
+        `;
+
+        // 댓글 입력 폼 이전에 삽입
+        commentInput.parentElement.parentElement.parentElement.insertBefore(newCommentDiv, commentInput.parentElement.parentElement);
+
+        // 입력 필드 초기화
+        commentInput.value = '';
+        showToast('댓글이 등록되었습니다.', 'success');
+      });
+
+      // Enter 키로도 등록 가능
+      commentInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+          commentSubmit.click();
+        }
+      });
+
+      // 파일 업로드 기능
+      const fileUpload = document.getElementById('file-upload');
+      document.querySelector('label[for="file-upload"]').parentElement.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+          fileUpload.click();
+        }
+      });
+
+      fileUpload.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length === 0) return;
+
+        for (let file of files) {
+          const newFileDiv = document.createElement('div');
+          newFileDiv.style.cssText = 'display: flex; align-items: center; padding: 12px; background: var(--bg-color-secondary); border-radius: 4px; margin-bottom: 12px;';
+
+          const icon = file.type.startsWith('image') ? 'file-image' : 'file';
+          const sizeStr = (file.size / 1024 / 1024).toFixed(1);
+
+          newFileDiv.innerHTML = `
+            <i data-lucide="${icon}" width="20" height="20" style="color: #2563EB; margin-right: 12px;"></i>
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 13px;">${file.name}</div>
+              <div style="font-size: 11px; color: var(--text-color-secondary);">${sizeStr} MB</div>
+            </div>
+            <button style="padding: 6px 12px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">다운로드</button>
+          `;
+
+          attachmentsList.appendChild(newFileDiv);
+        }
+
+        // Lucide 아이콘 다시 초기화
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+
+        showToast(`${files.length}개의 파일이 추가되었습니다.`, 'success');
+        fileUpload.value = '';
+      });
+
+      // Lucide 아이콘 초기화
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     });
   </script>
 </body>

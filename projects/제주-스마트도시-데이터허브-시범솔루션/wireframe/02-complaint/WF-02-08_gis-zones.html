@@ -253,41 +253,59 @@
         `;
       }
 
-      // 레이어 토글
+      // Leaflet 기본 레이어 컨트롤 생성
+      const baseLayers = {};
+      const overlayLayers = {
+        '민원 집중구역': L.featureGroup(),
+        '집중단속구역': L.featureGroup(),
+        '수요부족지역': L.featureGroup()
+      };
+
+      // 폴리곤을 레이어 그룹에 추가
+      zones.forEach((zone, index) => {
+        if (zone.type === 'concentration') {
+          overlayLayers['민원 집중구역'].addLayer(polygonLayers[index]);
+        } else if (zone.type === 'enforcement') {
+          overlayLayers['집중단속구역'].addLayer(polygonLayers[index]);
+        } else if (zone.type === 'demand') {
+          overlayLayers['수요부족지역'].addLayer(polygonLayers[index]);
+        }
+      });
+
+      // 각 오버레이 레이어를 지도에 추가
+      overlayLayers['민원 집중구역'].addTo(map);
+      overlayLayers['집중단속구역'].addTo(map);
+
+      // 레이어 컨트롤 추가 (기본 Leaflet 컨트롤)
+      const layerControl = L.control.layers(baseLayers, overlayLayers, {
+        position: 'topright',
+        collapsed: false
+      });
+
+      // 레이어 컨트롤을 숨기고 체크박스로 제어하는 대신, 커스텀 UI를 사용
+      // 레이어 토글 체크박스 이벤트
       document.getElementById('layer-concentration').addEventListener('change', function(e) {
-        zones.forEach((zone, index) => {
-          if (zone.type === 'concentration') {
-            if (e.target.checked) {
-              map.addLayer(polygonLayers[index]);
-            } else {
-              map.removeLayer(polygonLayers[index]);
-            }
-          }
-        });
+        if (e.target.checked) {
+          overlayLayers['민원 집중구역'].addTo(map);
+        } else {
+          map.removeLayer(overlayLayers['민원 집중구역']);
+        }
       });
 
       document.getElementById('layer-enforcement').addEventListener('change', function(e) {
-        zones.forEach((zone, index) => {
-          if (zone.type === 'enforcement') {
-            if (e.target.checked) {
-              map.addLayer(polygonLayers[index]);
-            } else {
-              map.removeLayer(polygonLayers[index]);
-            }
-          }
-        });
+        if (e.target.checked) {
+          overlayLayers['집중단속구역'].addTo(map);
+        } else {
+          map.removeLayer(overlayLayers['집중단속구역']);
+        }
       });
 
       document.getElementById('layer-demand').addEventListener('change', function(e) {
-        zones.forEach((zone, index) => {
-          if (zone.type === 'demand') {
-            if (e.target.checked) {
-              map.addLayer(polygonLayers[index]);
-            } else {
-              map.removeLayer(polygonLayers[index]);
-            }
-          }
-        });
+        if (e.target.checked) {
+          overlayLayers['수요부족지역'].addTo(map);
+        } else {
+          map.removeLayer(overlayLayers['수요부족지역']);
+        }
       });
     });
   </script>

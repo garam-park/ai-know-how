@@ -54,7 +54,7 @@
             <div class="filter-bar">
               <div class="filter-group" style="flex: 1;">
                 <label class="filter-label">용어 검색</label>
-                <input type="text" class="filter-input" placeholder="용어명을 검색하세요..." style="flex: 1;">
+                <input type="text" id="termSearchInput" class="filter-input" placeholder="용어명을 검색하세요..." style="flex: 1;">
               </div>
               <button class="filter-button" onclick="alert('신규 용어 등록')">
                 <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 4px;"></i>
@@ -170,6 +170,20 @@
     window.addEventListener('load', () => {
       initLayout('catalog');
       lucide.createIcons();
+
+      // 용어 자동완성 초기화
+      const termSuggestions = [
+        '도로 혼잡도',
+        '신호등 상태',
+        '통행속도',
+        '사건사고',
+        '민원',
+        '교통 사고',
+        '도로 위험 지수',
+        '신호 대기 시간'
+      ];
+
+      initAutocomplete('termSearchInput', termSuggestions);
     });
   </script>
 </body>

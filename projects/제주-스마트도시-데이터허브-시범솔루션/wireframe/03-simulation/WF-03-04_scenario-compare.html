@@ -199,6 +199,22 @@
       color: var(--color-success);
       min-width: 35px;
     }
+    /* Enhanced metric cell styling */
+    .metric-cell.best {
+      background: #047857;
+      color: white;
+      font-weight: 700;
+    }
+    .metric-cell.good {
+      background: #EAB308;
+      color: #78350F;
+      font-weight: 600;
+    }
+    .metric-cell.normal {
+      background: #9CA3AF;
+      color: white;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -435,62 +451,77 @@
     </div>
   </div>
 
+  <script src="../common/map.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('simulation');
 
-      // Radar Chart
-      const radarCtx = document.getElementById('radarChart').getContext('2d');
-      new Chart(radarCtx, {
-        type: 'radar',
-        data: {
-          labels: ['비용 효율', '혼잡도 개선', '민원 감소', '시민 만족', '환경 영향', '확장성'],
-          datasets: [
-            {
-              label: '주차장 확장',
-              data: [85, 92, 88, 86, 60, 65],
-              borderColor: '#2563EB',
-              backgroundColor: 'rgba(37, 99, 235, 0.1)',
-              borderWidth: 2,
-              pointBackgroundColor: '#2563EB'
-            },
-            {
-              label: '요금제 적용',
-              data: [95, 72, 64, 58, 75, 80],
-              borderColor: '#7C3AED',
-              backgroundColor: 'rgba(124, 58, 237, 0.1)',
-              borderWidth: 2,
-              pointBackgroundColor: '#7C3AED'
-            },
-            {
-              label: '공유주차',
-              data: [72, 60, 48, 70, 90, 95],
-              borderColor: '#16A34A',
-              backgroundColor: 'rgba(22, 163, 74, 0.1)',
-              borderWidth: 2,
-              pointBackgroundColor: '#16A34A'
-            }
-          ]
+      // Radar Chart using createRadarChart helper
+      const radarLabels = ['비용효율', '만족도', '시공용이성', '유지비절감', '환경개선', '지속성'];
+      const radarDatasets = [
+        {
+          label: '주차장 확장',
+          data: [85, 86, 72, 65, 60, 75],
+          borderColor: '#2563EB',
+          backgroundColor: '#2563EB33',
+          borderWidth: 2,
+          pointBackgroundColor: '#2563EB'
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom'
+        {
+          label: '요금제 적용',
+          data: [95, 58, 85, 88, 75, 80],
+          borderColor: '#7C3AED',
+          backgroundColor: '#7C3AED33',
+          borderWidth: 2,
+          pointBackgroundColor: '#7C3AED'
+        },
+        {
+          label: '공유주차',
+          data: [72, 70, 68, 62, 90, 95],
+          borderColor: '#16A34A',
+          backgroundColor: '#16A34A33',
+          borderWidth: 2,
+          pointBackgroundColor: '#16A34A'
+        }
+      ];
+
+      createRadarChart('radarChart', radarLabels, radarDatasets, {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: { size: 12, weight: '600' }
             }
-          },
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 100,
-              ticks: {
-                stepSize: 20
-              }
+          }
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              font: { size: 11 }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)'
             }
           }
         }
+      });
+
+      // Enhance confidence bars with animations
+      const confidenceBars = document.querySelectorAll('.confidence-progress');
+      confidenceBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+          bar.style.transition = 'width 0.6s ease-out';
+          bar.style.width = width;
+        }, 100 + index * 100);
       });
     });
   </script>

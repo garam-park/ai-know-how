@@ -98,26 +98,28 @@
               <div class="card-header">
                 <div class="card-title">주요 키워드 (부정)</div>
               </div>
-              <div class="card-body" style="height: 300px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px;">
-                <span style="font-size: 32px; font-weight: bold; color: var(--color-danger);">불법주차</span>
-                <span style="font-size: 24px; font-weight: bold; color: var(--color-danger);">위반</span>
-                <span style="font-size: 20px; font-weight: 600; color: var(--color-warning);">문제</span>
-                <span style="font-size: 18px; font-weight: 600; color: var(--color-warning);">점유</span>
-                <span style="font-size: 16px; font-weight: 600; color: var(--color-warning);">위험</span>
-                <span style="font-size: 14px; color: var(--color-gray-500);">방치</span>
-                <span style="font-size: 14px; color: var(--color-gray-500);">단속</span>
-                <span style="font-size: 13px; color: var(--color-gray-500);">피해</span>
-                <span style="font-size: 13px; color: var(--color-gray-500);">불편</span>
-                <span style="font-size: 12px; color: var(--color-gray-500);">안전</span>
+              <div class="card-body" id="wordcloud-container" style="height: 300px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; padding: 20px;">
+                <!-- Word cloud will be generated here -->
               </div>
             </div>
 
-            <!-- Sentiment Scores -->
+            <!-- Sentiment Score Distribution -->
             <div class="card">
               <div class="card-header">
-                <div class="card-title">상/하위 감성 민원</div>
+                <div class="card-title">감정값 추출 결과</div>
               </div>
               <div class="card-body">
+                <canvas id="sentimentScoresChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sentiment Trend -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <div class="card-title">상/하위 감성 민원</div>
+            </div>
+            <div class="card-body">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                   <!-- Positive -->
                   <div>
@@ -197,6 +199,94 @@
       createBarChart('strengthChart', scores, [
         { label: '민원 건수', data: strength, backgroundColor: '#2563EB' }
       ]);
+
+      // 감정값 추출 결과 바 차트 (긍정/부정/중립)
+      createBarChart('sentimentScoresChart',
+        ['긍정', '중립', '부정'],
+        [{
+          label: '민원 건수',
+          data: [168, 490, 741],
+          backgroundColor: ['#16A34A', '#6B7280', '#DC2626']
+        }],
+        {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      );
+
+      // 워드 클라우드 생성 (CSS 기반)
+      const words = [
+        { text: '불법주차', frequency: 450 },
+        { text: '위반', frequency: 320 },
+        { text: '문제', frequency: 280 },
+        { text: '점유', frequency: 240 },
+        { text: '위험', frequency: 210 },
+        { text: '방치', frequency: 180 },
+        { text: '단속', frequency: 170 },
+        { text: '피해', frequency: 160 },
+        { text: '불편', frequency: 150 },
+        { text: '안전', frequency: 140 },
+        { text: '신고', frequency: 130 },
+        { text: '개선', frequency: 120 },
+        { text: '조치', frequency: 110 },
+        { text: '대응', frequency: 100 },
+        { text: '지역', frequency: 90 }
+      ];
+
+      const maxFrequency = Math.max(...words.map(w => w.frequency));
+      const minFrequency = Math.min(...words.map(w => w.frequency));
+      const wordcloudContainer = document.getElementById('wordcloud-container');
+
+      // 단어를 무작위로 섞어서 배치
+      const shuffled = words.sort(() => Math.random() - 0.5);
+
+      shuffled.forEach(word => {
+        // 빈도에 따라 폰트 크기 계산 (12px ~ 42px)
+        const sizePercent = (word.frequency - minFrequency) / (maxFrequency - minFrequency);
+        const fontSize = 12 + sizePercent * 30;
+
+        // 빈도에 따라 색상 결정
+        let color;
+        if (sizePercent > 0.7) {
+          color = '#DC2626'; // 빨강 (높음)
+        } else if (sizePercent > 0.4) {
+          color = '#EAB308'; // 노랑 (중간)
+        } else {
+          color = '#6B7280'; // 회색 (낮음)
+        }
+
+        const span = document.createElement('span');
+        span.textContent = word.text;
+        span.style.cssText = `
+          font-size: ${fontSize}px;
+          font-weight: ${600 + Math.floor(sizePercent * 300)};
+          color: ${color};
+          padding: 4px 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: inline-block;
+          margin: 4px;
+        `;
+
+        span.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.1)';
+          this.style.opacity = '0.7';
+        });
+
+        span.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+          this.style.opacity = '1';
+        });
+
+        span.addEventListener('click', function() {
+          showToast(`"${word.text}" - 빈도: ${word.frequency}`, 'info');
+        });
+
+        wordcloudContainer.appendChild(span);
+      });
     });
   </script>
 </body>

@@ -64,8 +64,8 @@
           <div style="background-color: var(--bg-color); border-radius: var(--radius-lg); padding: var(--spacing-3xl) var(--spacing-xl); box-shadow: var(--shadow-sm); margin-bottom: var(--spacing-2xl); text-align: center;">
             <h2 style="font-size: var(--font-heading-md); margin-bottom: var(--spacing-lg); color: var(--text-color);">찾고 싶은 데이터를 검색하세요</h2>
 
-            <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
-              <input type="text" class="form-input" placeholder="찾고 싶은 데이터를 자연어로 검색하세요" style="flex: 1;">
+            <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xl); position: relative; flex: 1;">
+              <input type="text" id="catalogSearchInput" class="form-input" placeholder="찾고 싶은 데이터를 자연어로 검색하세요" style="flex: 1;">
               <button class="btn btn-primary">
                 <i data-lucide="search" style="width: 16px; height: 16px;"></i>
                 검색
@@ -258,6 +258,20 @@
     window.addEventListener('load', () => {
       initLayout('catalog');
       lucide.createIcons();
+
+      // 검색 자동완성 초기화
+      const searchSuggestions = [
+        '실시간 도로 교통 정보',
+        '민원 통계 현황',
+        '기상 관측 데이터',
+        '전기차 충전소 정보',
+        '버스 운행 현황',
+        '관광객 통계',
+        '지역 상점 개수',
+        '신고 민원 내역'
+      ];
+
+      initAutocomplete('catalogSearchInput', searchSuggestions);
     });
   </script>
 </body>

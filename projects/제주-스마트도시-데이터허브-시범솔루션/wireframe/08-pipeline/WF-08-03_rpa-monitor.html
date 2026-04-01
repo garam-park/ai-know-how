@@ -155,7 +155,10 @@
 
           <!-- 실행 로그 테이블 -->
           <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h2 class="text-lg font-semibold mb-4">실행 로그</h2>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold">실행 로그</h2>
+              <input type="text" placeholder="검색..." class="filter-input" id="logSearchInput" style="width: 200px;">
+            </div>
             <div class="overflow-x-auto">
               <table class="data-table" id="logTable">
                 <thead>
@@ -201,7 +204,7 @@
                     <td><span class="badge success">성공</span></td>
                     <td>00:08:12</td>
                   </tr>
-                  <tr style="background-color: #f8d7da;">
+                  <tr style="background-color: #f8d7da; cursor-pointer;" onclick="showErrorDetail(event, 'BOT-005')">
                     <td></td>
                     <td>BOT-005</td>
                     <td>기타포털</td>
@@ -249,6 +252,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('pipeline');
       initTableSort('logTable');
+      initTableFilter('logTable', 'logSearchInput');
     });
 
     function showBotRunModal() {
@@ -282,6 +286,51 @@
           </div>
         `,
         { confirmText: '실행', cancelText: '취소' }
+      );
+    }
+
+    function showErrorDetail(event, botId) {
+      event.stopPropagation();
+      showModal(
+        `${botId} - 에러 상세 정보`,
+        `
+          <div style="padding: 10px 0;">
+            <div style="margin-bottom: 20px;">
+              <h3 style="font-weight: 600; margin-bottom: 10px; color: #dc2626;">에러 메시지</h3>
+              <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 6px; padding: 12px; color: #7f1d1d; font-size: 13px; line-height: 1.6;">
+                <strong>Connection Timeout Error</strong><br>
+                Failed to establish connection to target site within 30 seconds.
+                The server at 'example-portal.kr' did not respond to the initial connection attempt.
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <h3 style="font-weight: 600; margin-bottom: 10px;">스택 트레이스</h3>
+              <div style="background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 12px; line-height: 1.6; max-height: 200px; overflow-y: auto; color: #374151;">
+                at RPA.Bot.ExecuteBot() in Bot.cs:line 245<br>
+                at RPA.Bot.Connect() in Bot.cs:line 156<br>
+                at RPA.Network.HttpClient.Get() in Network.cs:line 82<br>
+                at System.Net.Http.HttpClientHandler.SendAsync() in HttpClient.cs:line 1234<br>
+                at System.Net.Sockets.SocketError: Connection refused
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+              <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">
+                <strong>발생 시각:</strong> 2026-03-25 10:00:00<br>
+                <strong>재시도 횟수:</strong> 3회 (모두 실패)<br>
+                <strong>예상 해결:</strong> 대상 서버 상태 확인 필요
+              </p>
+            </div>
+          </div>
+        `,
+        {
+          confirmText: '재시도',
+          cancelText: '닫기',
+          onConfirm: () => {
+            showToast('${botId} 재시도 중입니다...', 'info');
+          }
+        }
       );
     }
   </script>

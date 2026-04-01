@@ -10,6 +10,18 @@
   <link rel="stylesheet" href="../common/tokens.css">
   <link rel="stylesheet" href="../common/layout.css">
   <link rel="stylesheet" href="../common/components.css">
+  <style>
+    .drilldown-link {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .drilldown-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  </style>
 </head>
 <body>
   <div id="app-shell">
@@ -59,7 +71,7 @@
           <div class="mb-6">
             <h2 class="text-lg font-semibold mb-4">수집 소스 현황</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-auto">
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="민원포털" onclick="showSourceDetail(event, '민원포털')">
                 <div class="kpi-header">
                   <div class="kpi-icon">📋</div>
                 </div>
@@ -69,9 +81,9 @@
                 <div class="flex gap-1">
                   <span class="badge success">정상</span>
                 </div>
-              </div>
+              </a>
 
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="만덕콜센터" onclick="showSourceDetail(event, '만덕콜센터')">
                 <div class="kpi-header">
                   <div class="kpi-icon">☎️</div>
                 </div>
@@ -81,9 +93,9 @@
                 <div class="flex gap-1">
                   <span class="badge warning">지연</span>
                 </div>
-              </div>
+              </a>
 
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="통합관제" onclick="showSourceDetail(event, '통합관제')">
                 <div class="kpi-header">
                   <div class="kpi-icon">🎥</div>
                 </div>
@@ -93,9 +105,9 @@
                 <div class="flex gap-1">
                   <span class="badge success">정상</span>
                 </div>
-              </div>
+              </a>
 
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="기상청API" onclick="showSourceDetail(event, '기상청API')">
                 <div class="kpi-header">
                   <div class="kpi-icon">🌤️</div>
                 </div>
@@ -105,9 +117,9 @@
                 <div class="flex gap-1">
                   <span class="badge success">정상</span>
                 </div>
-              </div>
+              </a>
 
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="112/119" onclick="showSourceDetail(event, '112/119')">
                 <div class="kpi-header">
                   <div class="kpi-icon">🚨</div>
                 </div>
@@ -117,9 +129,9 @@
                 <div class="flex gap-1">
                   <span class="badge success">정상</span>
                 </div>
-              </div>
+              </a>
 
-              <div class="kpi-card small">
+              <a href="#" class="kpi-card small drilldown-link" data-source="전기차충전" onclick="showSourceDetail(event, '전기차충전')">
                 <div class="kpi-header">
                   <div class="kpi-icon">🔌</div>
                 </div>
@@ -129,7 +141,7 @@
                 <div class="flex gap-1">
                   <span class="badge danger">실패</span>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
 
@@ -299,16 +311,47 @@
       // 테이블 정렬 기능
       initTableSort('logTable');
 
-      // 검색 기능
-      document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const tableRows = document.querySelectorAll('#logTable tbody tr');
-        tableRows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-      });
+      // 테이블 필터 기능 (검색)
+      initTableFilter('logTable', 'searchInput');
     });
+
+    // 수집 소스별 상세 드릴다운
+    function showSourceDetail(event, sourceName) {
+      event.preventDefault();
+      const content = `
+        <div style="padding: 20px 0;">
+          <h3 style="margin-bottom: 15px; font-weight: 600;">${sourceName} - 상세 정보</h3>
+          <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div>
+                <p style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">총 수집건수</p>
+                <p style="font-size: 20px; font-weight: 600;">12,345건</p>
+              </div>
+              <div>
+                <p style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">금일 수집</p>
+                <p style="font-size: 20px; font-weight: 600;">1,234건</p>
+              </div>
+              <div>
+                <p style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">성공률</p>
+                <p style="font-size: 20px; font-weight: 600; color: #16a34a;">98.5%</p>
+              </div>
+              <div>
+                <p style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">평균 응답시간</p>
+                <p style="font-size: 20px; font-weight: 600;">324ms</p>
+              </div>
+            </div>
+          </div>
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+            <p style="font-size: 12px; color: #6b7280; margin-bottom: 8px;"><strong>최근 에러:</strong></p>
+            <p style="font-size: 13px; color: #374151; line-height: 1.6;">
+              Connection timeout at 14:28:30<br/>
+              Retry 3 times, all failed
+            </p>
+          </div>
+        </div>
+      `;
+      showModal(`${sourceName} 상세 조회`, content, { showCancel: false, confirmText: '닫기' });
+    }
   </script>
 </body>
 </html>

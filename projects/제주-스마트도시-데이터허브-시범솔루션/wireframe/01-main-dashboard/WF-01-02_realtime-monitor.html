@@ -112,8 +112,19 @@
             </div>
           </div>
 
+          <!-- 실시간 타임스탬프 -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px; background-color: #F9FAFB; border-radius: 8px;">
+            <div style="font-size: 14px; color: #6B7280;">
+              <strong>최근 갱신:</strong> <span id="updateTimestamp" style="color: #1F2937; font-weight: 600;">00:00:00</span>
+            </div>
+            <button class="btn btn-secondary" onclick="manualRefresh()" style="padding: 6px 12px; font-size: 12px;">
+              <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
+              수동 갱신
+            </button>
+          </div>
+
           <!-- 하단: 주차장별 센서 상태 카드 (2열 9개) -->
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;" id="parkingCardsContainer">
             <!-- 주차장 1 -->
             <div class="card">
               <div style="display: flex; justify-content: space-between; align-items: start;">
@@ -122,15 +133,15 @@
                   <div style="font-size: 12px; color: #6B7280;">P001 · 제주시 중심</div>
                 </div>
                 <div style="text-align: right;">
-                  <div style="font-size: 14px; color: #2563EB; font-weight: 600;">145/200</div>
-                  <div style="font-size: 12px; color: #6B7280;">72.5%</div>
+                  <div style="font-size: 14px; color: #2563EB; font-weight: 600;" class="available-count">145/200</div>
+                  <div style="font-size: 12px; color: #6B7280;" class="occupancy-rate">72.5%</div>
                 </div>
               </div>
               <div class="progress-bar-container" style="margin: 12px 0;">
                 <div class="progress-bar" style="width: 72.5%;"></div>
               </div>
               <div style="font-size: 12px; color: #6B7280;">
-                센서 상태: <span style="color: #16A34A;">✓ 정상</span> · 2분 전
+                센서 상태: <span style="color: #16A34A;">✓ 정상</span> · <span class="time-ago">2분 전</span>
               </div>
             </div>
 
@@ -301,14 +312,17 @@
 
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
+  <script src="../common/charts.js"></script>
   <script src="../common/map.js"></script>
   <script>
     let map = null;
+    let refreshInterval = null;
 
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('main');
       initMap();
+      startAutoRefresh();
     });
 
     // 지도 초기화
@@ -324,6 +338,79 @@
     function refreshEvents() {
       showToast('이벤트가 새로고침되었습니다.', 'info');
     }
+
+    // 자동 새로고침 시작 (10초 간격)
+    function startAutoRefresh() {
+      // 초기 타임스탬프 업데이트
+      updateTimestamp();
+
+      refreshInterval = setInterval(() => {
+        updateTimestamp();
+        simulateDataUpdate();
+      }, 10000); // 10초 간격
+    }
+
+    // 타임스탐프 업데이트
+    function updateTimestamp() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const timestampEl = document.getElementById('updateTimestamp');
+      if (timestampEl) {
+        timestampEl.textContent = `${hours}:${minutes}:${seconds}`;
+      }
+    }
+
+    // 더미 데이터 변경 시뮬레이션
+    function simulateDataUpdate() {
+      const cards = document.querySelectorAll('#parkingCardsContainer .card');
+
+      cards.forEach((card, index) => {
+        // 랜덤 가용률 변경 (80-100% 범위에서 미세 변동)
+        const currentRate = parseFloat(card.querySelector('.occupancy-rate').textContent);
+        const variation = (Math.random() - 0.5) * 5; // -2.5% ~ +2.5%
+        const newRate = Math.max(0, Math.min(100, currentRate + variation));
+
+        // 가용 구간 계산
+        const total = parseInt(card.querySelector('.available-count').textContent.split('/')[1]);
+        const available = Math.round(total * (100 - newRate) / 100);
+
+        // DOM 업데이트
+        card.querySelector('.available-count').textContent = `${available}/${total}`;
+        card.querySelector('.occupancy-rate').textContent = newRate.toFixed(1) + '%';
+        card.querySelector('.time-ago').textContent = '방금 전';
+
+        // 프로그레스 바 업데이트
+        const progressBar = card.querySelector('.progress-bar');
+        progressBar.style.width = newRate.toFixed(1) + '%';
+
+        // 점유율에 따라 색상 변경
+        if (newRate > 85) {
+          progressBar.style.backgroundColor = '#DC2626';
+        } else if (newRate > 70) {
+          progressBar.style.backgroundColor = '#EAB308';
+        } else {
+          progressBar.style.backgroundColor = '';
+        }
+      });
+
+      showToast('센서 데이터가 업데이트되었습니다.', 'info', 2000);
+    }
+
+    // 수동 갱신
+    function manualRefresh() {
+      updateTimestamp();
+      simulateDataUpdate();
+    }
+
+    // 페이지 언로드 시 인터벌 제거
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
   </script>
 </body>
 </html>

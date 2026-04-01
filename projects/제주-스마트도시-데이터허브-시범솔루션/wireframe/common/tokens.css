@@ -203,3 +203,15 @@ body {
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow-md { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* ========== Dark Mode Variables ========== */
+[data-theme="dark"] {
+  --bg-color: #1F2937;
+  --bg-color-secondary: #111827;
+  --text-color: #F9FAFB;
+  --text-color-secondary: #9CA3AF;
+  --border-color: #374151;
+  --color-gray-50: #374151;
+  --color-gray-100: #1F2937;
+  --color-gray-200: #4B5563;
+}

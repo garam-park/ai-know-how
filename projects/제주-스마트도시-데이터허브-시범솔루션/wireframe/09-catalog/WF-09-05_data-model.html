@@ -140,11 +140,11 @@
               <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">관계 (Relations)</h3>
 
               <ul style="list-style: none; padding-left: 0;">
-                <li style="padding: var(--spacing-md); border-bottom: 1px solid var(--border-color); color: var(--text-color-secondary);">
-                  <strong style="color: var(--text-color);">hasLocation</strong> → Building
+                <li style="padding: var(--spacing-md); border-bottom: 1px solid var(--border-color); color: var(--text-color-secondary); cursor: pointer;" onclick="showRelationDetail('Building')">
+                  <strong style="color: var(--text-color); text-decoration: underline;">hasLocation</strong> → Building
                 </li>
-                <li style="padding: var(--spacing-md); color: var(--text-color-secondary);">
-                  <strong style="color: var(--text-color);">belongsTo</strong> → Organization
+                <li style="padding: var(--spacing-md); color: var(--text-color-secondary); cursor: pointer;" onclick="showRelationDetail('Organization')">
+                  <strong style="color: var(--text-color); text-decoration: underline;">belongsTo</strong> → Organization
                 </li>
               </ul>
             </div>
@@ -192,6 +192,41 @@
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    function showRelationDetail(targetEntity) {
+      const columnConfig = {
+        'Building': [
+          { name: 'id', type: 'String', required: true },
+          { name: 'type', type: 'String', required: true },
+          { name: 'name', type: 'String', required: false },
+          { name: 'address', type: 'String', required: true },
+          { name: 'buildingType', type: 'Enum', required: true }
+        ],
+        'Organization': [
+          { name: 'id', type: 'String', required: true },
+          { name: 'type', type: 'String', required: true },
+          { name: 'name', type: 'String', required: true },
+          { name: 'department', type: 'String', required: false },
+          { name: 'contactEmail', type: 'String', required: false }
+        ]
+      };
+
+      const columns = columnConfig[targetEntity] || [];
+      let detailHTML = '<div style="padding: 10px 0;"><h3 style="font-weight: 600; margin-bottom: 15px;">' + targetEntity + ' 엔티티</h3>';
+
+      detailHTML += '<table style="width: 100%; font-size: 13px; border-collapse: collapse;">';
+      detailHTML += '<tr style="border-bottom: 1px solid #e5e7eb; background-color: #f9fafb;"><td style="padding: 8px; font-weight: 600;">컬럼명</td><td style="padding: 8px; font-weight: 600;">데이터 타입</td><td style="padding: 8px; font-weight: 600;">필수 여부</td></tr>';
+
+      columns.forEach(col => {
+        detailHTML += '<tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px; color: #2563eb; font-weight: 500;">' + col.name + '</td>';
+        detailHTML += '<td style="padding: 8px;"><span class="badge default">' + col.type + '</span></td>';
+        detailHTML += '<td style="padding: 8px;">' + (col.required ? '<span class="badge success">Yes</span>' : '<span class="badge default">No</span>') + '</td></tr>';
+      });
+
+      detailHTML += '</table></div>';
+
+      showModal(targetEntity + ' 상세 정보', detailHTML, { showCancel: false, confirmText: '닫기' });
+    }
+
     window.addEventListener('load', () => {
       initLayout('catalog');
       lucide.createIcons();

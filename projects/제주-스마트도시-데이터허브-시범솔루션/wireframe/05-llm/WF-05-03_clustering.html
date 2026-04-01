@@ -280,69 +280,134 @@
   </div>
 
   <script src="../common/nav-data.js"></script>
+  <script src="../common/charts.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    let currentChart = null;
+
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('llm');
       initClusterChart();
     });
 
     function initClusterChart() {
-      const ctx = document.getElementById('clusterChart').getContext('2d');
-
       const colors = [
         '#2563EB', '#7C3AED', '#DC2626', '#F59E0B',
-        '#16A34A', '#0891B2', '#DB2777', '#EA580C'
+        '#16A34A', '#0891B2', '#DB2777', '#EA580C',
+        '#EC4899', '#8B5CF6', '#06B6D4', '#14B8A6'
       ];
 
       const clusterData = [
-        { x: 25, y: 45, r: 15, cluster: 0, label: 'C1' },
-        { x: 65, y: 35, r: 12, cluster: 1, label: 'C2' },
-        { x: 45, y: 70, r: 18, cluster: 2, label: 'C3' },
-        { x: 75, y: 55, r: 10, cluster: 3, label: 'C4' },
-        { x: 35, y: 25, r: 14, cluster: 4, label: 'C5' },
-        { x: 55, y: 50, r: 11, cluster: 5, label: 'C6' },
-        { x: 20, y: 65, r: 9, cluster: 6, label: 'C7' },
-        { x: 70, y: 20, r: 13, cluster: 7, label: 'C8' }
+        { x: 25, y: 45, r: 48, cluster: 0, keywords: ['주차장', '부족', '교통', '혼잡', '민원'], representatives: ['신도심 지역 주차장 부족으로 인한 교통 혼잡', '상업지구 야간 불법 주차 단속 요청', '대형마트 주차장 부족에 따른 주변 도로 점유'] },
+        { x: 65, y: 35, r: 35, cluster: 1, keywords: ['도로', '파손', '복구', '포트홀', '안전'], representatives: ['관광지 진입로 포트홀 복구 신청', '노후 도로 아스팔트 들뜸 현상', '우수관 파손으로 인한 도로 함몰'] },
+        { x: 45, y: 70, r: 32, cluster: 2, keywords: ['환경', '오염', '수질', '관리', '개선'], representatives: [] },
+        { x: 75, y: 55, r: 28, cluster: 3, keywords: ['안전', '시설', '점검', '위험', '조치'], representatives: [] },
+        { x: 35, y: 25, r: 42, cluster: 4, keywords: ['민원', '처리', '만족도', '응답', '해결'], representatives: [] },
+        { x: 55, y: 50, r: 26, cluster: 5, keywords: ['관광', '시설', '개선', '서비스', '확대'], representatives: [] },
+        { x: 20, y: 65, r: 24, cluster: 6, keywords: ['교육', '지원', '프로그램', '운영', '참여'], representatives: [] },
+        { x: 70, y: 20, r: 31, cluster: 7, keywords: ['도시', '계획', '발전', '정책', '추진'], representatives: [] }
       ];
 
       const datasets = clusterData.map((d, idx) => ({
         label: `클러스터 ${idx + 1}`,
-        data: [{ x: d.x, y: d.y, r: d.r * 2 }],
-        backgroundColor: colors[idx],
+        data: [{ x: d.x, y: d.y, r: d.r }],
+        backgroundColor: colors[idx] + '66',
         borderColor: colors[idx],
-        opacity: 0.8,
-        pointStyle: 'circle'
+        borderWidth: 2,
+        pointStyle: 'circle',
+        clusterId: idx,
+        keywords: d.keywords,
+        representatives: d.representatives
       }));
 
-      const chart = new Chart(ctx, {
+      const canvas = document.getElementById('clusterChart');
+      if (currentChart) {
+        currentChart.destroy();
+      }
+
+      currentChart = new Chart(canvas, {
         type: 'bubble',
         data: { datasets },
         options: {
           responsive: true,
           maintainAspectRatio: true,
+          onClick: (event, activeElements) => {
+            if (activeElements.length > 0) {
+              const datasetIndex = activeElements[0].datasetIndex;
+              const clusterData = datasets[datasetIndex];
+              updateClusterDetails(datasetIndex, clusterData);
+            }
+          },
           plugins: {
-            legend: { display: true, position: 'bottom' }
+            legend: { display: true, position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                title: function(context) {
+                  return '클러스터 #' + (context[0].datasetIndex + 1);
+                },
+                label: function(context) {
+                  return '민원 수: ' + context.raw.r;
+                }
+              }
+            }
           },
           scales: {
             x: {
               type: 'linear',
               position: 'bottom',
               min: 0, max: 100,
-              title: { display: true, text: 'Dimension 1' }
+              title: { display: true, text: 'Embedding Dimension 1 (X)' }
             },
             y: {
               min: 0, max: 100,
-              title: { display: true, text: 'Dimension 2' }
+              title: { display: true, text: 'Embedding Dimension 2 (Y)' }
             }
           }
         }
       });
+
+      // 첫 번째 클러스터 상세 정보 표시
+      updateClusterDetails(0, datasets[0]);
+    }
+
+    function updateClusterDetails(index, clusterData) {
+      const detailPanels = document.querySelectorAll('.cluster-detail-panel');
+      detailPanels.forEach((panel, i) => {
+        panel.style.display = i <= 1 ? '' : 'none'; // 처음 2개만 표시
+      });
+
+      // 첫 번째 패널 업데이트
+      const firstPanel = detailPanels[0];
+      if (firstPanel) {
+        const badge = firstPanel.querySelector('.cluster-badge');
+        const colors = ['#2563EB', '#7C3AED', '#DC2626', '#F59E0B', '#16A34A', '#0891B2', '#DB2777', '#EA580C'];
+        badge.style.background = colors[index];
+
+        const titleSpan = firstPanel.querySelector('.cluster-name span');
+        if (titleSpan) {
+          titleSpan.textContent = `클러스터 #${index + 1}`;
+        }
+
+        const countSpan = firstPanel.querySelector('[data-count]') || firstPanel.children[1];
+        if (countSpan && countSpan.innerHTML.includes('<strong>')) {
+          countSpan.innerHTML = `<strong>${Math.floor(Math.random() * 40) + 25}</strong>개 문서`;
+        }
+
+        const keywordList = firstPanel.querySelector('.keyword-list');
+        if (keywordList && clusterData.keywords) {
+          keywordList.innerHTML = clusterData.keywords.slice(0, 5).map(kw => `
+            <li class="keyword-item"><strong>${kw}</strong> (${(0.7 + Math.random() * 0.3).toFixed(2)})</li>
+          `).join('');
+        }
+      }
+
+      showToast(`클러스터 #${index + 1} 상세 정보가 표시되었습니다.`, 'info');
     }
 
     function updateClusters(value) {
       document.getElementById('clusterValue').textContent = value;
-      showToast('클러스터 개수가 ' + value + '개로 설정되었습니다.', 'info');
+      initClusterChart();
+      showToast('클러스터 개수가 ' + value + '개로 설정되고 차트가 재렌더링되었습니다.', 'info');
     }
   </script>
 </body>

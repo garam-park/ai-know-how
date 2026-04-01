@@ -178,7 +178,7 @@
               <div class="card-subtitle">최근 수집 현황</div>
             </div>
             <div class="card-body">
-              <table class="data-table">
+              <table class="data-table" id="pipelineTable">
                 <thead>
                   <tr>
                     <th>소스명</th>
@@ -188,65 +188,73 @@
                     <th>상태</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
+                <tbody id="pipelineTableBody">
+                  <tr class="sensor-row" data-source="parking">
                     <td>공영주차장 센서</td>
-                    <td>2026-04-01 10:32:15</td>
-                    <td>1,245건</td>
-                    <td>0</td>
-                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                    <td class="update-time">2026-04-01 10:32:15</td>
+                    <td class="collect-count">1,245건</td>
+                    <td class="error-count">0</td>
+                    <td class="status-cell"><span style="color: #16A34A;">✓ 정상</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="complaint">
                     <td>민원 신청 시스템</td>
-                    <td>2026-04-01 10:31:50</td>
-                    <td>156건</td>
-                    <td>0</td>
-                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                    <td class="update-time">2026-04-01 10:31:50</td>
+                    <td class="collect-count">156건</td>
+                    <td class="error-count">0</td>
+                    <td class="status-cell"><span style="color: #16A34A;">✓ 정상</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="traffic">
                     <td>교통 신호 제어</td>
-                    <td>2026-04-01 10:32:00</td>
-                    <td>8,934건</td>
-                    <td>2</td>
-                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                    <td class="update-time">2026-04-01 10:32:00</td>
+                    <td class="collect-count">8,934건</td>
+                    <td class="error-count">2</td>
+                    <td class="status-cell"><span style="color: #EAB308;">⚠ 경고</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="water">
                     <td>상수도 관리 시스템</td>
-                    <td>2026-04-01 10:30:20</td>
-                    <td>542건</td>
-                    <td>0</td>
-                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                    <td class="update-time">2026-04-01 10:30:20</td>
+                    <td class="collect-count">542건</td>
+                    <td class="error-count">0</td>
+                    <td class="status-cell"><span style="color: #16A34A;">✓ 정상</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="iot">
                     <td>IoT 센서 게이트웨이</td>
-                    <td>2026-04-01 10:32:30</td>
-                    <td>45,123건</td>
-                    <td>0</td>
-                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                    <td class="update-time">2026-04-01 10:32:30</td>
+                    <td class="collect-count">45,123건</td>
+                    <td class="error-count">0</td>
+                    <td class="status-cell"><span style="color: #16A34A;">✓ 정상</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="cctv">
                     <td>CCTV 분석 서버</td>
-                    <td>2026-04-01 10:25:45</td>
-                    <td>234건</td>
-                    <td>5</td>
-                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                    <td class="update-time">2026-04-01 10:25:45</td>
+                    <td class="collect-count">234건</td>
+                    <td class="error-count">5</td>
+                    <td class="status-cell"><span style="color: #EAB308;">⚠ 경고</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="weather">
                     <td>기상청 데이터 API</td>
-                    <td>2026-04-01 10:00:00</td>
-                    <td>12건</td>
-                    <td>0</td>
-                    <td><span style="color: #16A34A;">✓ 정상</span></td>
+                    <td class="update-time">2026-04-01 10:00:00</td>
+                    <td class="collect-count">12건</td>
+                    <td class="error-count">0</td>
+                    <td class="status-cell"><span style="color: #16A34A;">✓ 정상</span></td>
                   </tr>
-                  <tr>
+                  <tr class="sensor-row" data-source="db">
                     <td>외부 DB 동기화</td>
-                    <td>2026-04-01 09:50:30</td>
-                    <td>8,456건</td>
-                    <td>1</td>
-                    <td><span style="color: #EAB308;">⚠ 경고</span></td>
+                    <td class="update-time">2026-04-01 09:50:30</td>
+                    <td class="collect-count">8,456건</td>
+                    <td class="error-count">1</td>
+                    <td class="status-cell"><span style="color: #EAB308;">⚠ 경고</span></td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- 경보 이력 미니 타임라인 -->
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #E5E7EB;">
+              <div style="font-weight: 600; color: #1F2937; margin-bottom: 12px;">경보 이력 (최근 5건)</div>
+              <div id="alertTimeline" style="display: flex; flex-direction: column; gap: 12px; max-height: 200px; overflow-y: auto;">
+                <!-- 경보 기록이 여기에 자동으로 추가됨 -->
+              </div>
             </div>
           </div>
 
@@ -361,10 +369,15 @@
   <script src="../common/components.js"></script>
   <script src="../common/charts.js"></script>
   <script>
+    let refreshInterval = null;
+    const alertHistory = [];
+
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('main');
       initCharts();
+      startAutoRefresh();
+      initializeAlertTimeline();
     });
 
     // 차트 초기화
@@ -393,8 +406,141 @@
       createLineChart('apiResponseChart', apiData.labels, apiData.datasets);
     }
 
+    // 자동 갱신 시작 (15초 간격)
+    function startAutoRefresh() {
+      refreshInterval = setInterval(() => {
+        simulateSensorUpdate();
+      }, 15000); // 15초 간격
+    }
+
+    // 센서 데이터 업데이트 시뮬레이션
+    function simulateSensorUpdate() {
+      const rows = document.querySelectorAll('.sensor-row');
+
+      rows.forEach(row => {
+        const errorCell = row.querySelector('.error-count');
+        const statusCell = row.querySelector('.status-cell');
+        const updateTimeCell = row.querySelector('.update-time');
+
+        // 현재 에러 값
+        let currentError = parseInt(errorCell.textContent);
+
+        // 랜덤하게 에러 값 변경 (0 ~ 5 범위의 미세한 변동)
+        const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+        const newError = Math.max(0, currentError + variation);
+
+        errorCell.textContent = newError;
+
+        // 상태 업데이트 (에러에 따라 색상 변경)
+        let statusColor = '#16A34A';
+        let statusText = '✓ 정상';
+
+        if (newError > 3) {
+          statusColor = '#DC2626';
+          statusText = '✗ 위험';
+          row.style.backgroundColor = '#FEE2E2'; // 빨강 배경
+        } else if (newError > 0) {
+          statusColor = '#EAB308';
+          statusText = '⚠ 경고';
+          row.style.backgroundColor = '#FEF3C7'; // 노랑 배경
+        } else {
+          statusColor = '#16A34A';
+          statusText = '✓ 정상';
+          row.style.backgroundColor = '';
+        }
+
+        statusCell.innerHTML = `<span style="color: ${statusColor};">${statusText}</span>`;
+
+        // 타임스탬프 업데이트
+        const now = new Date();
+        const timeStr = now.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(/\. /g, '-').replace(/:/g, ':').replace(/(\d{4})-(\d{2})-(\d{2})\s/, '$1-$2-$3 ');
+        updateTimeCell.textContent = timeStr;
+
+        // 경고 발생 기록
+        if (newError > 0) {
+          const source = row.querySelector('td').textContent;
+          addAlert(source, newError > 3 ? 'danger' : 'warning', newError > 3 ? '위험' : '경고');
+        }
+      });
+    }
+
+    // 경보 이력에 추가
+    function addAlert(source, level, message) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('ko-KR');
+
+      const alert = {
+        time: timeStr,
+        source: source,
+        level: level,
+        message: message
+      };
+
+      alertHistory.unshift(alert);
+      if (alertHistory.length > 5) {
+        alertHistory.pop();
+      }
+
+      updateAlertTimeline();
+    }
+
+    // 경보 타임라인 초기화
+    function initializeAlertTimeline() {
+      // 초기 경고 데이터
+      addAlert('교통 신호 제어', 'warning', '경고');
+      addAlert('CCTV 분석 서버', 'warning', '경고');
+      addAlert('외부 DB 동기화', 'warning', '경고');
+    }
+
+    // 경보 타임라인 업데이트
+    function updateAlertTimeline() {
+      const timeline = document.getElementById('alertTimeline');
+      timeline.innerHTML = '';
+
+      alertHistory.forEach((alert, idx) => {
+        const color = alert.level === 'danger' ? '#DC2626' : '#EAB308';
+        const bgColor = alert.level === 'danger' ? '#FEE2E2' : '#FEF3C7';
+        const icon = alert.level === 'danger' ? '✗' : '⚠';
+
+        const item = document.createElement('div');
+        item.style.cssText = `
+          display: flex;
+          gap: 12px;
+          padding: 10px;
+          background-color: ${bgColor};
+          border-left: 3px solid ${color};
+          border-radius: 4px;
+          font-size: 12px;
+        `;
+
+        item.innerHTML = `
+          <div style="flex-shrink: 0; color: ${color}; font-weight: 600;">${icon}</div>
+          <div style="flex: 1;">
+            <div style="color: #1F2937; font-weight: 500;">${alert.source}</div>
+            <div style="color: #6B7280; font-size: 11px; margin-top: 2px;">${alert.time}</div>
+          </div>
+          <div style="color: ${color}; font-weight: 600; flex-shrink: 0;">${alert.message}</div>
+        `;
+
+        timeline.appendChild(item);
+      });
+
+      // 타임라인이 비어있으면 메시지 표시
+      if (alertHistory.length === 0) {
+        timeline.innerHTML = '<div style="text-align: center; color: #9CA3AF; padding: 20px; font-size: 12px;">경보 이력이 없습니다</div>';
+      }
+    }
+
     // 새로고침
     function refreshStatus() {
+      simulateSensorUpdate();
       showToast('시스템 상태가 새로고침되었습니다.', 'info');
     }
 
@@ -402,6 +548,13 @@
     function openSettings() {
       showToast('설정 기능은 준비 중입니다.', 'info');
     }
+
+    // 페이지 언로드 시 인터벌 제거
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
   </script>
 </body>
 </html>

@@ -62,17 +62,20 @@
         </div>
 
         <div class="page-content">
-          <!-- 탭 네비게이션 -->
+          <!-- 탭 네비게이션 (필터 탭: 전체/시스템/민원/보안) -->
           <div class="tabs" style="margin-bottom: 24px;">
             <div class="tab-headers">
-              <button class="tab-header active" onclick="switchTab(0)">
+              <button class="tab-header active" onclick="switchTab('all')" data-filter="all">
                 전체 <span class="badge info" style="margin-left: 8px;">12</span>
               </button>
-              <button class="tab-header" onclick="switchTab(1)">
+              <button class="tab-header" onclick="switchTab('system')" data-filter="system">
                 시스템 <span class="badge info" style="margin-left: 8px;">5</span>
               </button>
-              <button class="tab-header" onclick="switchTab(2)">
-                이벤트 <span class="badge info" style="margin-left: 8px;">7</span>
+              <button class="tab-header" onclick="switchTab('complaint')" data-filter="complaint">
+                민원 <span class="badge info" style="margin-left: 8px;">4</span>
+              </button>
+              <button class="tab-header" onclick="switchTab('security')" data-filter="security">
+                보안 <span class="badge info" style="margin-left: 8px;">3</span>
               </button>
             </div>
           </div>
@@ -115,11 +118,11 @@
           </div>
 
           <!-- 알림 목록 -->
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- 알림 1 (미읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+          <div style="display: flex; flex-direction: column; gap: 12px;" id="notificationsList">
+            <!-- 알림 1 (미읽음) - 시스템 -->
+            <div class="card notification-item" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="system" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -144,10 +147,10 @@
               </div>
             </div>
 
-            <!-- 알림 2 (미읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+            <!-- 알림 2 (미읽음) - 민원 -->
+            <div class="card notification-item" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="complaint" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #3B82F6; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -172,10 +175,10 @@
               </div>
             </div>
 
-            <!-- 알림 3 (읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+            <!-- 알림 3 (읽음) - 시스템 -->
+            <div class="card notification-item read" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="system" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -192,10 +195,10 @@
               </div>
             </div>
 
-            <!-- 알림 4 (읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+            <!-- 알림 4 (읽음) - 보안 -->
+            <div class="card notification-item read" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="security" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -212,10 +215,10 @@
               </div>
             </div>
 
-            <!-- 알림 5 (읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+            <!-- 알림 5 (읽음) - 민원 -->
+            <div class="card notification-item read" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="complaint" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -232,10 +235,10 @@
               </div>
             </div>
 
-            <!-- 알림 6 (읽음) -->
-            <div class="card" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
+            <!-- 알림 6 (읽음) - 보안 -->
+            <div class="card notification-item read" style="padding: 12px; cursor: pointer; transition: background-color 0.2s;" data-type="security" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor=''">
               <div style="display: flex; gap: 12px; align-items: flex-start;">
-                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0;"></div>
+                <div style="width: 12px; height: 12px; background-color: #D1D5DB; border-radius: 50%; margin-top: 4px; flex-shrink: 0; cursor: pointer;" class="read-indicator" onclick="toggleReadStatus(event)"></div>
                 <div style="flex: 1;">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
                     <div style="flex: 1;">
@@ -269,17 +272,57 @@
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    let currentFilter = 'all';
+
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
       initLayout('main');
     });
 
-    // 탭 전환
-    function switchTab(index) {
+    // 탭 전환 및 필터링
+    function switchTab(filterType) {
+      currentFilter = filterType;
       const tabs = document.querySelectorAll('.tab-header');
+      const items = document.querySelectorAll('.notification-item');
+
+      // 탭 활성화 업데이트
       tabs.forEach(t => t.classList.remove('active'));
-      tabs[index].classList.add('active');
-      showToast('탭이 전환되었습니다.', 'info');
+      document.querySelector(`[data-filter="${filterType}"]`).classList.add('active');
+
+      // 알림 필터링
+      items.forEach(item => {
+        if (filterType === 'all' || item.dataset.type === filterType) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      showToast(`필터가 적용되었습니다.`, 'info');
+    }
+
+    // 읽음/미읽음 상태 토글
+    function toggleReadStatus(event) {
+      event.stopPropagation();
+      const indicator = event.target.closest('.read-indicator');
+      const card = indicator.closest('.notification-item');
+      const titleEl = card.querySelector('div[style*="font-weight: 600"], div[style*="font-weight: 400"]');
+
+      if (card.classList.contains('read')) {
+        // 미읽음으로 변경
+        card.classList.remove('read');
+        indicator.style.backgroundColor = '#3B82F6';
+        if (titleEl) titleEl.style.fontWeight = '600';
+        if (titleEl) titleEl.style.color = '#1F2937';
+        showToast('미읽음으로 표시되었습니다.', 'info');
+      } else {
+        // 읽음으로 변경
+        card.classList.add('read');
+        indicator.style.backgroundColor = '#D1D5DB';
+        if (titleEl) titleEl.style.fontWeight = '400';
+        if (titleEl) titleEl.style.color = '#6B7280';
+        showToast('읽음으로 표시되었습니다.', 'success');
+      }
     }
 
     // 상세 내용 토글
@@ -297,11 +340,15 @@
 
     // 전체 읽음 처리
     function markAllAsRead() {
-      const circles = document.querySelectorAll('.card');
-      circles.forEach(card => {
-        const circle = card.querySelector('div[style*="background-color: #3B82F6"]');
-        if (circle) {
-          circle.style.backgroundColor = '#D1D5DB';
+      const items = document.querySelectorAll('.notification-item:not(.read)');
+      items.forEach(item => {
+        item.classList.add('read');
+        const indicator = item.querySelector('.read-indicator');
+        indicator.style.backgroundColor = '#D1D5DB';
+        const titleEl = item.querySelector('div[style*="font-weight"]');
+        if (titleEl) {
+          titleEl.style.fontWeight = '400';
+          titleEl.style.color = '#6B7280';
         }
       });
       showToast('모든 알림을 읽음으로 표시했습니다.', 'success');

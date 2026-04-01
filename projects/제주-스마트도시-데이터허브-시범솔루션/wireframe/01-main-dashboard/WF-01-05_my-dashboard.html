@@ -77,9 +77,10 @@
           <!-- 2열 레이아웃: 좌측 위젯 + 우측 추가 패널 -->
           <div style="display: grid; grid-template-columns: 1fr 300px; gap: 16px;">
             <!-- 좌측: 위젯 그리드 -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; grid-auto-rows: max-content;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; grid-auto-rows: max-content;" id="widgetGrid">
               <!-- 위젯 1: 민원 요약 -->
-              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">민원 요약</div>
                 </div>
@@ -102,7 +103,8 @@
               </div>
 
               <!-- 위젯 2: 이벤트 요약 -->
-              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">이벤트 요약</div>
                 </div>
@@ -125,7 +127,8 @@
               </div>
 
               <!-- 위젯 3: 날씨 -->
-              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">제주 날씨</div>
                 </div>
@@ -141,7 +144,8 @@
               </div>
 
               <!-- 위젯 4: 빠른 액세스 -->
-              <div class="card widget-card" style="cursor: move;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">빠른 액세스</div>
                 </div>
@@ -162,7 +166,8 @@
               </div>
 
               <!-- 위젯 5: 주간 트렌드 (2x1) -->
-              <div class="card widget-card" style="cursor: move; grid-column: span 2;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; grid-column: span 2; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">주간 민원 트렌드</div>
                 </div>
@@ -172,7 +177,8 @@
               </div>
 
               <!-- 위젯 6: 최근 알림 (2x1) -->
-              <div class="card widget-card" style="cursor: move; grid-column: span 2;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div class="card widget-card" style="cursor: move; grid-column: span 2; position: relative;" onmouseover="this.style.opacity='0.8'; showWidgetControls(this)" onmouseout="this.style.opacity='1'; hideWidgetControls(this)">
+                <button class="widget-remove-btn" onclick="removeWidget(event)" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 18px; color: #6B7280; cursor: pointer; display: none;">×</button>
                 <div class="card-header" style="margin-bottom: 12px;">
                   <div class="card-title" style="font-size: 14px;">최근 알림</div>
                 </div>
@@ -203,6 +209,10 @@
 
             <!-- 우측: 추가 가능한 위젯 패널 -->
             <div style="display: flex; flex-direction: column;">
+              <button class="btn btn-primary" onclick="openAddWidgetModal()" style="margin-bottom: 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                위젯 추가
+              </button>
               <div style="font-weight: 600; color: #1F2937; margin-bottom: 12px; padding: 12px; border-bottom: 1px solid #E5E7EB;">
                 추가 가능한 위젯
               </div>
@@ -291,6 +301,7 @@
   <script src="../common/charts.js"></script>
   <script>
     let editMode = false;
+    const widgetOrder = ['민원 요약', '이벤트 요약', '제주 날씨', '빠른 액세스', '주간 민원 트렌드', '최근 알림'];
 
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', () => {
@@ -314,23 +325,129 @@
       });
     }
 
+    // 위젯 컨트롤 표시/숨김
+    function showWidgetControls(widgetEl) {
+      const btn = widgetEl.querySelector('.widget-remove-btn');
+      if (btn) btn.style.display = 'block';
+    }
+
+    function hideWidgetControls(widgetEl) {
+      const btn = widgetEl.querySelector('.widget-remove-btn');
+      if (btn) btn.style.display = 'none';
+    }
+
+    // 위젯 제거
+    function removeWidget(event) {
+      event.stopPropagation();
+      const widget = event.target.closest('.widget-card');
+      const title = widget.querySelector('.card-title').textContent;
+
+      if (confirm(`"${title}" 위젯을 제거하시겠습니까?`)) {
+        widget.style.opacity = '0';
+        setTimeout(() => {
+          widget.style.display = 'none';
+        }, 300);
+        showToast(`"${title}" 위젯이 제거되었습니다.`, 'info');
+      }
+    }
+
+    // 위젯 추가 모달 열기
+    function openAddWidgetModal() {
+      const widgets = [
+        { id: 'ai', icon: '📊', name: 'AI 성능 요약', desc: 'AI 모델별 성능 지표' },
+        { id: 'system', icon: '🖥️', name: '시스템 상태', desc: '서버/DB 상태 모니터링' },
+        { id: 'department', icon: '📈', name: '부서별 현황', desc: '부서별 처리 현황 차트' },
+        { id: 'tasks', icon: '📋', name: '나의 작업', desc: '할당된 민원 및 업무' },
+        { id: 'announcement', icon: '📢', name: '공지사항', desc: '최근 공지사항 피드' },
+        { id: 'weather', icon: '☁️', name: '날씨 상세', desc: '지역별 날씨 예보' }
+      ];
+
+      let content = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-height: 400px; overflow-y: auto;">';
+      widgets.forEach(w => {
+        content += `
+          <div style="padding: 12px; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size: 24px; margin-bottom: 8px;">${w.icon}</div>
+            <div style="font-weight: 600; color: #1F2937; font-size: 13px;">${w.name}</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">${w.desc}</div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 8px; padding: 4px; font-size: 11px;" onclick="addWidgetAndClose('${w.id}', '${w.name}')">추가</button>
+          </div>
+        `;
+      });
+      content += '</div>';
+
+      showModal('위젯 추가', content, { showCancel: true, confirmText: '닫기' });
+    }
+
+    // 위젯 추가 및 모달 닫기
+    function addWidgetAndClose(widgetId, widgetName) {
+      showToast(`"${widgetName}" 위젯이 추가되었습니다.`, 'success');
+      document.querySelector('.modal-backdrop').classList.remove('open');
+    }
+
     // 편집 모드 토글
     function toggleEditMode() {
       editMode = !editMode;
       const infoBox = document.getElementById('editModeInfo');
       const btn = document.getElementById('editModeBtn');
+      const widgets = document.querySelectorAll('.widget-card');
 
       if (editMode) {
         infoBox.style.display = 'flex';
         btn.style.backgroundColor = '#16A34A';
         btn.style.color = 'white';
+        // 위젯에 이동 버튼 추가
+        widgets.forEach((w, idx) => {
+          let controls = w.querySelector('.widget-controls');
+          if (!controls) {
+            controls = document.createElement('div');
+            controls.className = 'widget-controls';
+            controls.style.cssText = 'position: absolute; bottom: 8px; right: 8px; display: flex; gap: 4px; background: white; padding: 4px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);';
+
+            const upBtn = document.createElement('button');
+            upBtn.textContent = '↑';
+            upBtn.style.cssText = 'background: none; border: 1px solid #E5E7EB; padding: 4px 8px; cursor: pointer; border-radius: 4px;';
+            upBtn.onclick = (e) => moveWidget(e, 'up');
+
+            const downBtn = document.createElement('button');
+            downBtn.textContent = '↓';
+            downBtn.style.cssText = 'background: none; border: 1px solid #E5E7EB; padding: 4px 8px; cursor: pointer; border-radius: 4px;';
+            downBtn.onclick = (e) => moveWidget(e, 'down');
+
+            controls.appendChild(upBtn);
+            controls.appendChild(downBtn);
+            w.appendChild(controls);
+          }
+          controls.style.display = 'flex';
+        });
       } else {
         infoBox.style.display = 'none';
         btn.style.backgroundColor = '';
         btn.style.color = '';
+        // 이동 버튼 숨기기
+        widgets.forEach(w => {
+          const controls = w.querySelector('.widget-controls');
+          if (controls) controls.style.display = 'none';
+        });
       }
 
       showToast(editMode ? '편집 모드가 활성화되었습니다.' : '편집 모드가 비활성화되었습니다.', 'info');
+    }
+
+    // 위젯 순서 변경
+    function moveWidget(event, direction) {
+      event.stopPropagation();
+      const widget = event.target.closest('.widget-card');
+      const grid = document.getElementById('widgetGrid');
+      const widgets = Array.from(grid.querySelectorAll('.widget-card'));
+      const currentIdx = widgets.indexOf(widget);
+
+      if (direction === 'up' && currentIdx > 0) {
+        grid.insertBefore(widget, widgets[currentIdx - 1]);
+        showToast('위젯 순서가 변경되었습니다.', 'info', 1500);
+      } else if (direction === 'down' && currentIdx < widgets.length - 1) {
+        grid.insertBefore(widgets[currentIdx + 1], widget);
+        showToast('위젯 순서가 변경되었습니다.', 'info', 1500);
+      }
     }
 
     // 대시보드 저장
@@ -343,11 +460,6 @@
     function cancelEdit() {
       toggleEditMode();
       showToast('변경사항이 취소되었습니다.', 'info');
-    }
-
-    // 위젯 추가
-    function addWidget(type) {
-      showToast(`"${type}" 위젯이 추가되었습니다.`, 'success');
     }
 
     // 설정 열기

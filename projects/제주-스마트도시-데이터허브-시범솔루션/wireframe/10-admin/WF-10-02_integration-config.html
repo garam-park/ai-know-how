@@ -67,7 +67,7 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:32</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '민원포털')">테스트</button>
                 </div>
               </div>
             </div>
@@ -88,7 +88,7 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 13:15</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '기상청')">테스트</button>
                 </div>
               </div>
             </div>
@@ -109,7 +109,7 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:20</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '통합관제')">테스트</button>
                 </div>
               </div>
             </div>
@@ -130,7 +130,7 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:10</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '전기차충전')">테스트</button>
                 </div>
               </div>
             </div>
@@ -151,7 +151,7 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">아직 동기화 안 됨</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '112/119')">테스트</button>
                 </div>
               </div>
             </div>
@@ -172,15 +172,24 @@
                 <p style="font-size: var(--font-body-sm); color: var(--text-color-secondary); margin-bottom: var(--spacing-md);">최종동기화: 2026-03-25 14:00</p>
                 <div style="display: flex; gap: var(--spacing-sm);">
                   <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('설정')">설정</button>
-                  <button class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="alert('테스트')">테스트</button>
+                  <button class="btn btn-secondary test-btn" style="flex: 1; font-size: 12px; padding: 4px 8px;" onclick="testConnection(this, '스마트시티')">테스트</button>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 하단: 연계 현황 요약 -->
-          <h3 style="font-size: var(--font-heading-sm); margin-bottom: var(--spacing-lg); color: var(--text-color);">연계 현황 요약</h3>
-          <table class="data-table">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+            <h3 style="font-size: var(--font-heading-sm); color: var(--text-color);">연계 현황 요약</h3>
+            <div style="display: flex; gap: var(--spacing-md);">
+              <input type="text" id="integrationTableFilter" class="filter-input" placeholder="테이블 검색..." style="width: 200px;">
+              <button class="btn btn-secondary" onclick="downloadIntegrationData()">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                다운로드
+              </button>
+            </div>
+          </div>
+          <table class="data-table" id="integrationTable">
             <thead>
               <tr>
                 <th>시스템명</th>
@@ -236,8 +245,66 @@
   <script src="../common/nav-data.js"></script>
   <script src="../common/components.js"></script>
   <script>
+    /**
+     * 연결 테스트 시뮬레이션
+     * @param {HTMLElement} button - 클릭된 버튼 요소
+     * @param {string} systemName - 시스템 이름
+     */
+    function testConnection(button, systemName) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = '테스트 중...';
+
+      setTimeout(() => {
+        const isSuccess = Math.random() > 0.3;
+
+        if (isSuccess) {
+          showToast(`${systemName} 연결 테스트 성공`, 'success');
+        } else {
+          showToast(`${systemName} 연결 테스트 실패: Connection timeout`, 'error');
+        }
+
+        button.disabled = false;
+        button.textContent = originalText;
+      }, 2000);
+    }
+
+    /**
+     * 연계 현황 테이블 다운로드
+     */
+    function downloadIntegrationData() {
+      const table = document.getElementById('integrationTable');
+      let csv = '\uFEFF'; // UTF-8 BOM
+
+      // 헤더
+      const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
+      csv += headers.join(',') + '\n';
+
+      // 데이터 행
+      Array.from(table.querySelectorAll('tbody tr')).forEach(tr => {
+        const cells = Array.from(tr.cells).map(td => {
+          let text = td.textContent.trim();
+          if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+            text = '"' + text.replace(/"/g, '""') + '"';
+          }
+          return text;
+        });
+        csv += cells.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = '연계현황_' + new Date().toISOString().split('T')[0] + '.csv';
+      link.click();
+
+      showToast('연계 현황 데이터 다운로드 완료', 'success');
+    }
+
     window.addEventListener('load', () => {
       initLayout('admin');
+      initTableSort('integrationTable');
+      initTableFilter('integrationTable', 'integrationTableFilter');
       lucide.createIcons();
     });
   </script>

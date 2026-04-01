@@ -284,6 +284,10 @@
               <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
               요약 생성
             </button>
+            <button class="submit-button" style="background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); margin-top: 12px;" onclick="linkToReport()">
+              <i data-lucide="link" style="width: 18px; height: 18px;"></i>
+              보고서 연동
+            </button>
           </div>
 
           <!-- 결과 영역 (생성 후 표시) -->
@@ -321,7 +325,7 @@
 
               <div class="card">
                 <div class="card-header">
-                  <div class="card-title">주요 키워드</div>
+                  <div class="card-title">주요 키워드 (15개)</div>
                 </div>
                 <div class="card-body">
                   <div class="keyword-cloud">
@@ -333,6 +337,13 @@
                     <div class="keyword-item">민원</div>
                     <div class="keyword-item">혼잡</div>
                     <div class="keyword-item">수리</div>
+                    <div class="keyword-item">안전</div>
+                    <div class="keyword-item high">포트홀</div>
+                    <div class="keyword-item">보도</div>
+                    <div class="keyword-item">관광</div>
+                    <div class="keyword-item">시설</div>
+                    <div class="keyword-item">환경</div>
+                    <div class="keyword-item">오염</div>
                   </div>
                 </div>
               </div>
@@ -485,6 +496,22 @@
                       <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
                       <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
                     </tr>
+                    <tr>
+                      <td>2025-12-01 ~ 12-31</td>
+                      <td>시설, 환경</td>
+                      <td>267</td>
+                      <td>2026-01-05 09:30</td>
+                      <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
+                      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
+                    </tr>
+                    <tr>
+                      <td>2025-11-01 ~ 11-30</td>
+                      <td>교통</td>
+                      <td>312</td>
+                      <td>2025-12-03 11:15</td>
+                      <td><span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px;">완료</span></td>
+                      <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">보기</button></td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -515,7 +542,7 @@
 
         initTypeChart();
         showToast('342건의 민원 요약이 생성되었습니다.', 'success');
-      }, 2000);
+      }, 3000);
     }
 
     function initTypeChart() {
@@ -565,6 +592,12 @@
 
     function removeTag(el) {
       el.closest('.multi-select-tag').remove();
+    }
+
+    function linkToReport() {
+      showToast('보고서 WF-07-01로 연동되었습니다.', 'success');
+      // 실제로는 WF-07-01 페이지로 이동
+      // window.location.href = '../07-report/WF-07-01.html';
     }
   </script>
 </body>

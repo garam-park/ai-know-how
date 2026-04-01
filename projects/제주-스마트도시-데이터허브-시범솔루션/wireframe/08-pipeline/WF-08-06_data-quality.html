@@ -145,9 +145,12 @@
           <!-- 하단 좌측 품질 이슈 목록 + 우측 파이차트 -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-              <h2 class="text-lg font-semibold mb-4">품질 이슈 목록</h2>
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">품질 이슈 목록</h2>
+                <input type="text" placeholder="검색..." class="filter-input" id="qualitySearchInput" style="width: 150px; font-size: 13px;">
+              </div>
               <div class="overflow-x-auto">
-                <table class="data-table" style="width: 100%; font-size: 13px;">
+                <table class="data-table" style="width: 100%; font-size: 13px;" id="qualityTable">
                   <thead>
                     <tr>
                       <th>데이터소스</th>
@@ -314,6 +317,10 @@
           }
         }
       });
+
+      // 품질 이슈 테이블 정렬 및 필터
+      initTableSort('qualityTable');
+      initTableFilter('qualityTable', 'qualitySearchInput');
     });
   </script>
 </body>

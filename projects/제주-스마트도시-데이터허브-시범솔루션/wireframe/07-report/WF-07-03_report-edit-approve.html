@@ -53,6 +53,14 @@
     .comment-btn:hover { background: #f3f4f6; }
     .comment-btn.submit { background: #3b82f6; color: white; border-color: #3b82f6; }
     .comment-btn.submit:hover { background: #2563eb; }
+    .editor-toolbar { display: flex; gap: 4px; align-items: center; margin-bottom: 12px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; flex-wrap: wrap; }
+    .toolbar-btn { padding: 6px 10px; border: 1px solid #d1d5db; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+    .toolbar-btn:hover { background: #f3f4f6; border-color: #3b82f6; color: #3b82f6; }
+    .toolbar-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .toolbar-separator { width: 1px; height: 20px; background: #d1d5db; margin: 0 4px; }
+    .comment-item.resolved { opacity: 0.6; }
+    .comment-item.resolved .comment-text { text-decoration: line-through; color: #9ca3af; }
+    .comment-item.resolved { background: #f3f4f6; }
   </style>
 </head>
 <body>
@@ -130,6 +138,37 @@
               <!-- Section 1 -->
               <div class="content-section">
                 <div class="section-heading">1. 요약</div>
+                <div class="editor-toolbar">
+                  <button class="toolbar-btn" data-command="bold" title="굵게">
+                    <i data-lucide="bold" style="width:14px;height:14px;"></i>
+                    B
+                  </button>
+                  <button class="toolbar-btn" data-command="italic" title="기울임">
+                    <i data-lucide="italic" style="width:14px;height:14px;"></i>
+                    I
+                  </button>
+                  <button class="toolbar-btn" data-command="underline" title="밑줄">
+                    <i data-lucide="underline" style="width:14px;height:14px;"></i>
+                    U
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button class="toolbar-btn" data-command="insertUnorderedList" title="순서 없는 목록">
+                    <i data-lucide="list" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="insertOrderedList" title="순서 있는 목록">
+                    <i data-lucide="list-ordered" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="indent" title="들여쓰기">
+                    <i data-lucide="indent-increase" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="outdent" title="내어쓰기">
+                    <i data-lucide="indent-decrease" style="width:14px;height:14px;"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button class="toolbar-btn" data-command="undo" title="되돌리기">
+                    <i data-lucide="undo" style="width:14px;height:14px;"></i>
+                  </button>
+                </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                   <button class="ai-regen-btn">
                     <i data-lucide="zap" style="width:14px;height:14px;"></i>
@@ -142,6 +181,18 @@
               <!-- Section 2 -->
               <div class="content-section">
                 <div class="section-heading">2. 교통 현황 분석</div>
+                <div class="editor-toolbar">
+                  <button class="toolbar-btn" data-command="bold" title="굵게">B</button>
+                  <button class="toolbar-btn" data-command="italic" title="기울임">I</button>
+                  <button class="toolbar-btn" data-command="underline" title="밑줄">U</button>
+                  <div class="toolbar-separator"></div>
+                  <button class="toolbar-btn" data-command="insertUnorderedList" title="순서 없는 목록">
+                    <i data-lucide="list" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="undo" title="되돌리기">
+                    <i data-lucide="undo" style="width:14px;height:14px;"></i>
+                  </button>
+                </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                   <button class="ai-regen-btn">
                     <i data-lucide="zap" style="width:14px;height:14px;"></i>
@@ -159,6 +210,18 @@
               <!-- Section 3 -->
               <div class="content-section">
                 <div class="section-heading">3. 주차장 현황</div>
+                <div class="editor-toolbar">
+                  <button class="toolbar-btn" data-command="bold" title="굵게">B</button>
+                  <button class="toolbar-btn" data-command="italic" title="기울임">I</button>
+                  <button class="toolbar-btn" data-command="underline" title="밑줄">U</button>
+                  <div class="toolbar-separator"></div>
+                  <button class="toolbar-btn" data-command="insertUnorderedList" title="순서 없는 목록">
+                    <i data-lucide="list" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="undo" title="되돌리기">
+                    <i data-lucide="undo" style="width:14px;height:14px;"></i>
+                  </button>
+                </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                   <button class="ai-regen-btn">
                     <i data-lucide="zap" style="width:14px;height:14px;"></i>
@@ -176,6 +239,18 @@
               <!-- Section 4 -->
               <div class="content-section">
                 <div class="section-heading">4. 결론 및 제안</div>
+                <div class="editor-toolbar">
+                  <button class="toolbar-btn" data-command="bold" title="굵게">B</button>
+                  <button class="toolbar-btn" data-command="italic" title="기울임">I</button>
+                  <button class="toolbar-btn" data-command="underline" title="밑줄">U</button>
+                  <div class="toolbar-separator"></div>
+                  <button class="toolbar-btn" data-command="insertUnorderedList" title="순서 없는 목록">
+                    <i data-lucide="list" style="width:14px;height:14px;"></i>
+                  </button>
+                  <button class="toolbar-btn" data-command="undo" title="되돌리기">
+                    <i data-lucide="undo" style="width:14px;height:14px;"></i>
+                  </button>
+                </div>
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                   <button class="ai-regen-btn">
                     <i data-lucide="zap" style="width:14px;height:14px;"></i>
@@ -195,12 +270,12 @@
                 댓글 (3)
               </div>
 
-              <div class="comment-item">
+              <div class="comment-item resolved">
                 <div class="comment-header">
                   <div class="comment-name">박준호</div>
                   <span class="dept-badge dept-city">도시계획팀</span>
                   <div class="comment-time">2026-04-02 14:30</div>
-                  <span class="comment-status status-resolved">해결됨</span>
+                  <span class="comment-status status-resolved" data-toggle-resolved style="cursor: pointer;">해결됨</span>
                 </div>
                 <div class="comment-text">요약 부분이 좀 더 간결하게 정리되었으면 좋겠습니다. 핵심 내용만 1-2문장으로 요약해주세요.</div>
               </div>
@@ -215,12 +290,12 @@
                 <div class="comment-text">교통량 증가 원인에 대해 더 자세한 분석이 필요합니다. 계절 요인뿐 아니라 특정 이벤트의 영향도 포함해주세요.</div>
               </div>
 
-              <div class="comment-item">
+              <div class="comment-item resolved">
                 <div class="comment-header">
                   <div class="comment-name">이지훈</div>
                   <span class="dept-badge dept-traffic">교통팀</span>
                   <div class="comment-time">2026-04-02 10:45</div>
-                  <span class="comment-status status-resolved">해결됨</span>
+                  <span class="comment-status status-resolved" data-toggle-resolved style="cursor: pointer;">해결됨</span>
                 </div>
                 <div class="comment-text">데이터 출처와 분석 방법을 명시해주셔야 합니다. 부록에 상세 설명을 추가해주세요.</div>
               </div>
@@ -245,14 +320,95 @@
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('report');
 
+      // Rich text editor toolbar
+      document.querySelectorAll('.editor-toolbar').forEach(toolbar => {
+        const toolbarBtns = toolbar.querySelectorAll('.toolbar-btn[data-command]');
+        const editorContent = toolbar.nextElementSibling?.nextElementSibling;
+
+        if (editorContent && editorContent.classList.contains('editor-content')) {
+          toolbarBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              const command = this.dataset.command;
+
+              if (command === 'indent') {
+                document.execCommand('indent', false, null);
+              } else if (command === 'outdent') {
+                document.execCommand('outdent', false, null);
+              } else {
+                document.execCommand(command, false, null);
+              }
+
+              editorContent.focus();
+            });
+          });
+        }
+      });
+
+      // Auto-save indicator
+      let autoSaveTimer;
+      const autoSaveDiv = document.querySelector('.auto-save');
+
+      document.querySelectorAll('.editor-content').forEach(editor => {
+        editor.addEventListener('input', function() {
+          clearTimeout(autoSaveTimer);
+          const originalText = autoSaveDiv.textContent;
+
+          autoSaveTimer = setTimeout(function() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            autoSaveDiv.innerHTML = `
+              <i data-lucide="check-circle" style="width:14px;height:14px;color:#10b981;"></i>
+              자동 저장됨 ${hours}:${minutes}:${seconds}
+            `;
+
+            if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
+            }
+          }, 500);
+        });
+      });
+
+      // Comment status toggle
+      document.querySelectorAll('[data-toggle-resolved]').forEach(statusBtn => {
+        statusBtn.addEventListener('click', function() {
+          const commentItem = this.closest('.comment-item');
+          commentItem.classList.toggle('resolved');
+          this.textContent = commentItem.classList.contains('resolved') ? '해결됨' : '검토중';
+        });
+      });
+
       // AI Regenerate buttons
       document.querySelectorAll('.ai-regen-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-          alert('AI가 이 섹션의 내용을 재생성합니다.');
-          this.nextElementSibling.textContent = 'AI 재생성 중...';
-          setTimeout(() => {
-            this.nextElementSibling.textContent = 'AI 재생성 완료된 콘텐츠가 여기에 표시됩니다.';
-          }, 2000);
+          const section = this.closest('.content-section');
+          const editorContent = section.querySelector('.editor-content');
+
+          if (editorContent) {
+            // Show loading state
+            const originalText = editorContent.textContent;
+            editorContent.style.opacity = '0.5';
+            editorContent.style.pointerEvents = 'none';
+            btn.disabled = true;
+
+            // Simulate AI regeneration
+            setTimeout(() => {
+              const sampleTexts = {
+                '1': '이 보고서는 2026년 4월 제주도의 교통 시스템 성능을 종합적으로 분석하고 평가한 문서입니다. 주요 지표로는 월별 교통량 증감률, 주차장 점유율, 대중교통 이용 추이, 그리고 교통량 예측 데이터를 포함하고 있습니다.',
+                '2': '4월의 제주도 전체 교통량은 전월 대비 약 12.3% 증가하여 총 480만 차량이 통과했습니다. 지역별로는 중앙지역이 일일 평균 42,850대로 전월 대비 15.2% 증가했고, 서귀포 지역은 28,430대(+8.5%), 신제주 지역은 35,620대(+12.1%)를 기록했습니다.',
+                '3': '주차장 포화도는 평균 72%로 나타났으며, 특히 중앙지역의 78% 점유율이 주목됩니다. 서귀포는 65%의 여유로운 상태를 유지하고 있고, 신제주는 72%로 주의 수준입니다.',
+                '4': '현재의 교통 증가 추세는 관광 시즌의 본격화와 봄철 여행 수요의 증가에 기인하며, 향후 더 높은 피크를 예상할 수 있습니다. 주차장 확충과 스마트 교통 관제 시스템의 고도화가 시급한 상황입니다.'
+              };
+
+              editorContent.textContent = sampleTexts[Object.keys(sampleTexts)[Math.floor(Math.random() * Object.keys(sampleTexts).length)]];
+              editorContent.style.opacity = '1';
+              editorContent.style.pointerEvents = 'auto';
+              btn.disabled = false;
+            }, 2000);
+          }
         });
       });
 

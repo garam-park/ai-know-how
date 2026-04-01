@@ -162,9 +162,14 @@
     }
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: 24px;
+    }
+    @media (min-width: 1400px) {
+      .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     .metric-card {
       background: white;
@@ -175,6 +180,11 @@
       flex-direction: column;
       gap: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .metric-header {
       display: flex;
@@ -187,7 +197,7 @@
       color: var(--text-color-primary);
     }
     .metric-arrow {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
     }
     .metric-arrow.positive {
@@ -197,13 +207,13 @@
       color: var(--color-danger);
     }
     .metric-value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
       color: var(--color-primary);
     }
     .metric-change {
       font-size: 12px;
-      padding: 6px 12px;
+      padding: 8px 12px;
       border-radius: 6px;
       text-align: center;
       font-weight: 600;
@@ -219,6 +229,58 @@
     .metric-change.neutral {
       background: #F3F4F6;
       color: #6B7280;
+    }
+    /* Slider implementation for before/after comparison */
+    .comparison-wrapper {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+    .comparison-maps-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .comparison-map-clip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .comparison-slider-handle {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 4px;
+      height: 100%;
+      background: white;
+      border: 2px solid var(--color-primary);
+      cursor: col-resize;
+      transform: translateX(-50%);
+      z-index: 20;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+    .comparison-slider-handle::before {
+      content: '⟨';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--color-primary);
+      font-weight: bold;
+    }
+    .comparison-slider-handle::after {
+      content: '⟩';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--color-primary);
+      font-weight: bold;
     }
   </style>
 </head>
@@ -288,43 +350,51 @@
             </div>
           </div>
 
-          <!-- Before/After Comparison -->
+          <!-- Before/After Comparison with Slider -->
           <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-color-primary);">공간 분포 비교 (시뮬레이션 전/후)</h3>
-          <div class="comparison-container">
-            <div class="comparison-side">
-              <div class="comparison-label">정책 전</div>
-              <div class="comparison-map">
-                <div class="map-cell worsened">제주시 중1구<br/>혼잡: 85%</div>
-                <div class="map-cell worsened">제주시 중2구<br/>혼잡: 78%</div>
-                <div class="map-cell unchanged">제주시 동1구<br/>혼잡: 68%</div>
-                <div class="map-cell unchanged">제주시 서1구<br/>혼잡: 71%</div>
-                <div class="map-cell unchanged">서귀포시 중앙<br/>혼잡: 74%</div>
-                <div class="map-cell unchanged">서귀포시 동부<br/>혼잡: 52%</div>
-                <div class="map-cell unchanged">북제주군 구좌<br/>혼잡: 32%</div>
-                <div class="map-cell unchanged">북제주군 조천<br/>혼잡: 38%</div>
-                <div class="map-cell unchanged">남제주군 중산<br/>혼잡: 45%</div>
+          <div class="slider-wrapper" style="margin-bottom: 0; border: none; background: transparent; padding: 0;">
+            <div class="slider-text" style="margin-bottom: 16px;">슬라이더를 드래그하여 정책 전/후 상황을 확인하세요</div>
+
+            <div class="comparison-wrapper" id="comparisonWrapper">
+              <div class="comparison-maps-container" id="comparisonMapsContainer">
+                <!-- After (background) -->
+                <div class="comparison-side" style="position: relative; width: 100%;">
+                  <div class="comparison-label" style="z-index: 15;">정책 후 (예측)</div>
+                  <div class="comparison-map" id="mapAfter">
+                    <div class="map-cell improved">제주시 중1구<br/>혼잡: 62%<br/>↓ 23%p</div>
+                    <div class="map-cell improved">제주시 중2구<br/>혼잡: 55%<br/>↓ 23%p</div>
+                    <div class="map-cell unchanged">제주시 동1구<br/>혼잡: 64%<br/>↓ 4%p</div>
+                    <div class="map-cell improved">제주시 서1구<br/>혼잡: 55%<br/>↓ 16%p</div>
+                    <div class="map-cell improved">서귀포시 중앙<br/>혼잡: 58%<br/>↓ 16%p</div>
+                    <div class="map-cell unchanged">서귀포시 동부<br/>혼잡: 48%<br/>↓ 4%p</div>
+                    <div class="map-cell unchanged">북제주군 구좌<br/>혼잡: 30%<br/>↓ 2%p</div>
+                    <div class="map-cell unchanged">북제주군 조천<br/>혼잡: 35%<br/>↓ 3%p</div>
+                    <div class="map-cell unchanged">남제주군 중산<br/>혼잡: 42%<br/>↓ 3%p</div>
+                  </div>
+                </div>
+
+                <!-- Before (foreground with clip) -->
+                <div class="comparison-map-clip" id="beforeClip">
+                  <div class="comparison-side" style="position: relative; width: 200%;">
+                    <div class="comparison-label">정책 전</div>
+                    <div class="comparison-map" id="mapBefore" style="position: absolute; top: 0; left: 0; width: 50vw; max-width: none;">
+                      <div class="map-cell worsened">제주시 중1구<br/>혼잡: 85%</div>
+                      <div class="map-cell worsened">제주시 중2구<br/>혼잡: 78%</div>
+                      <div class="map-cell unchanged">제주시 동1구<br/>혼잡: 68%</div>
+                      <div class="map-cell unchanged">제주시 서1구<br/>혼잡: 71%</div>
+                      <div class="map-cell unchanged">서귀포시 중앙<br/>혼잡: 74%</div>
+                      <div class="map-cell unchanged">서귀포시 동부<br/>혼잡: 52%</div>
+                      <div class="map-cell unchanged">북제주군 구좌<br/>혼잡: 32%</div>
+                      <div class="map-cell unchanged">북제주군 조천<br/>혼잡: 38%</div>
+                      <div class="map-cell unchanged">남제주군 중산<br/>혼잡: 45%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Slider Handle -->
+                <div class="comparison-slider-handle" id="sliderHandle" style="left: 50%;"></div>
               </div>
             </div>
-
-            <div class="comparison-side">
-              <div class="comparison-label">정책 후 (예측)</div>
-              <div class="comparison-map">
-                <div class="map-cell improved">제주시 중1구<br/>혼잡: 62%<br/>↓ 23%p</div>
-                <div class="map-cell improved">제주시 중2구<br/>혼잡: 55%<br/>↓ 23%p</div>
-                <div class="map-cell unchanged">제주시 동1구<br/>혼잡: 64%<br/>↓ 4%p</div>
-                <div class="map-cell improved">제주시 서1구<br/>혼잡: 55%<br/>↓ 16%p</div>
-                <div class="map-cell improved">서귀포시 중앙<br/>혼잡: 58%<br/>↓ 16%p</div>
-                <div class="map-cell unchanged">서귀포시 동부<br/>혼잡: 48%<br/>↓ 4%p</div>
-                <div class="map-cell unchanged">북제주군 구좌<br/>혼잡: 30%<br/>↓ 2%p</div>
-                <div class="map-cell unchanged">북제주군 조천<br/>혼잡: 35%<br/>↓ 3%p</div>
-                <div class="map-cell unchanged">남제주군 중산<br/>혼잡: 42%<br/>↓ 3%p</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="slider-wrapper">
-            <div class="slider-text">슬라이더를 드래그하여 정책 전/후 상황을 확인하세요</div>
-            <input type="range" class="slider-input" min="0" max="100" value="50">
           </div>
 
           <!-- Key Metrics -->
@@ -393,14 +463,68 @@
     document.addEventListener('DOMContentLoaded', function() {
       initLayout('simulation');
 
-      // Slider comparison functionality
-      const slider = document.querySelector('.slider-input');
-      const beforeMap = document.querySelector('.comparison-map');
+      // Interactive before/after slider comparison
+      const wrapper = document.getElementById('comparisonMapsContainer');
+      const beforeClip = document.getElementById('beforeClip');
+      const sliderHandle = document.getElementById('sliderHandle');
+      let isDragging = false;
 
-      slider.addEventListener('input', function() {
-        const value = this.value;
-        // This could be used to animate between before/after views
-        console.log('Comparison slider position:', value);
+      function updateSliderPosition(e) {
+        if (!isDragging && e.type !== 'touchstart' && e.type !== 'touchmove' && e.type !== 'mousedown' && e.type !== 'mousemove' && e.type.indexOf('pointer') === -1) {
+          return;
+        }
+
+        const rect = wrapper.getBoundingClientRect();
+        let x;
+
+        if (e.touches) {
+          x = e.touches[0].clientX - rect.left;
+        } else {
+          x = e.clientX - rect.left;
+        }
+
+        // Constrain x within bounds
+        x = Math.max(0, Math.min(x, rect.width));
+
+        const percentage = (x / rect.width) * 100;
+
+        beforeClip.style.width = percentage + '%';
+        sliderHandle.style.left = percentage + '%';
+      }
+
+      // Mouse events
+      sliderHandle.addEventListener('mousedown', () => {
+        isDragging = true;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          updateSliderPosition(e);
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      // Touch events
+      sliderHandle.addEventListener('touchstart', () => {
+        isDragging = true;
+      });
+
+      document.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+          updateSliderPosition(e);
+        }
+      });
+
+      document.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+
+      // Click anywhere on the wrapper to move slider
+      wrapper.addEventListener('click', (e) => {
+        updateSliderPosition(e);
       });
     });
   </script>

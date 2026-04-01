@@ -39,6 +39,27 @@
     .preset-card:hover { background: #eff6ff; border-color: #3b82f6; }
     .preset-icon { font-size: 36px; margin-bottom: 8px; }
     .preset-name { font-size: 13px; font-weight: 600; color: #1f2937; }
+    .preview-sections { display: flex; flex-direction: column; gap: 8px; padding: 16px 12px; }
+    .preview-section-box { height: 14px; border-radius: 2px; background: linear-gradient(90deg, #dbeafe 0%, #bfdbfe 100%); }
+    .preview-section-box.summary { height: 20px; background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%); }
+    .preview-section-box.body { height: 24px; background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%); }
+    .section-reorder-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; z-index: 1000; min-width: 400px; max-height: 500px; overflow-y: auto; box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15); }
+    .section-list { list-style: none; padding: 0; margin: 0; }
+    .section-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 8px; }
+    .section-item.cover { background: #eff6ff; }
+    .section-item.summary { background: #f0fdf4; }
+    .section-item.body { background: #fffbeb; }
+    .reorder-btn { padding: 6px 8px; border: 1px solid #d1d5db; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+    .reorder-btn:hover { background: #f3f4f6; border-color: #3b82f6; color: #3b82f6; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+    .modal-btn { padding: 8px 14px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+    .modal-btn.primary { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .modal-btn.primary:hover { background: #2563eb; }
+    .modal-btn:hover { background: #f3f4f6; }
+    @keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.95); }
+    }
   </style>
 </head>
 <body>
@@ -86,7 +107,11 @@
             <!-- Template 1 -->
             <div class="template-card">
               <div class="template-preview">
-                <div class="preview-icon">📊</div>
+                <div class="preview-sections">
+                  <div class="preview-section-box cover"></div>
+                  <div class="preview-section-box summary"></div>
+                  <div class="preview-section-box body"></div>
+                </div>
                 <span class="template-badge">커스텀</span>
               </div>
               <div class="template-info">
@@ -117,7 +142,11 @@
             <!-- Template 2 -->
             <div class="template-card">
               <div class="template-preview">
-                <div class="preview-icon">📈</div>
+                <div class="preview-sections">
+                  <div class="preview-section-box cover"></div>
+                  <div class="preview-section-box summary"></div>
+                  <div class="preview-section-box body"></div>
+                </div>
                 <span class="template-badge">커스텀</span>
               </div>
               <div class="template-info">
@@ -148,7 +177,11 @@
             <!-- Template 3 -->
             <div class="template-card">
               <div class="template-preview">
-                <div class="preview-icon">👥</div>
+                <div class="preview-sections">
+                  <div class="preview-section-box cover"></div>
+                  <div class="preview-section-box summary"></div>
+                  <div class="preview-section-box body"></div>
+                </div>
                 <span class="template-badge">커스텀</span>
               </div>
               <div class="template-info">
@@ -179,7 +212,11 @@
             <!-- Template 4 -->
             <div class="template-card">
               <div class="template-preview">
-                <div class="preview-icon">🎯</div>
+                <div class="preview-sections">
+                  <div class="preview-section-box cover"></div>
+                  <div class="preview-section-box summary"></div>
+                  <div class="preview-section-box body"></div>
+                </div>
                 <span class="template-badge">커스텀</span>
               </div>
               <div class="template-info">
@@ -210,7 +247,11 @@
             <!-- Template 5 -->
             <div class="template-card">
               <div class="template-preview">
-                <div class="preview-icon">🔍</div>
+                <div class="preview-sections">
+                  <div class="preview-section-box cover"></div>
+                  <div class="preview-section-box summary"></div>
+                  <div class="preview-section-box body"></div>
+                </div>
                 <span class="template-badge">커스텀</span>
               </div>
               <div class="template-info">
@@ -286,9 +327,125 @@
           e.stopPropagation();
           const action = this.textContent.trim().split('\n')[0].trim();
           const templateName = this.closest('.template-card').querySelector('.template-name').textContent;
-          console.log(`${action}: ${templateName}`);
+          const templateCard = this.closest('.template-card');
+
+          if (action === '편집') {
+            // Show edit modal with section reordering
+            showSectionReorderModal(templateName);
+          } else if (action === '복제') {
+            // Duplicate template
+            duplicateTemplate(templateCard, templateName);
+          } else if (action === '삭제') {
+            // Delete template with confirmation
+            showModal('템플릿 삭제', `"${templateName}" 템플릿을 삭제하시겠습니까?`, {
+              confirmText: '삭제',
+              cancelText: '취소',
+              onConfirm: () => {
+                templateCard.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                  templateCard.remove();
+                  showToast(`${templateName} 템플릿이 삭제되었습니다.`, 'info');
+                }, 300);
+              }
+            });
+          }
         });
       });
+
+      function showSectionReorderModal(templateName) {
+        const sections = [
+          { name: '표지', type: 'cover' },
+          { name: '요약', type: 'summary' },
+          { name: '본문', type: 'body' }
+        ];
+
+        let modalContent = `
+          <div style="margin-bottom: 16px;">
+            <h3 style="font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 12px;">${templateName} - 섹션 재정렬</h3>
+          </div>
+          <ul class="section-list">
+        `;
+
+        sections.forEach((section, index) => {
+          modalContent += `
+            <li class="section-item ${section.type}">
+              <span style="flex: 1; font-size: 13px; font-weight: 500; color: #1f2937;">${section.name}</span>
+              <button class="reorder-btn move-up" ${index === 0 ? 'disabled' : ''}>↑</button>
+              <button class="reorder-btn move-down" ${index === sections.length - 1 ? 'disabled' : ''}>↓</button>
+            </li>
+          `;
+        });
+
+        modalContent += `</ul>`;
+
+        showModal('섹션 재정렬', modalContent, {
+          confirmText: '완료',
+          cancelText: '취소',
+          onConfirm: () => {
+            showToast(`${templateName} 템플릿이 수정되었습니다.`, 'success');
+          }
+        });
+
+        // Reorder button functionality
+        const modal = document.querySelector('.modal');
+        const listItems = modal.querySelectorAll('.section-item');
+
+        modal.querySelectorAll('.move-up').forEach((btn, index) => {
+          btn.addEventListener('click', () => {
+            if (index > 0) {
+              const temp = listItems[index].innerHTML;
+              listItems[index].innerHTML = listItems[index - 1].innerHTML;
+              listItems[index - 1].innerHTML = temp;
+            }
+          });
+        });
+
+        modal.querySelectorAll('.move-down').forEach((btn, index) => {
+          btn.addEventListener('click', () => {
+            if (index < listItems.length - 1) {
+              const temp = listItems[index].innerHTML;
+              listItems[index].innerHTML = listItems[index + 1].innerHTML;
+              listItems[index + 1].innerHTML = temp;
+            }
+          });
+        });
+      }
+
+      function duplicateTemplate(originalCard, templateName) {
+        const clonedCard = originalCard.cloneNode(true);
+        const newName = templateName + ' (사본)';
+        clonedCard.querySelector('.template-name').textContent = newName;
+
+        const grid = document.querySelector('.template-grid');
+        grid.appendChild(clonedCard);
+
+        // Re-attach event listeners to the cloned card
+        clonedCard.querySelectorAll('.action-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const action = this.textContent.trim().split('\n')[0].trim();
+            if (action === '편집') {
+              showSectionReorderModal(newName);
+            } else if (action === '복제') {
+              duplicateTemplate(clonedCard, newName);
+            } else if (action === '삭제') {
+              showModal('템플릿 삭제', `"${newName}" 템플릿을 삭제하시겠습니까?`, {
+                confirmText: '삭제',
+                cancelText: '취소',
+                onConfirm: () => {
+                  clonedCard.style.animation = 'fadeOut 0.3s ease forwards';
+                  setTimeout(() => {
+                    clonedCard.remove();
+                    showToast(`${newName} 템플릿이 삭제되었습니다.`, 'info');
+                  }, 300);
+                }
+              });
+            }
+          });
+        });
+
+        showToast(`"${newName}" 템플릿이 생성되었습니다.`, 'success');
+      }
 
       // Preset card clicks
       document.querySelectorAll('.preset-card').forEach(card => {

@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="../common/layout.css">
   <link rel="stylesheet" href="../common/components.css">
   <style>
+    .response-detail { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .response-detail.expanded { max-height: 500px; }
     .chat-container { display: flex; height: calc(100vh - 80px); flex-direction: column; }
     .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
     .message { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
@@ -304,13 +306,25 @@
         });
       });
 
-      // Character counter
+      // Character counter with real-time update
       function updateCharCount() {
         const content = document.querySelector('.editor-content').textContent;
-        document.getElementById('char-count').textContent = content.length;
+        const charCount = content.length;
+        document.getElementById('char-count').textContent = charCount;
       }
 
-      document.querySelector('.editor-content').addEventListener('input', updateCharCount);
+      // Initialize with oninput event for real-time updates
+      const editorContent = document.querySelector('.editor-content');
+      editorContent.addEventListener('input', updateCharCount);
+      editorContent.addEventListener('DOMCharacterDataModified', updateCharCount);
+
+      // Manual trigger for contenteditable changes
+      const observer = new MutationObserver(updateCharCount);
+      observer.observe(editorContent, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
 
       // Modal buttons
       document.querySelector('.modal-btn.cancel').addEventListener('click', function() {
