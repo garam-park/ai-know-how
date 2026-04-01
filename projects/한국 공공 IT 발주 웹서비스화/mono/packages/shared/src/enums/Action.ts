@@ -1,0 +1,13 @@
+export enum Action {
+  VIEW = "VIEW",
+  EDIT = "EDIT",
+  CREATE = "CREATE",
+  DELETE = "DELETE",
+  INVITE = "INVITE",
+  REMOVE = "REMOVE",
+  APPROVE = "APPROVE",
+  REQUEST = "REQUEST",
+  DOWNLOAD = "DOWNLOAD",
+  MANAGE = "MANAGE",
+  SETTING = "SETTING",
+}

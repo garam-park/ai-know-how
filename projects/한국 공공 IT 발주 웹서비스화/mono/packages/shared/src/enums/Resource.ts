@@ -1,0 +1,14 @@
+export enum Resource {
+  WBS = "WBS",
+  REPORT = "REPORT",
+  TIMESHEET = "TIMESHEET",
+  MEMBER = "MEMBER",
+  COMPANY = "COMPANY",
+  PROJECT = "PROJECT",
+  DELIVERABLE = "DELIVERABLE",
+  ISSUE = "ISSUE",
+  RISK = "RISK",
+  CHANGE = "CHANGE",
+  AUDIT = "AUDIT",
+  CLOSE = "CLOSE",
+}
