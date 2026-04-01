@@ -8,6 +8,9 @@
  * @param {string} groupId - 현재 그룹 ID
  */
 function initLayout(groupId) {
+  // GNB 메뉴 렌더링 (먼저 실행해야 .gnb-menu-item이 생성됨)
+  renderGnbMenus();
+
   // GNB 메뉴 활성화 표시
   const gnbMenuItems = document.querySelectorAll('.gnb-menu-item');
   gnbMenuItems.forEach(item => {

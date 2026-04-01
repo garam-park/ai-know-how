@@ -5,16 +5,16 @@
 
 const NAV_DATA = {
   gnbMenus: [
-    { id: 'main', label: '메인', icon: 'layout-dashboard', path: '../01-main-dashboard/' },
-    { id: 'complaint', label: '민원분석', icon: 'message-square-warning', path: '../02-complaint/' },
-    { id: 'simulation', label: '정책시뮬레이션', icon: 'flask-conical', path: '../03-simulation/' },
-    { id: 'event', label: '이벤트감시', icon: 'shield-alert', path: '../04-event/' },
-    { id: 'llm', label: 'LLM분석', icon: 'brain', path: '../05-llm/' },
-    { id: 'assistant', label: 'AI어시스턴트', icon: 'bot', path: '../06-assistant/' },
-    { id: 'report', label: '보고서', icon: 'file-text', path: '../07-report/' },
-    { id: 'pipeline', label: '데이터수집', icon: 'database', path: '../08-pipeline/' },
-    { id: 'catalog', label: '카탈로그', icon: 'book-open', path: '../09-catalog/' },
-    { id: 'admin', label: '시스템관리', icon: 'settings', path: '../10-admin/' }
+    { id: 'main', label: '메인', icon: 'layout-dashboard', path: '../01-main-dashboard/WF-01-01_kpi-dashboard.html' },
+    { id: 'complaint', label: '민원분석', icon: 'message-square-warning', path: '../02-complaint/WF-02-01_complaint-dashboard.html' },
+    { id: 'simulation', label: '정책시뮬레이션', icon: 'flask-conical', path: '../03-simulation/WF-03-01_simulation-config.html' },
+    { id: 'event', label: '이벤트감시', icon: 'shield-alert', path: '../04-event/WF-04-01_realtime-console.html' },
+    { id: 'llm', label: 'LLM분석', icon: 'brain', path: '../05-llm/WF-05-01_summary-viewer.html' },
+    { id: 'assistant', label: 'AI어시스턴트', icon: 'bot', path: '../06-assistant/WF-06-01_chat.html' },
+    { id: 'report', label: '보고서', icon: 'file-text', path: '../07-report/WF-07-01_report-list.html' },
+    { id: 'pipeline', label: '데이터수집', icon: 'database', path: '../08-pipeline/WF-08-01_collection-status.html' },
+    { id: 'catalog', label: '카탈로그', icon: 'book-open', path: '../09-catalog/WF-09-01_catalog-search.html' },
+    { id: 'admin', label: '시스템관리', icon: 'settings', path: '../10-admin/WF-10-01_user-management.html' }
   ],
 
   lnbMenus: {
