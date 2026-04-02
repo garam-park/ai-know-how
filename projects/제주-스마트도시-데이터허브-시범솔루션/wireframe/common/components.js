@@ -957,17 +957,38 @@ function renderFooter() {
   // 현재 연도
   const currentYear = new Date().getFullYear();
 
+  // 현재 페이지의 RFP 근거 조회
+  const currentPage = getCurrentPageName();
+  const rfpRefs = getRfpReferences(currentPage);
+
+  // RFP 근거 HTML 생성
+  let rfpHtml = '';
+  if (rfpRefs.length > 0) {
+    const rfpTags = rfpRefs.map(ref =>
+      `<span class="rfp-tag"><strong>${ref.code}</strong> ${ref.label}</span>`
+    ).join('');
+    rfpHtml = `
+      <div class="footer-rfp">
+        <span class="footer-rfp-label">RFP 근거</span>
+        ${rfpTags}
+      </div>
+    `;
+  }
+
   // 푸터 내용 설정
   footer.innerHTML = `
-    <div class="footer-copyright">
-      © ${currentYear} 제주특별자치도 스마트도시 데이터허브
-    </div>
-    <div class="footer-links">
-      <a href="#" class="footer-link">개인정보처리방침</a>
-      <a href="#" class="footer-link">이용약관</a>
-    </div>
-    <div class="footer-version">
-      v1.0.0
+    ${rfpHtml}
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        &copy; ${currentYear} 제주특별자치도 스마트도시 데이터허브
+      </div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">개인정보처리방침</a>
+        <a href="#" class="footer-link">이용약관</a>
+      </div>
+      <div class="footer-version">
+        v1.0.0
+      </div>
     </div>
   `;
 }

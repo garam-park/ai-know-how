@@ -1,0 +1,9 @@
+services:
+  wireframe:
+    image: nginx:alpine
+    container_name: jeju-datahub-wireframe
+    ports:
+      - "8088:80"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+    restart: unless-stopped
