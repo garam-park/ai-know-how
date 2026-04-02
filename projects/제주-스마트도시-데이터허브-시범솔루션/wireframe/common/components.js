@@ -965,7 +965,7 @@ function renderFooter() {
   let rfpHtml = '';
   if (rfpRefs.length > 0) {
     const rfpTags = rfpRefs.map(ref =>
-      `<span class="rfp-tag"><strong>${ref.code}</strong> ${ref.label}</span>`
+      `<span class="rfp-tag"><strong>${ref.code}</strong> ${ref.label}<span class="rfp-owner">담당사: ${ref.owners || '-'}</span></span>`
     ).join('');
     rfpHtml = `
       <div class="footer-rfp">

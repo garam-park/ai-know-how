@@ -248,6 +248,66 @@
       font-size: 12px;
       font-weight: var(--font-weight-medium);
     }
+
+    .rfp-summary {
+      margin-top: var(--spacing-2xl);
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .rfp-summary-title {
+      font-size: var(--font-heading-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .rfp-summary-desc {
+      font-size: var(--font-body-sm);
+      color: var(--text-color-secondary);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.6;
+    }
+
+    .rfp-table-wrap {
+      overflow-x: auto;
+    }
+
+    .rfp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-body-sm);
+      min-width: 720px;
+    }
+
+    .rfp-table th,
+    .rfp-table td {
+      border: 1px solid var(--border-color);
+      padding: var(--spacing-sm) var(--spacing-md);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .rfp-table th {
+      background-color: var(--color-gray-50);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+
+    .rfp-table td {
+      color: var(--text-color-secondary);
+    }
+
+    .rfp-note {
+      margin-top: var(--spacing-md);
+      font-size: 12px;
+      color: var(--text-color-secondary);
+    }
   </style>
 </head>
 <body>
@@ -669,6 +729,56 @@
         </a>
       </div>
     </div>
+
+    <section class="rfp-summary">
+      <h3 class="rfp-summary-title">RFP 요구사항 담당회사 요약</h3>
+      <p class="rfp-summary-desc">
+        하단 표는 RFP 대분류별 주관 회사와 주요 협업 회사를 빠르게 확인하기 위한 요약입니다.
+      </p>
+
+      <div class="rfp-table-wrap">
+        <table class="rfp-table">
+          <thead>
+            <tr>
+              <th>RFP 분류</th>
+              <th>주관</th>
+              <th>주요 협업</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SFR</td>
+              <td>🧠 디토닉, 🎨 이노팸, 📡 이노뎁(항목별 상이)</td>
+              <td>🔌 진우이노베이션, 🎨 이노팸, 🧠 디토닉</td>
+            </tr>
+            <tr>
+              <td>DAR</td>
+              <td>🧠 디토닉</td>
+              <td>🎨 이노팸, 📡 이노뎁, 🔌 진우이노베이션</td>
+            </tr>
+            <tr>
+              <td>ECR</td>
+              <td>🧠 디토닉</td>
+              <td>🎨 이노팸, 📡 이노뎁, 🔌 진우이노베이션</td>
+            </tr>
+            <tr>
+              <td>SIR</td>
+              <td>🎨 이노팸</td>
+              <td>🧠 디토닉, 📡 이노뎁, 🔌 진우이노베이션</td>
+            </tr>
+            <tr>
+              <td>PMR / QUR / TER / PER / PSR / COR</td>
+              <td>🧠 디토닉(총괄)</td>
+              <td>🎨 이노팸, 📡 이노뎁, 🔌 진우이노베이션</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="rfp-note">
+        상세 매핑은 docs/references/20260331/RFP-할당회사.md 문서를 기준으로 합니다.
+      </p>
+    </section>
   </div>
 
   <footer class="footer">
