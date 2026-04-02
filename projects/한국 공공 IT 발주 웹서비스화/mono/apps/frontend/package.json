@@ -1,0 +1,39 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test:e2e:up": "cd ../../ && docker-compose -f docker-compose.test.yml up -d --wait",
+    "test:e2e:down": "cd ../../ && docker-compose -f docker-compose.test.yml down -v",
+    "test:e2e": "npm run test:e2e:up && playwright test || (npm run test:e2e:down && exit 1) && npm run test:e2e:down",
+    "test:e2e:ui": "npm run test:e2e:up && playwright test --ui && npm run test:e2e:down"
+  },
+  "dependencies": {
+    "@shared/types": "workspace:*",
+    "@tanstack/react-query": "^5.96.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.18.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@tanstack/react-query-devtools": "^5.96.1",
+    "@types/node": "^20.19.37",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vitejs/plugin-react-swc": "^4.0.0",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0"
+  }
+}

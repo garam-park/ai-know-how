@@ -1,0 +1,317 @@
+// ============================================================
+// 공공 IT 수주 후 관리 SaaS - Prisma Schema
+// 작성일: 2026-04-01
+// DB: PostgreSQL
+// ============================================================
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// 공통 참고사항
+// - 모든 테이블: created_at, updated_at, deleted_at 포함
+// - deleted_at != null → Soft Delete 처리된 레코드
+// - weight default 1 → 미입력 시 단순 평균과 동일하게 동작
+//
+// [WbsNode progress 업데이트 정책]
+// - TASK 노드: 담당자 직접 입력 / PM 강제 수정 / 산출물 검수 승인 시 (추후)
+// - CATEGORY 노드: 하위 TASK progress 변경 이벤트 발생 시 자동 재계산
+// - 재계산 공식: Σ(progress × weight) / Σ(weight) (루트까지 재귀 반영)
+// - 모든 업데이트는 반드시 recalculateProgress() 단일 함수를 통해서만 처리
+//
+// [중복투입 감지 정책]
+// - ProjectMember.inputRate: 해당 프로젝트 투입비율 % (기본 100%)
+// - 멤버 초대 / 투입비율 변경 시 동일 유저의 기간 겹치는 프로젝트 inputRate 합산
+// - 합산 > 100% 이면 경고 (차단 or 경고만 할지는 추후 결정)
+// ============================================================
+
+
+// ------------------------------------------------------------
+// 1. USER - 개인 계정 (이메일 기준)
+// ------------------------------------------------------------
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  name      String
+  tel       String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  ownedCompanies    Company[]       @relation("CompanyOwner")
+  projectMembers    ProjectMember[]
+  assignedWbsNodes  WbsNode[]       @relation("WbsAssignee")
+
+  @@map("user")
+}
+
+
+// ------------------------------------------------------------
+// 2. COMPANY - 참여 회사
+// ------------------------------------------------------------
+model Company {
+  id        Int       @id @default(autoincrement())
+  name      String
+  bizNo     String?   @unique @map("biz_no")   // 사업자번호
+  address   String?
+  tel       String?
+  ownerId   Int?      @map("owner_id")          // nullable, 나중에 채움
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  owner           User?             @relation("CompanyOwner", fields: [ownerId], references: [id])
+  projectCompanies ProjectCompany[]
+
+  @@map("company")
+}
+
+
+// ------------------------------------------------------------
+// 3. PROJECT - 사업
+// ------------------------------------------------------------
+model Project {
+  id          Int       @id @default(autoincrement())
+  name        String                              // 사업명
+  code        String?                             // 사업코드 (nullable)
+  description String?
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime  @map("end_date")
+  budget      BigInt?                             // 예산 (nullable)
+  maxWbsDepth Int       @default(5) @map("max_wbs_depth") // WBS 최대 깊이
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  projectCompanies      ProjectCompany[]
+  projectMembers        ProjectMember[]
+  projectRolePermissions ProjectRolePermission[]
+  wbsNodes              WbsNode[]
+
+  @@map("project")
+}
+
+
+// ------------------------------------------------------------
+// 4. PROJECT_COMPANY - 프로젝트-회사 관계 (트리구조)
+// ------------------------------------------------------------
+model ProjectCompany {
+  id        Int         @id @default(autoincrement())
+  projectId Int         @map("project_id")
+  companyId Int         @map("company_id")
+  role      CompanyRole                           // 주관사/참여사/하청/발주처
+  parentId  Int?        @map("parent_id")         // null이면 최상위
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
+
+  // Relations
+  project        Project          @relation(fields: [projectId], references: [id])
+  company        Company          @relation(fields: [companyId], references: [id])
+  parent         ProjectCompany?  @relation("CompanyTree", fields: [parentId], references: [id])
+  children       ProjectCompany[] @relation("CompanyTree")
+  projectMembers ProjectMember[]
+  wbsNodes       WbsNode[]
+
+  @@map("project_company")
+}
+
+enum CompanyRole {
+  OWNER       // 발주처
+  PRIME       // 주관사
+  PARTNER     // 참여사
+  SUB         // 하청
+
+  @@map("company_role")
+}
+
+
+// ------------------------------------------------------------
+// 5. ROLE - 권한 프리셋
+// ------------------------------------------------------------
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique                     // 주관사PM, 참여사PM, 실무자, 뷰어
+  description String?
+  isSystem    Boolean @default(false) @map("is_system") // true = 기본 프리셋 (삭제 불가)
+
+  // Relations
+  projectMembers   ProjectMember[]
+  rolePermissions  RolePermission[]
+
+  @@map("role")
+}
+
+
+// ------------------------------------------------------------
+// 6. PERMISSION - resource + action 단위 권한
+// ------------------------------------------------------------
+model Permission {
+  id       Int      @id @default(autoincrement())
+  resource Resource
+  action   Action
+
+  // Relations
+  rolePermissions        RolePermission[]
+  projectRolePermissions ProjectRolePermission[]
+
+  @@unique([resource, action])
+  @@map("permission")
+}
+
+enum Resource {
+  WBS
+  REPORT
+  TIMESHEET
+  MEMBER
+  COMPANY
+  PROJECT
+  DELIVERABLE
+  ISSUE
+  RISK
+  CHANGE
+  AUDIT
+  CLOSE
+
+  @@map("resource")
+}
+
+enum Action {
+  VIEW
+  EDIT
+  CREATE
+  DELETE
+  INVITE
+  REMOVE
+  APPROVE
+  REQUEST
+  DOWNLOAD
+  MANAGE
+  SETTING
+
+  @@map("action")
+}
+
+enum Scope {
+  ALL           // 전체
+  OWN_COMPANY   // 자기 회사 파트만
+  OWN_TASK      // 자기 담당 태스크만
+  NONE          // 접근 불가
+
+  @@map("scope")
+}
+
+
+// ------------------------------------------------------------
+// 7. ROLE_PERMISSION - Role → Permission + Scope 기본값
+// ------------------------------------------------------------
+model RolePermission {
+  id           Int   @id @default(autoincrement())
+  roleId       Int   @map("role_id")
+  permissionId Int   @map("permission_id")
+  scope        Scope
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permission")
+}
+
+
+// ------------------------------------------------------------
+// 8. PROJECT_ROLE_PERMISSION - 프로젝트별 권한 커스터마이징
+//    RolePermission 기본값을 프로젝트 단위로 덮어씀
+// ------------------------------------------------------------
+model ProjectRolePermission {
+  id           Int   @id @default(autoincrement())
+  projectId    Int   @map("project_id")
+  roleId       Int   @map("role_id")
+  permissionId Int   @map("permission_id")
+  scope        Scope
+
+  // Relations
+  project    Project    @relation(fields: [projectId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([projectId, roleId, permissionId])
+  @@map("project_role_permission")
+}
+
+
+// ------------------------------------------------------------
+// 9. PROJECT_MEMBER - 프로젝트-유저 관계
+// ------------------------------------------------------------
+model ProjectMember {
+  id               Int       @id @default(autoincrement())
+  projectId        Int       @map("project_id")
+  userId           Int       @map("user_id")
+  projectCompanyId Int       @map("project_company_id") // 이 프로젝트에서 소속 회사
+  roleId           Int       @map("role_id")             // 이 프로젝트에서의 역할(프리셋)
+  inputRate        Int       @default(100) @map("input_rate") // 투입비율 % (기본 100%)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  // Relations
+  project        Project        @relation(fields: [projectId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  projectCompany ProjectCompany @relation(fields: [projectCompanyId], references: [id])
+  role           Role           @relation(fields: [roleId], references: [id])
+
+  @@unique([projectId, userId]) // 한 프로젝트에 한 사람은 딱 하나의 소속/역할만
+  @@map("project_member")
+}
+
+
+// ------------------------------------------------------------
+// 10. WBS_NODE - WBS 노드 (CATEGORY / TASK, 트리구조)
+// ------------------------------------------------------------
+model WbsNode {
+  id               Int         @id @default(autoincrement())
+  projectId        Int         @map("project_id")
+  parentId         Int?        @map("parent_id")          // null이면 최상위
+  type             WbsType
+  depth            Int                                      // 현재 깊이 (0부터 시작)
+  order            Int                                      // 같은 레벨에서 순서
+  code             String?                                  // 관리 코드 (nullable) - AIR, UNG 등
+  title            String
+  description      String?
+  startDate        DateTime?   @map("start_date")
+  endDate          DateTime?   @map("end_date")
+  progress         Int         @default(0)                  // 진척률 0~100 / recalculateProgress()로만 업데이트
+  weight           Int         @default(1)                  // 가중치, default 1 = 단순평균과 동일
+  assigneeId       Int?        @map("assignee_id")          // 담당자 (nullable)
+  projectCompanyId Int?        @map("project_company_id")   // 담당 컨소사 (nullable)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  deletedAt        DateTime?   @map("deleted_at")
+
+  // Relations
+  project        Project         @relation(fields: [projectId], references: [id])
+  parent         WbsNode?        @relation("WbsTree", fields: [parentId], references: [id])
+  children       WbsNode[]       @relation("WbsTree")
+  assignee       User?           @relation("WbsAssignee", fields: [assigneeId], references: [id])
+  projectCompany ProjectCompany? @relation(fields: [projectCompanyId], references: [id])
+
+  @@map("wbs_node")
+}
+
+enum WbsType {
+  CATEGORY  // 분류 (하위 노드 보유 가능)
+  TASK      // 실제 작업 단위
+
+  @@map("wbs_type")
+}
