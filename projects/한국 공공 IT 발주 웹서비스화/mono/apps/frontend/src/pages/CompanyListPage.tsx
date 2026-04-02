@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 import EmptyState from '../components/EmptyState';
 import Pagination from '../components/Pagination';
+import CompanyCreateModal from '../components/CompanyCreateModal';
 import { useToast } from '../contexts/ToastContext';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -18,6 +19,7 @@ export default function CompanyListPage() {
   const [keyword, setKeyword] = useState('');
   const debouncedKeyword = useDebounce(keyword, 300);
   const [page, setPage] = useState(1);
+  const [showCreate, setShowCreate] = useState(false);
   const LIMIT = 20;
 
   const { addToast } = useToast();
@@ -44,7 +46,16 @@ export default function CompanyListPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, marginBottom: 16 }}>회사 목록</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h1 style={{ fontSize: 24, margin: 0 }}>회사 목록</h1>
+        <button 
+          onClick={() => setShowCreate(true)}
+          style={{ padding: '8px 16px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 600 }}
+        >
+          + 회사 등록
+        </button>
+      </div>
+
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         <input 
           value={keyword} 
@@ -63,7 +74,7 @@ export default function CompanyListPage() {
           description="프로젝트에 참여할 회사를 먼저 등록하세요."
           action={
             <button 
-              onClick={() => addToast('info', '회사 등록 기능은 준비중입니다.')}
+              onClick={() => setShowCreate(true)}
               style={{ padding: '8px 16px', background: '#2b6cb0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
             >
               회사 등록
@@ -97,6 +108,12 @@ export default function CompanyListPage() {
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
+
+      <CompanyCreateModal 
+        open={showCreate} 
+        onClose={() => setShowCreate(false)} 
+        onCreated={() => setShowCreate(false)} 
+      />
     </div>
   );
 }
