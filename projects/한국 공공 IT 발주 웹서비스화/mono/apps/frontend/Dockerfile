@@ -16,6 +16,10 @@ COPY packages/shared/ packages/shared/
 COPY apps/frontend/ apps/frontend/
 COPY tsconfig.base.json ./
 RUN cd packages/shared && pnpm run build
+
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN cd apps/frontend && pnpm run build
 
 # Serve with nginx
