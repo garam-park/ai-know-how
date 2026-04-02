@@ -11,6 +11,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3003',
     trace: 'on-first-retry',
+    storageState: './e2e/.auth/user.json',
   },
   projects: [
     {

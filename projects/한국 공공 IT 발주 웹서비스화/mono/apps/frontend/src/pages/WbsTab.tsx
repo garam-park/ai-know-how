@@ -165,6 +165,13 @@ export default function WbsTab() {
     onError: (err: any) => addToast('error', err?.message || '추가에 실패했습니다.')
   });
 
+  const progressMutation = useMutation({
+    mutationFn: ({ id, progress }: { id: number, progress: number }) =>
+      api.patch(`/projects/${projectId}/wbs-nodes/${id}/progress`, { progress }),
+    onSuccess: () => { updateCache(); },
+    onError: (err: any) => addToast('error', err?.message || '진척률 수정에 실패했습니다.')
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number, payload: any }) => api.patch(`/projects/${projectId}/wbs-nodes/${id}`, payload),
     onSuccess: () => { updateCache(); },
@@ -215,7 +222,7 @@ export default function WbsTab() {
                 node={node} 
                 onAddChild={setAddingTo}
                 onUpdate={(id, data) => updateMutation.mutate({ id, payload: data })}
-                onUpdateProgress={(id, progress) => updateMutation.mutate({ id, payload: { progress } })}
+                onUpdateProgress={(id, progress) => progressMutation.mutate({ id, progress })}
                 onDelete={(id, hasChildren) => {
                   if (window.confirm(hasChildren ? '하위 항목도 모두 삭제됩니다. 계속하시겠습니까?' : '이 항목을 삭제하시겠습니까?')) {
                     deleteMutation.mutate(id);

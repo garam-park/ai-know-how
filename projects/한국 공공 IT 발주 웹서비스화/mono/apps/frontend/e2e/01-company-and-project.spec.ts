@@ -26,13 +26,13 @@ test.describe('Phase 2.1 & 2.2: 회사 생성 및 프로젝트 주관사 지정 
     
     // 폼 입력
     const projectName = `E2E 프로젝트 ${Date.now()}`;
-    await page.getByLabel(/사업명/).fill(projectName);
+    await page.getByPlaceholder('진행할 프로젝트의 이름을 입력하세요').fill(projectName);
     
-    // 주관사 선택 드롭다운 (label: 소속 회사)
-    await page.getByLabel(/소속 회사 \(주관사\)/).selectOption({ label: companyName });
+    // 주관사 선택 드롭다운 (select 첫 번째 요소)
+    await page.locator('select').first().selectOption({ label: companyName });
     
-    await page.getByLabel(/시작일/).fill('2025-01-01');
-    await page.getByLabel(/종료일/).fill('2025-12-31');
+    await page.locator('input[type="date"]').first().fill('2025-01-01');
+    await page.locator('input[type="date"]').nth(1).fill('2025-12-31');
     
     await page.getByRole('button', { name: '생성', exact: true }).click();
     
