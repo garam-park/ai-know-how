@@ -48,7 +48,7 @@
 
 문서와 코드를 한 프로젝트 안에서 함께 관리한다.
 
-````text
+````
 Projects/build_example-project/
 ├── README.md          # 프로젝트 개요, 목표, 현재 상태
 ├── CLAUDE.md          # 이 프로젝트 전용 AI 지시사항
@@ -57,7 +57,7 @@ Projects/build_example-project/
 │   ├── research.md    # 조사 및 리서치
 │   └── decisions.md   # 기술 선택 이유 (ADR)
 └── src/               # 소스 코드
-```text
+```
 
 ### 규칙
 - DO: 새 프로젝트 시작 시 반드시 `README.md` 생성
@@ -82,7 +82,7 @@ Projects/build_example-project/
 
 ## DO NOT
 - 이 프로젝트에서 AI가 절대 하면 안 되는 것
-```text
+```
 
 ---
 
@@ -101,17 +101,17 @@ Projects/build_example-project/
 
 ### 결과
 트레이드오프 및 영향.
-```text
+```
 
 ---
 
 ## 라이프사이클
 
-```text
+```
 Projects/learn_X    →  (완료 시)          →  Resources/note_X
 Resources/note_X    →  (더 이상 안 볼 때)  →  Archive/note_X
 Projects/build_X    →  (완료 시)          →  Archive/build_X
-```text
+```
 
 ### 규칙
 - DO: 완료된 Projects는 Resources 또는 Archive로 이동
