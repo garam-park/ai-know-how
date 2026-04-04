@@ -46,10 +46,10 @@ related_src:
 
 원본 파일을 `wip/` 디렉토리에 복사하고 버전·날짜를 갱신한다.
 
-````text
+````
 원본: docs/deliverables/{원본파일명}_v{X.Y.Z}_{YYYYMMDD}.md
 복사: docs/deliverables/wip/{원본파일명}_v{X.Y.Z+1}_{오늘날짜}.md
-```text
+```
 
 **완료 기준**: `wip/` 디렉토리에 새 버전 파일이 존재한다.
 
@@ -89,13 +89,13 @@ related_src:
 
 1. `wip/` 파일을 원래 위치로 이동한다.
 
-   ```text
+   ```
    wip/{파일명}_v{X.Y.Z+1}_{오늘날짜}.md → docs/deliverables/{파일명}_v{X.Y.Z+1}_{오늘날짜}.md
 ````
 
 1. 원본 파일을 `histories/{오늘날짜}/` 디렉토리로 이동한다.
 
-   ```text
+   ```
    docs/deliverables/{원본파일명}_v{X.Y.Z}_{원본날짜}.md → docs/deliverables/histories/{오늘날짜}/{원본파일명}_v{X.Y.Z}_{원본날짜}.md
    ```
 

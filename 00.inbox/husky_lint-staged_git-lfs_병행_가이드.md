@@ -2,7 +2,7 @@
 
 > **목적**: Husky/lint-staged와 Git LFS를 한 프로젝트에서 함께 사용할 때 발생하는 충돌을 이해하고, 안전하게 설정할 수 있게 된다.
 >
-> **사전 지식**: [husky_lint-staged_가이드.md](husky_lint-staged_가이드.md), [git-lfs-guide.md](git-lfs-guide.md)
+> **사전 지식**: [husky*lint-staged*가이드.md](husky_lint-staged_가이드.md), [git-lfs-guide.md](git-lfs-guide.md)
 
 ---
 
@@ -22,7 +22,7 @@
 
 Husky와 Git LFS는 둘 다 **Git hook을 사용**한다. 문제는 같은 hook 파일을 서로 덮어쓸 수 있다는 점이다.
 
-```text
+```
 .git/hooks/
 ├── pre-commit      ← husky가 사용 (lint-staged 실행)
 ├── pre-push        ← Git LFS가 사용 (LFS 객체 푸시)
@@ -112,7 +112,7 @@ docs/**/*.MD -filter -diff -merge text
 
 만약 `.gitattributes`에서 `*.md`도 LFS로 추적하면서 lint-staged에서도 `*.md`를 처리하면:
 
-```text
+```
 1. git add docs/guide.md
 2. Git LFS가 guide.md를 포인터로 변환
 3. lint-staged가 포인터 텍스트에 markdownlint 실행
@@ -210,7 +210,7 @@ git commit -m "chore: configure husky, lint-staged with git lfs hooks"
 
 ## 5. 최종 파일 구조
 
-```text
+```
 프로젝트/
 ├── .gitattributes              ← LFS 추적 규칙
 ├── .husky/
@@ -257,13 +257,13 @@ git lfs ls-files
 
 ## 7. 체크리스트
 
-| 항목 | 확인 사항 | 확인 |
-|------|-----------|------|
-| hook 공존 | `.husky/pre-push`에 `git lfs pre-push` 호출이 있는가 | ☐ |
-| hook 공존 | `.husky/post-merge`에 `git lfs post-merge` 호출이 있는가 | ☐ |
-| hook 공존 | `.husky/post-checkout`에 `git lfs post-checkout` 호출이 있는가 | ☐ |
-| hook 순서 | `.husky/pre-commit`에서 `git lfs pre-commit`이 `npx lint-staged`보다 먼저 실행되는가 | ☐ |
-| 패턴 분리 | lint-staged 대상 glob과 LFS 추적 패턴이 겹치지 않는가 | ☐ |
-| .gitattributes | 텍스트 파일(md 등)이 LFS에서 명시적으로 제외되어 있는가 | ☐ |
-| 설치 순서 | `git lfs install` 후에 `npx husky init`을 실행했는가 | ☐ |
-| 팀 공유 | `.husky/` 폴더와 `.gitattributes`가 모두 커밋되어 있는가 | ☐ |
+| 항목           | 확인 사항                                                                            | 확인 |
+| -------------- | ------------------------------------------------------------------------------------ | ---- |
+| hook 공존      | `.husky/pre-push`에 `git lfs pre-push` 호출이 있는가                                 | ☐    |
+| hook 공존      | `.husky/post-merge`에 `git lfs post-merge` 호출이 있는가                             | ☐    |
+| hook 공존      | `.husky/post-checkout`에 `git lfs post-checkout` 호출이 있는가                       | ☐    |
+| hook 순서      | `.husky/pre-commit`에서 `git lfs pre-commit`이 `npx lint-staged`보다 먼저 실행되는가 | ☐    |
+| 패턴 분리      | lint-staged 대상 glob과 LFS 추적 패턴이 겹치지 않는가                                | ☐    |
+| .gitattributes | 텍스트 파일(md 등)이 LFS에서 명시적으로 제외되어 있는가                              | ☐    |
+| 설치 순서      | `git lfs install` 후에 `npx husky init`을 실행했는가                                 | ☐    |
+| 팀 공유        | `.husky/` 폴더와 `.gitattributes`가 모두 커밋되어 있는가                             | ☐    |

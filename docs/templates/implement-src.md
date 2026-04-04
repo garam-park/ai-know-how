@@ -50,7 +50,7 @@ related_src:
 
 ````typescript
 // 예시 코드 또는 변경 명세
-```text
+```
 
 **완료 기준**: {이 단계가 끝났을 때의 상태}
 
@@ -64,7 +64,7 @@ related_src:
 
 ```typescript
 // 예시 코드 또는 변경 명세
-```text
+```
 
 **완료 기준**: {이 단계가 끝났을 때의 상태}
 
@@ -82,7 +82,7 @@ related_src:
 curl -X POST http://localhost:3000/flight-plans \
   -H "Content-Type: application/json" \
   -d '{"departureVertiportId": 1, "arrivalVertiportId": 2}'
-```text
+```
 
 기대 응답:
 
@@ -91,5 +91,5 @@ curl -X POST http://localhost:3000/flight-plans \
   "id": 1,
   "status": "PENDING"
 }
-```text
+```
 ````
