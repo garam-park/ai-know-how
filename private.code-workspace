@@ -1,20 +1,28 @@
 {
   "folders": [
     {
-      "name": "🔒 Private",
+      "name": "🏠 Home",
       "path": "."
     },
     {
-      "name": "📂 PARA",
-      "path": "./PARA"
+      "name": "📂 Projects",
+      "path": "./PARA/01.projects"
     },
     {
-      "name": "📥 Inbox",
-      "path": "./inbox"
+      "name": "📂 Areas",
+      "path": "./PARA/02.areas"
+    },
+    {
+      "name": "📂 Resources",
+      "path": "./PARA/03.resources"
     },
     {
       "name": "📝 Tasks",
       "path": "./tasks"
+    },
+    {
+      "name": "📥 Inbox",
+      "path": "./inbox"
     }
   ],
   "settings": {
