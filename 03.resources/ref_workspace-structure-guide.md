@@ -7,7 +7,7 @@
 
 ```
 private/        개인 작업, 실험, 프로젝트 준비
-projects/       프로젝트별 통합 관리 (문서 + 코드)
+workspaces/     프로젝트별 통합 관리 (문서 + 코드)
 repos/          실제 코드 (독립 git repo)
 ```
 
@@ -25,31 +25,42 @@ repos/          실제 코드 (독립 git repo)
 │   ├── .opencode/
 │   │   └── opencode.json
 │   ├── private.code-workspace
+│   ├── inbox/                                # 위치가 애매한 문서. 위치를 정해지기 전까지 임시 보관
 │   └── PARA/
-│       ├── Projects/
+│       ├── 01.projects/
 │       │   ├── plan_jeju-smartcity/      # 프로젝트 준비 (문서만)
+│       │   │   └── tasks/                # 작업 상태 관리 (칸반)
 │       │   ├── learn_fastapi-core/       # 학습 (문서 + 실습)
+│       │   │   └── tasks/                # 작업 상태 관리 (칸반)
 │       │   └── build_poc-iot-sensor/     # PoC ──submodule──▶ repos/poc-iot-sensor
-│       ├── Areas/
-│       ├── Resources/
-│       └── Archive/
+│       │       └── tasks/                # 작업 상태 관리 (칸반)
+│       ├── 02.areas/
+│       ├── 03.resources/
+│       └── 04.archive/
 │
-├── projects/
-│   └── jeju-smartcity/                  # project workspace
+├── workspaces/
+│   └── {project-name}/                  # project workspace
 │       ├── .claude/
 │       │   ├── CLAUDE.md
 │       │   └── rules/
 │       ├── .opencode/
 │       │   └── opencode.json
-│       ├── jeju-smartcity.code-workspace
+│       ├── {project-name}.code-workspace
 │       ├── docs/
+│       │   ├── inbox/                    # 위치가 애매한 문서. 위치를 정해지기 전까지 임시 보관
 │       │   ├── planning/                 # 기획 문서
 │       │   ├── audit/                    # 감리 문서
 │       │   └── meetings/                 # 회의록
+│       ├── tasks/                        # 작업 상태 관리 (칸반)
+│       │   ├── backlog/
+│       │   ├── in-progress/
+│       │   ├── review-ready/             # 검토 대기
+│       │   ├── reviewed/                 # 검토 완료
+│       │   └── done/
 │       ├── logs/                         # 작업 기록
 │       │   └── YYYY-MM-DD.md
-│       ├── frontend/    ──submodule──▶  repos/jeju-frontend
-│       └── backend/     ──submodule──▶  repos/jeju-backend
+│       ├── frontend/    ──submodule──▶  repos/frontend # like repos/jeju-frontend
+│       └── backend/     ──submodule──▶  repos/backend # like repos/jeju-backend
 │
 └── repos/                               # 독립 git repos
     ├── jeju-frontend/
@@ -111,6 +122,12 @@ project-name/
 │   ├── planning/        # 기획 문서
 │   ├── audit/           # 감리 문서
 │   └── meetings/        # 회의록
+├── tasks/               # 작업 상태 관리 (칸반)
+│   ├── backlog/         # 대기 중인 작업
+│   ├── in-progress/     # 진행 중인 작업
+│   ├── review-ready/     # 검토 대기
+│   ├── reviewed/          # 검토 완료
+│   └── done/            # 완료된 작업
 ├── logs/                # 날짜별 작업 기록
 │   └── YYYY-MM-DD.md
 ├── frontend/            # submodule
@@ -123,13 +140,13 @@ project-name/
 
 **목적:** 실제 코드베이스. private / project workspace 양쪽에서 submodule로 참조됨
 
-| repos/ 항목        | 소속                    | 공개 여부 | 수명          |
-| ------------------ | ----------------------- | --------- | ------------- |
-| `jeju-frontend`    | projects/jeju-smartcity | 팀 공유   | 프로젝트 기간 |
-| `jeju-backend`     | projects/jeju-smartcity | 팀 공유   | 프로젝트 기간 |
-| `poc-iot-sensor`   | private                 | 본인만    | 단명 가능     |
-| `poc-llm-pipeline` | private                 | 본인만    | 단명 가능     |
-| `shared-lib`       | 여러 곳                 | 선택적    | 장기          |
+| repos/ 항목        | 소속                      | 공개 여부 | 수명          |
+| ------------------ | ------------------------- | --------- | ------------- |
+| `jeju-frontend`    | workspaces/jeju-smartcity | 팀 공유   | 프로젝트 기간 |
+| `jeju-backend`     | workspaces/jeju-smartcity | 팀 공유   | 프로젝트 기간 |
+| `poc-iot-sensor`   | private                   | 본인만    | 단명 가능     |
+| `poc-llm-pipeline` | private                   | 본인만    | 단명 가능     |
+| `shared-lib`       | 여러 곳                   | 선택적    | 장기          |
 
 ---
 
@@ -195,13 +212,103 @@ project-name/
 
 ---
 
+## Tasks 디렉토리 운영 (칸반식 작업 관리)
+
+**목적:** 프로젝트별 작업을 상태 기반으로 추적하고 관리
+
+### 구조
+
+```
+tasks/
+├── backlog/         # 아직 시작하지 않은 작업
+├── in-progress/     # 현재 진행 중인 작업
+├── review-ready/    # 검토 대기 중인 작업
+├── reviewed/        # 검토 완료된 작업
+└── done/            # 완료된 작업
+```
+
+### 파일 네이밍 규칙
+
+```
+{type}-{short-description}.md
+
+예) feat-user-auth.md
+    fix-login-bug.md
+    refactor-api-response.md
+    docs-setup-guide.md
+```
+
+| Type       | 용도           |
+| ---------- | -------------- |
+| `feat`     | 신규 기능      |
+| `fix`      | 버그 수정      |
+| `refactor` | 리팩토링       |
+| `docs`     | 문서 작업      |
+| `chore`    | 기타 잡무      |
+| `spike`    | 조사/실험 작업 |
+
+### 작업 파일 형식
+
+```markdown
+# {작업 제목}
+
+- Status: in-progress
+- Created: YYYY-MM-DD
+- Updated: YYYY-MM-DD
+- Assignee: {이름}
+
+## 개요
+
+작업에 대한 간단한 설명
+
+## 체크리스트
+
+- [ ] TODO 1
+- [ ] TODO 2
+- [ ] TODO 3
+
+## 참고 사항
+
+- 관련 문서 링크
+- 특이 사항
+```
+
+### 작업 상태 이동
+
+```bash
+# backlog → in-progress
+mv tasks/backlog/feat-user-auth.md tasks/in-progress/
+
+# in-progress → review-ready
+mv tasks/in-progress/feat-user-auth.md tasks/review-ready/
+
+# review-ready → reviewed (검토 통과)
+mv tasks/review-ready/feat-user-auth.md tasks/reviewed/
+
+# review-ready → in-progress (검토 반려, 수정 필요)
+mv tasks/review-ready/feat-user-auth.md tasks/in-progress/
+
+# reviewed → done
+mv tasks/reviewed/feat-user-auth.md tasks/done/
+```
+
+### private vs project workspace 차이
+
+| 항목        | private/PARA/Projects/ | workspaces/{project-name}/      |
+| ----------- | ---------------------- | ------------------------------- |
+| 공유        | 본인만                 | 팀원 선택적 공유                |
+| granularity | 개인 학습/실험 단위    | 프로젝트 기능/이슈 단위         |
+| 연동        | logs/ 와 선택적 연동   | logs/YYYY-MM-DD.md 와 연동 권장 |
+
+---
+
 ## Submodule 운영
 
 ### 신규 submodule 추가
 
 ```bash
 # project workspace에 추가
-cd projects/jeju-smartcity
+cd workspaces/jeju-smartcity
 git submodule add https://github.com/org/jeju-frontend frontend
 git submodule add https://github.com/org/jeju-backend  backend
 git commit -m "add submodules: frontend, backend"
@@ -262,7 +369,7 @@ private/PARA/Projects/build_poc-iot-sensor/
 repos/poc-iot-sensor → repos/jeju-iot-sensor
 
 # project workspace에 submodule 추가
-cd ~/projects/jeju-smartcity
+cd ~/workspaces/jeju-smartcity
 git submodule add https://github.com/org/jeju-iot-sensor iot-sensor
 
 # private submodule 제거
@@ -292,7 +399,7 @@ mv PARA/Projects/build_poc-iot-sensor PARA/Archive/
 
 ```bash
 # 1. 납품 시점 코드 상태 확인
-cd projects/jeju-smartcity
+cd workspaces/jeju-smartcity
 git submodule status
 
 # 2. 감리 문서 작성
@@ -315,7 +422,7 @@ git push origin delivery/2025-Q1
 
 ```bash
 # project workspace에서 AI 작업 시
-cd ~/projects/jeju-smartcity
+cd ~/workspaces/jeju-smartcity
 claude  # .claude/CLAUDE.md 자동 로드 + submodule 코드 접근 가능
 
 # private workspace에서 PoC 작업 시
@@ -360,7 +467,7 @@ GitHub 기준:
 private/ repo
 └── 본인만 (private)
 
-projects/jeju-smartcity/ repo
+workspaces/jeju-smartcity/ repo
 └── Settings → Collaborators
     ├── 팀원 초대
     └── 필요시 고객사 초대 (docs/ 열람용)
@@ -384,17 +491,17 @@ repos/poc-iot-sensor/ repo
 ```
 repos/                          ← 모든 코드의 원천 (독립 git repo)
   ↑ submodule        ↑ submodule
-private/             projects/
+private/             workspaces/
 (실험, PoC, 준비)    (납품, 감리, 팀 협업)
   ↓ PoC 성공 시 승격
-projects/
+workspaces/
 ```
 
 | 목적             | 위치                                 |
 | ---------------- | ------------------------------------ |
 | 개인 학습, 준비  | `private/PARA/Projects/`             |
 | PoC, 실험 코드   | `repos/poc-*` + `private/` submodule |
-| 프로젝트 문서    | `projects/name/docs/`                |
+| 프로젝트 문서    | `workspaces/name/docs/`              |
 | 실제 서비스 코드 | `repos/`                             |
 | IDE 통합 관리    | `.code-workspace`                    |
 | 버전 고정 (납품) | project workspace `git tag`          |
