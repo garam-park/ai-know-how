@@ -2,69 +2,110 @@
 
 OpenCode 기반 멀티 에이전트 오케스트레이션으로 디자인 시스템 구축 프로세스를 자동화한다.
 
+**Code-First**를 기본으로 하며, 고객 요청 시 **Penpot 시안을 On-Demand로 생성**한다. 여러 디자인 시스템을 **동시에** 진행할 수 있다.
+
 ---
 
 ## 개요
 
-디자인 시스템 구축의 5개 Phase(Discovery → Foundation → Build → Ship → Evolve)를 12개 전문 에이전트가 분담하여 처리한다. 각 Phase 완료 시 승인 게이트를 거쳐 다음 단계로 진행하며, 문제 발생 시 자동으로 Back Propagation이 발생한다.
+디자인 시스템 구축의 5개 Phase(Discovery → Foundation → Build → Ship → Evolve)를 12개 전문 에이전트가 분담하여 처리한다. Figma 없이 Code-First로 진행하며, 고객 미팅용 시각 자료는 Penpot으로 선택적 생성한다.
 
 ```
 Phase 1: Discovery  →  Phase 2: Foundation  →  Phase 3: Build  →  Phase 4: Ship  →  Phase 5: Evolve
    (감사·기획)           (토큰·브랜드)           (설계·검증)          (구현·배포)          (운영·거버넌스)
 ```
 
----
+### 아키텍처: Code-First + Penpot On-Demand
 
-## 설치
-
-### 필수 환경
-
-- [OpenCode](https://opencode.ai) 설치
-- Node.js 18 이상
-
-### 설정
-
-```bash
-# 프로젝트 디렉토리로 이동
-cd inbox/ds
-
-# OpenCode 실행
-opencode
 ```
+평소: Code-First로 진행
+  토큰 JSON → Style Dictionary → React 컴포넌트 → Storybook
 
-설정 파일(`.opencode/opencode.json`)이 이미 포함되어 있어 별도 설정이 필요 없다.
+고객 요청 시: Penpot On-Demand
+  Storybook 스냅샷 → Penpot 파일 자동 생성 → 고객 시안 제공
+  Penpot 피드백 → Code-First 파이프라인 반영
+```
 
 ---
 
-## 빠른 시작
+## 디렉토리 구조
 
-### 전체 파이프라인 실행
-
-```bash
-opencode run ds-build
+```
+inbox/ds/
+├── README.md                         # 이 파일
+├── ds-init                           # 프로젝트 생성 스크립트
+├── template/                         # 공통 템플릿 (에이전트, 스킬, 도구)
+│   ├── .opencode/
+│   │   ├── opencode.json             # 프로젝트 설정 템플릿
+│   │   ├── agents/                   # 12개 에이전트 정의
+│   │   ├── skills/
+│   │   │   └── design-system-build/
+│   │   │       └── SKILL.md          # 파이프라인 워크플로 + 승인 기준
+│   │   └── tools/                    # 4개 커스텀 도구
+│   └── _README.md                    # 프로젝트별 README 템플릿
+└── projects/                         # 실제 디자인 시스템 프로젝트들
+    ├── kakao-mobile/                 # 카카오 모바일 디자인 시스템
+    │   ├── README.md
+    │   ├── .opencode/
+    │   ├── docs/
+    │   └── packages/
+    └── toss/                         # 토스 디자인 시스템
+        ├── README.md
+        ├── .opencode/
+        ├── docs/
+        └── packages/
 ```
 
-Greenfield/Brownfield를 자동 판단하여 Phase 1부터 Phase 5까지 순차적으로 실행한다.
+---
 
-### 개별 작업 실행
+## 멀티 프로젝트 시작
+
+### 1. 새 프로젝트 생성
 
 ```bash
-# 현황 감사 (Brownfield 전용)
-opencode run ds-audit
+./ds-init <프로젝트명>
+```
 
-# 토큰 정의
-opencode run ds-tokens
+예시:
 
-# 컴포넌트 설계 → 구현 → 문서화
-opencode run ds-components
+```bash
+./ds-init kakao-mobile
+./ds-init toss
+./ds-init naver-cloud
+```
 
-# 배포 준비
-opencode run ds-release
+각 프로젝트는 완전히 격리된 환경에서 동작한다.
+
+### 2. 프로젝트 실행
+
+```bash
+# 카카오 모바일 DS 실행
+cd projects/kakao-mobile && opencode run ds-build
+
+# 토스 DS 실행 (별도 터미널에서)
+cd projects/toss && opencode run ds-build
+```
+
+### 3. 동시 실행
+
+각 프로젝트 디렉토리에서 별도 터미널로 실행하면 충돌 없이 병렬 진행한다.
+
+```bash
+# 터미널 1
+cd inbox/ds/projects/kakao-mobile && opencode
+
+# 터미널 2
+cd inbox/ds/projects/toss && opencode
+
+# 터미널 3
+cd inbox/ds/projects/naver-cloud && opencode
 ```
 
 ---
 
 ## 커맨드 목록
+
+각 프로젝트 디렉토리에서 실행한다.
 
 | 커맨드          | 설명                                                                  | 대상 에이전트    |
 | --------------- | --------------------------------------------------------------------- | ---------------- |
@@ -86,19 +127,19 @@ opencode run ds-release
 
 ### 전문 서브에이전트
 
-| Phase              | 에이전트              | 역할                                                      |
-| ------------------ | --------------------- | --------------------------------------------------------- |
-| **P1: Discovery**  | `auditor`             | 기존 UI 현황 감사, 중복 분석, 기술 부채 시각화            |
-|                    | `planner`             | Design System Charter, MVP 범위, RACI, Roadmap            |
-| **P2: Foundation** | `token-engineer`      | 토큰 3계층 정의, JSON/YAML 명세서, Style Dictionary 빌드  |
-|                    | `brand-designer`      | 색상·타이포·아이콘·모션 원칙, UX Writing 가이드           |
-| **P3: Build**      | `ui-architect`        | Atomic Design 컴포넌트 설계, Spec 문서화                  |
-|                    | `a11y-engineer`       | WCAG 2.1 접근성 검증, 반응형 브레이크포인트               |
-|                    | `figma-builder`       | Figma 라이브러리 구축 (Variants, Auto-layout, Properties) |
-| **P4: Ship**       | `component-developer` | React/Vue 컴포넌트 개발, 토큰 연동, 단위 테스트           |
-|                    | `doc-engineer`        | Storybook 스토리, 디자인 포털, Migration 가이드           |
-|                    | `release-engineer`    | SemVer, CI/CD, 시각 회귀 테스트, Changelog                |
-| **P5: Evolve**     | `governance-manager`  | RFC 프로세스, 채택률 측정, 분기 Health Check              |
+| Phase              | 에이전트              | 역할                                                     |
+| ------------------ | --------------------- | -------------------------------------------------------- |
+| **P1: Discovery**  | `auditor`             | 기존 UI 현황 감사, 중복 분석, 기술 부채 시각화           |
+|                    | `planner`             | Design System Charter, MVP 범위, RACI, Roadmap           |
+| **P2: Foundation** | `token-engineer`      | 토큰 3계층 정의, JSON/YAML 명세서, Style Dictionary 빌드 |
+|                    | `brand-designer`      | 색상·타이포·아이콘·모션 원칙, UX Writing 가이드          |
+| **P3: Build**      | `ui-architect`        | Atomic Design 컴포넌트 설계, Spec 문서화                 |
+|                    | `a11y-engineer`       | WCAG 2.1 접근성 검증, 반응형 브레이크포인트              |
+|                    | `visual-archivist`    | Storybook 기반 시각 Spec, 고객 요청 시 Penpot 시안 생성  |
+| **P4: Ship**       | `component-developer` | React/Vue 컴포넌트 개발, 토큰 연동, 단위 테스트          |
+|                    | `doc-engineer`        | Storybook 스토리, 디자인 포털, Migration 가이드          |
+|                    | `release-engineer`    | SemVer, CI/CD, 시각 회귀 테스트, Changelog               |
+| **P5: Evolve**     | `governance-manager`  | RFC 프로세스, 채택률 측정, 분기 Health Check             |
 
 ---
 
@@ -112,7 +153,7 @@ opencode run ds-release
 | ------ | ---------- | --------------------------------------------------------------- |
 | Gate 1 | Discovery  | UI 인벤토리 100% 커버리지, Charter 필수 요소 존재               |
 | Gate 2 | Foundation | 토큰 참조 무결성, Style Dictionary 빌드 성공, 색상 대비 AA 통과 |
-| Gate 3 | Build      | Spec completeness, WCAG 2.1 AA 통과, Figma Variants 전체 조합   |
+| Gate 3 | Build      | Spec completeness, WCAG 2.1 AA 통과, Storybook 스토리 전체 조합 |
 | Gate 4 | Ship       | 단위 테스트 100%, 시각 회귀 테스트 통과, SemVer 준수            |
 | Gate 5 | Evolve     | 채택률 70% 이상, P0/P1 issue 0건, 버전 편차 0                   |
 
@@ -122,7 +163,7 @@ opencode run ds-release
 | ------ | --------------------------------------- | ------------------------------------------------ |
 | Gate 1 | 스테이크홀더, PO                        | MVP 범위, 거버넌스 모델, 우선순위                |
 | Gate 2 | 디자인 리드, 프론트엔드 리드            | 토큰-브랜드 일치, Semantic 네이밍, 다크모드 대응 |
-| Gate 3 | 프론트엔드 리드, 디자인 리드, UX 라이터 | Props API, Figma 시각 품질, UX Writing 톤        |
+| Gate 3 | 프론트엔드 리드, 디자인 리드, UX 라이터 | Props API, Storybook 렌더링 품질, UX Writing 톤  |
 | Gate 4 | 테크 리드, 개발 팀 대표, 릴리스 매니저  | 배포 결정, 문서 완성도, Changelog                |
 | Gate 5 | 거버넌스 코어 팀, DS 팀 리드            | RFC 승인, Deprecation 결정, Health Check 액션    |
 
@@ -142,64 +183,19 @@ opencode run ds-release
 
 문제 발생 시 자동으로 해당 Step으로 역행하여 수정한다.
 
-| 트리거              | 역행 대상      | 조치                 |
-| ------------------- | -------------- | -------------------- |
-| 브랜드 방향 변경    | Step③ 토큰     | 토큰 재정의          |
-| a11y 구조 문제      | Step⑤ Spec     | Spec 재설계          |
-| Figma 구현 불가     | Step⑤ Spec     | Spec 수정            |
-| 토큰 구조 결함      | Step③ 토큰     | 토큰 재정의          |
-| Spec 불명확         | Step⑦ Figma    | Figma 수정           |
-| 문서화 중 코드 오류 | Step⑧ 코드     | 코드 수정            |
-| 시각 회귀 실패      | Step⑧ 코드     | 코드 수정            |
-| 구조적 결함         | Step⑤ Spec     | Spec 전면 재검토     |
-| RFC 승인            | Step⑤ 컴포넌트 | 컴포넌트 추가 설계   |
-| 토큰 확장 요청      | Step③ 토큰     | 토큰 명세서 업데이트 |
-| 새 버전 배포        | Step⑧ 코드     | 코드 구현 재진입     |
-
----
-
-## 디렉토리 구조
-
-```
-inbox/ds/
-├── .opencode/
-│   ├── opencode.json                 # 전체 설정 (에이전트, 커맨드)
-│   ├── agents/                       # 12개 에이전트 정의
-│   │   ├── ds-orchestrator.md
-│   │   ├── auditor.md
-│   │   ├── planner.md
-│   │   ├── token-engineer.md
-│   │   ├── brand-designer.md
-│   │   ├── ui-architect.md
-│   │   ├── a11y-engineer.md
-│   │   ├── figma-builder.md
-│   │   ├── component-developer.md
-│   │   ├── doc-engineer.md
-│   │   ├── release-engineer.md
-│   │   └── governance-manager.md
-│   ├── skills/
-│   │   └── design-system-build/
-│   │       └── SKILL.md              # 파이프라인 워크플로 + 승인 기준
-│   └── tools/                        # 4개 커스텀 도구
-│       ├── token-gen.ts              # Style Dictionary 토큰 변환
-│       ├── figma-sync.ts             # Figma API 연동
-│       ├── a11y-check.ts             # axe-core 접근성 검사
-│       └── visual-regression.ts      # Chromatic/Percy 시각 회귀
-├── docs/                             # 산출물
-│   ├── audit/                        # Phase 1: 현황 감사 리포트
-│   ├── charter/                      # Phase 1: Charter, MVP 범위
-│   ├── tokens/                       # Phase 2: 토큰 명세서
-│   ├── brand/                        # Phase 2: 브랜드 가이드라인
-│   ├── components/                   # Phase 3: 컴포넌트 Spec
-│   ├── a11y/                         # Phase 3: 접근성·반응형
-│   ├── figma-spec/                   # Phase 3: Figma 라이브러리 Spec
-│   ├── portal/                       # Phase 4: 디자인 포털 문서
-│   ├── governance/                   # Phase 5: 거버넌스 문서
-│   └── gate-reviews/                 # 승인 이력 기록
-└── packages/                         # 코드 산출물
-    ├── tokens/                       # CSS/SCSS/JS 토큰 파일
-    └── components/                   # React/Vue 컴포넌트 소스코드
-```
+| 트리거              | 역행 대상         | 조치                  |
+| ------------------- | ----------------- | --------------------- |
+| 브랜드 방향 변경    | Step③ 토큰        | 토큰 재정의           |
+| a11y 구조 문제      | Step⑤ Spec        | Spec 재설계           |
+| Visual Spec 불명확  | Step⑤ Spec        | Spec 수정             |
+| 토큰 구조 결함      | Step③ 토큰        | 토큰 재정의           |
+| Spec 불명확         | Step⑦ Visual Spec | visual-archivist 수정 |
+| 문서화 중 코드 오류 | Step⑧ 코드        | 코드 수정             |
+| 시각 회귀 실패      | Step⑧ 코드        | 코드 수정             |
+| 구조적 결함         | Step⑤ Spec        | Spec 전면 재검토      |
+| RFC 승인            | Step⑤ 컴포넌트    | 컴포넌트 추가 설계    |
+| 토큰 확장 요청      | Step③ 토큰        | 토큰 명세서 업데이트  |
+| 새 버전 배포        | Step⑧ 코드        | 코드 구현 재진입      |
 
 ---
 
@@ -208,7 +204,7 @@ inbox/ds/
 ### 시나리오 1: 신규 프로젝트 (Greenfield)
 
 ```bash
-cd inbox/ds
+cd projects/kakao-mobile
 opencode run ds-build
 ```
 
@@ -220,6 +216,8 @@ opencode run ds-build
 ### 시나리오 2: 레거시 프로젝트 (Brownfield)
 
 ```bash
+cd projects/toss
+
 # 1단계: 현황 감사
 opencode run ds-audit
 
@@ -227,33 +225,56 @@ opencode run ds-audit
 opencode run ds-build
 ```
 
-1. `auditor`가 기존 UI 인벤토리, 중복 분석, 기술 부채 리포트 생성
-2. `ds-build`가 audit 리포트를 읽어 Brownfield 경로로 진입
-3. Step① 현황 감사 결과 → Step② Charter → 이후 동일
-
-### 시나리오 3: 토큰만 재정의
+### 시나리오 3: 여러 프로젝트 동시 진행
 
 ```bash
+# 터미널 1: 카카오 모바일 DS
+cd projects/kakao-mobile && opencode run ds-build
+
+# 터미널 2: 토스 DS
+cd projects/toss && opencode run ds-build
+
+# 터미널 3: 네이버 클라우드 DS
+cd projects/naver-cloud && opencode run ds-build
+```
+
+각 프로젝트는 독립된 디렉토리에서 동작하므로 산출물 충돌이 없다.
+
+### 시나리오 4: 토큰만 재정의
+
+```bash
+cd projects/kakao-mobile
 opencode run ds-tokens
 ```
 
-브랜드 변경, 다크모드 추가 등 토큰 구조 변경이 필요할 때 실행한다.
-
-### 시나리오 4: 컴포넌트 추가
+### 시나리오 5: 컴포넌트 추가
 
 ```bash
+cd projects/toss
 opencode run ds-components
 ```
 
-RFC 승인으로 신규 컴포넌트가 결정되었을 때 실행한다. 설계 → 구현 → 문서화까지 전체 파이프라인을 실행한다.
-
-### 시나리오 5: 배포
+### 시나리오 6: 배포
 
 ```bash
+cd projects/kakao-mobile
 opencode run ds-release
 ```
 
-단위 테스트, 시각 회귀 테스트, SemVer 버전 결정, CI/CD 검증, Changelog 작성을 수행한다.
+### 시나리오 7: 고객 미팅용 Penpot 시안 생성
+
+```bash
+# 프로젝트 디렉토리에서
+# visual-archivist가 자동으로 Penpot 시안 생성
+# (storybook-snapshot → penpot-on-demand 파이프라인)
+```
+
+고객이 "시각적 결과물을 보고 싶다"고 요청할 때:
+
+1. `visual-archivist`가 Storybook 컴포넌트 스냅샷 수집
+2. Penpot 파일 자동 생성 + 컴포넌트 배치
+3. 고객에게 Penpot 공유 링크 제공
+4. Penpot 코멘트 → 피드백 수집 → Code-First 파이프라인 반영
 
 ---
 
@@ -264,8 +285,6 @@ opencode run ds-release
 Style Dictionary 기반 토큰 변환 도구.
 
 ```typescript
-// 사용 예 (에이전트 내부에서 호출)
-// 토큰 JSON → CSS 변수 + SCSS + JS 동시 출력
 token -
   gen({
     source: "packages/tokens/tokens.json",
@@ -274,24 +293,49 @@ token -
   });
 ```
 
-### figma-sync.ts
+### storybook-snapshot.ts
 
-Figma API 연동 도구.
+Storybook 컴포넌트 스크린샷 수집. 시각 Spec 문서화 및 Penpot 시안 생성용.
 
 ```typescript
-// Figma Variables → 로컬 tokens.json 동기화
-figma -
-  sync({
-    fileId: "abc123",
-    action: "sync-tokens",
+storybook -
+  snapshot({
+    storybookUrl: "http://localhost:6006",
+    components: ["Button", "Input", "Modal"],
+    states: ["default", "hover", "focus", "disabled"],
+    output: "docs/visual-spec/snapshots",
+  });
+```
+
+### penpot-on-demand.ts
+
+Penpot 시안 자동 생성 (On-Demand). 고객 미팅용.
+
+```typescript
+// 새 Penpot 시안 파일 생성
+penpot -
+  on -
+  demand({
+    action: "create-file",
+    projectName: "kakao-mobile",
+    snapshots: ["docs/visual-spec/snapshots/Button.png"],
   });
 
-// 컴포넌트 메타데이터 추출
-figma -
-  sync({
-    fileId: "abc123",
-    action: "export-spec",
-    nodeIds: ["1:2", "3:4"],
+// 고객 공유 링크 생성
+penpot -
+  on -
+  demand({
+    action: "export-link",
+    fileId: "penpot-file-id",
+  });
+
+// Penpot 코멘트 → 피드백 동기화
+penpot -
+  on -
+  demand({
+    action: "sync-feedback",
+    fileId: "penpot-file-id",
+    feedbackUrl: "https://penpot.example.com/webhook",
   });
 ```
 
@@ -302,7 +346,7 @@ axe-core 기반 접근성 검사 도구.
 ```typescript
 a11y -
   check({
-    target: "http://localhost:6006", // Storybook URL
+    target: "http://localhost:6006",
     level: "AA",
   });
 ```
@@ -323,27 +367,41 @@ visual -
 
 ## 승인 이력 확인
 
-모든 게이트 검토 결과는 `docs/gate-reviews/`에 기록된다.
+모든 게이트 검토 결과는 각 프로젝트의 `docs/gate-reviews/`에 기록된다.
 
 ```bash
-# 최근 승인 이력 확인
-ls -la docs/gate-reviews/
+# 카카오 모바일 승인 이력
+ls projects/kakao-mobile/docs/gate-reviews/
 
-# 승인 결과 확인
-cat docs/gate-reviews/20260405-gate2-foundation.md
+# 토스 승인 이력
+ls projects/toss/docs/gate-reviews/
 ```
 
-기록 형식:
+---
 
-```markdown
-# Gate 2: Foundation 검토
+## 프로젝트 관리
 
-- Date: 2026-04-05
-- Reviewer: 홍길동
-- Status: approved
-- Auto-check results: 토큰 참조 무결성 ✓, Style Dictionary 빌드 ✓, 색상 대비 AA ✓, 타이포 스케일 ✓
-- Comments: Semantic 네이밍 직관적, 다크모드 대응 구조 적절
+### 새 프로젝트 추가
+
+```bash
+./ds-init <프로젝트명>
 ```
+
+### 프로젝트 목록 확인
+
+```bash
+ls projects/
+```
+
+### 프로젝트 삭제
+
+```bash
+rm -rf projects/<프로젝트명>
+```
+
+### 템플릿 업데이트
+
+`template/.opencode/`의 에이전트, 스킬, 도구를 수정하면 **이후 생성되는 프로젝트**에 반영된다. 기존 프로젝트는 수동으로 업데이트해야 한다.
 
 ---
 
@@ -366,9 +424,13 @@ cat docs/gate-reviews/20260405-gate2-foundation.md
 도구 파일(`.opencode/tools/*.ts`)의 의존성을 확인한다.
 
 ```bash
-cd inbox/ds/.opencode
+cd projects/kakao-mobile/.opencode
 npm install @opencode-ai/plugin
 ```
+
+### 프로젝트 간 데이터 혼동
+
+각 프로젝트는 독립 디렉토리에서 실행되므로 혼동되지 않는다. 반드시 해당 프로젝트 디렉토리에서 `opencode`를 실행하라.
 
 ---
 

@@ -4,7 +4,7 @@ mode: subagent
 model: opencode/qwen3.6-plus-free
 permission:
   read: "docs/components/**/*"
-  read: "docs/figma-spec/**/*"
+  read: "docs/visual-spec/**/*"
   read: "docs/a11y/**/*"
   write: "packages/components/**/*"
   write: "packages/tokens/**/*"

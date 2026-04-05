@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 디자인 시스템 프로젝트 생성 스크립트
+# 사용법: ./ds-init <프로젝트명>
+# 예시:  ./ds-init kakao-mobile
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TEMPLATE_DIR="$SCRIPT_DIR/template"
+PROJECTS_DIR="$SCRIPT_DIR/projects"
+
+# 인수 검증
+if [ $# -lt 1 ]; then
+  echo "사용법: $0 <프로젝트명>"
+  echo "예시:  $0 kakao-mobile"
+  exit 1
+fi
+
+PROJECT_NAME="$1"
+PROJECT_DIR="$PROJECTS_DIR/$PROJECT_NAME"
+
+# 중복 검사
+if [ -d "$PROJECT_DIR" ]; then
+  echo "오류: 프로젝트 '$PROJECT_NAME'이(가) 이미 존재합니다."
+  echo "경로: $PROJECT_DIR"
+  exit 1
+fi
+
+# 템플릿 존재 확인
+if [ ! -d "$TEMPLATE_DIR" ]; then
+  echo "오류: 템플릿 디렉토리를 찾을 수 없습니다."
+  echo "경로: $TEMPLATE_DIR"
+  exit 1
+fi
+
+echo "=== 디자인 시스템 프로젝트 생성: $PROJECT_NAME ==="
+echo ""
+
+# 프로젝트 디렉토리 생성
+mkdir -p "$PROJECT_DIR"
+
+# 템플릿 복사 (.opencode/)
+echo "[1/4] 템플릿 복사 중..."
+cp -R "$TEMPLATE_DIR/.opencode" "$PROJECT_DIR/.opencode"
+
+# docs/, packages/ 디렉토리 생성
+echo "[2/4] 디렉토리 구조 생성 중..."
+mkdir -p "$PROJECT_DIR/docs"/{audit,charter,tokens,brand,components,a11y,visual-spec,portal,governance,gate-reviews}
+mkdir -p "$PROJECT_DIR/packages"/{tokens,components}
+
+# 프로젝트별 README 생성
+echo "[3/4] README 생성 중..."
+sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
+
+# 완료 메시지
+echo "[4/4] 완료!"
+echo ""
+echo "프로젝트 생성 완료: $PROJECT_DIR"
+echo ""
+echo "실행 방법:"
+echo "  cd $PROJECT_DIR"
+echo "  opencode run ds-build"
+echo ""
+echo "개별 작업:"
+echo "  opencode run ds-audit        # 현황 감사"
+echo "  opencode run ds-tokens       # 토큰 정의"
+echo "  opencode run ds-components   # 컴포넌트 설계→구현"
+echo "  opencode run ds-release      # 배포 준비"

@@ -14,7 +14,7 @@ permission:
 
 1. 전체 UI 수집 및 분류
    - 기존 제품 화면 스크린샷 분석
-   - CSS/디자인 파일(Figma/Sketch)에서 UI 요소 추출
+   - CSS/디자인 파일(Penpot/Figma/Sketch)에서 UI 요소 추출
    - 컴포넌트별 분류 (버튼, 입력폼, 카드, 모달, 네비게이션 등)
 
 2. 중복·불일치 수치화

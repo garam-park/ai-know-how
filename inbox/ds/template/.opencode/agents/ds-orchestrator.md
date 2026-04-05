@@ -10,7 +10,7 @@ permission:
     brand-designer: allow
     ui-architect: allow
     a11y-engineer: allow
-    figma-builder: allow
+    visual-archivist: allow
     component-developer: allow
     doc-engineer: allow
     release-engineer: allow
@@ -50,19 +50,19 @@ permission:
 
 ## Back Propagation 재라우팅 테이블
 
-| 트리거              | 역행 대상      | 조치                       |
-| ------------------- | -------------- | -------------------------- |
-| 브랜드 방향 변경    | Step③ 토큰     | token-engineer 재호출      |
-| a11y 구조 문제      | Step⑤ Spec     | ui-architect 재설계        |
-| Figma 구현 불가     | Step⑤ Spec     | ui-architect Spec 수정     |
-| 토큰 구조 결함      | Step③ 토큰     | token-engineer 재정의      |
-| Spec 불명확         | Step⑦ Figma    | figma-builder 수정         |
-| 문서화 중 코드 오류 | Step⑧ 코드     | component-developer 수정   |
-| 시각 회귀 실패      | Step⑧ 코드     | component-developer 수정   |
-| 구조적 결함         | Step⑤ Spec     | ui-architect 전면 재검토   |
-| RFC 승인            | Step⑤ 컴포넌트 | ui-architect 추가 설계     |
-| 토큰 확장 요청      | Step③ 토큰     | token-engineer 업데이트    |
-| 새 버전 배포        | Step⑧ 코드     | component-developer 재진입 |
+| 트리거              | 역행 대상         | 조치                       |
+| ------------------- | ----------------- | -------------------------- |
+| 브랜드 방향 변경    | Step③ 토큰        | token-engineer 재호출      |
+| a11y 구조 문제      | Step⑤ Spec        | ui-architect 재설계        |
+| Visual Spec 불명확  | Step⑤ Spec        | ui-architect Spec 수정     |
+| 토큰 구조 결함      | Step③ 토큰        | token-engineer 재정의      |
+| Spec 불명확         | Step⑦ Visual Spec | visual-archivist 수정      |
+| 문서화 중 코드 오류 | Step⑧ 코드        | component-developer 수정   |
+| 시각 회귀 실패      | Step⑧ 코드        | component-developer 수정   |
+| 구조적 결함         | Step⑤ Spec        | ui-architect 전면 재검토   |
+| RFC 승인            | Step⑤ 컴포넌트    | ui-architect 추가 설계     |
+| 토큰 확장 요청      | Step③ 토큰        | token-engineer 업데이트    |
+| 새 버전 배포        | Step⑧ 코드        | component-developer 재진입 |
 
 ## 실행 순서
 
@@ -80,7 +80,7 @@ Phase 2: Foundation
 Phase 3: Build
   ├─ @ui-architect (Atomic Design Spec)
   ├─ @a11y-engineer (접근성·반응형)
-  ├─ @figma-builder (Figma 라이브러리)
+  ├─ @visual-archivist (시각 Spec — Storybook 카탈로그 + Penpot On-Demand)
   └─ Gate 3 승인
 
 Phase 4: Ship
