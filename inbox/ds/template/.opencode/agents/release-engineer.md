@@ -14,8 +14,9 @@ permission:
 ## 수행 작업
 
 1. 시각 회귀 테스트
-   - Chromatic/Percy 연동
-   - Storybook 기반 스크린샷 비교
+   - Playwright 로컬 스냅샷 비교
+   - Storybook 기반 스크린샷 촬영
+   - 이전 베이스라인과 픽셀 단위 비교 (임계치 2%)
    - 변경 감지 시 승인 워크플로
 
 2. 접근성 자동 검사

@@ -41,7 +41,7 @@ opencode run ds-release
 │   ├── skills/
 │   │   └── design-system-build/
 │   │       └── SKILL.md
-│   └── tools/                        # 4개 커스텀 도구
+  │   └── tools/                        # 5개 커스텀 도구
 ├── docs/
 │   ├── audit/                        # 현황 감사 리포트
 │   ├── charter/                      # Charter, MVP 범위

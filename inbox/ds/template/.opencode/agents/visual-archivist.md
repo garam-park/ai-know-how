@@ -34,7 +34,7 @@ permission:
 ## 선택 작업 (고객 요청 시)
 
 4. Penpot 시안 자동 생성 (On-Demand)
-   - storybook-snapshot 도구로 컴포넌트 스크린샷 수집
+   - playwright-visual-test 도구로 컴포넌트 스크린샷 수집
    - penpot-on-demand 도구로 Penpot 파일 생성 + 컴포넌트 배치
    - 고객에게 Penpot 링크 제공
    - Penpot 코멘트 → 피드백 수집 → Code-First 파이프라인 반영

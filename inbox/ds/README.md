@@ -41,7 +41,7 @@ inbox/ds/
 │   │   ├── skills/
 │   │   │   └── design-system-build/
 │   │   │       └── SKILL.md          # 파이프라인 워크플로 + 승인 기준
-│   │   └── tools/                    # 4개 커스텀 도구
+│   │   └── tools/                    # 6개 커스텀 도구
 │   └── _README.md                    # 프로젝트별 README 템플릿
 └── projects/                         # 실제 디자인 시스템 프로젝트들
     ├── kakao-mobile/                 # 카카오 모바일 디자인 시스템
@@ -263,18 +263,145 @@ opencode run ds-release
 
 ### 시나리오 7: 고객 미팅용 Penpot 시안 생성
 
+고객이 "시각적 결과물을 보고 싶다"고 요청할 때 실행한다.
+
+#### 사전 조건
+
+- Phase 3(Build) 이상 완료 → Storybook 빌드 가능 상태
+- Penpot 서버 접속 가능 (셀프 호스팅 또는 Penpot Cloud)
+
+#### 단계 1: Storybook 빌드
+
 ```bash
-# 프로젝트 디렉토리에서
-# visual-archivist가 자동으로 Penpot 시안 생성
-# (storybook-snapshot → penpot-on-demand 파이프라인)
+cd projects/kakao-mobile
+
+# Storybook 정적 빌드
+cd packages/components
+npm run build-storybook
 ```
 
-고객이 "시각적 결과물을 보고 싶다"고 요청할 때:
+#### 단계 2: OpenCode에서 visual-archivist 호출
 
-1. `visual-archivist`가 Storybook 컴포넌트 스냅샷 수집
-2. Penpot 파일 자동 생성 + 컴포넌트 배치
-3. 고객에게 Penpot 공유 링크 제공
-4. Penpot 코멘트 → 피드백 수집 → Code-First 파이프라인 반영
+```bash
+cd projects/kakao-mobile
+opencode
+```
+
+OpenCode 세션에서 다음을 입력:
+
+```
+@visual-archivist 고객 미팅용 Penpot 시안을 생성해주세요.
+대상 컴포넌트: Button, Input, Modal, Card, NavBar
+상태: default, hover, focus, disabled
+Penpot 프로젝트명: kakao-mobile-client-presentation
+```
+
+#### 단계 3: 자동 실행 흐름
+
+`visual-archivist`가 다음을 순차적으로 수행:
+
+1. **playwright-visual-test 도구 호출**
+
+   ```
+   playwright-visual-test({
+     storybookUrl: "./storybook-static",
+     components: ["Button", "Input", "Modal", "Card", "NavBar"],
+     threshold: 0.02,
+     viewports: ["desktop"]
+   })
+   ```
+
+   → 컴포넌트별 스냅샷 촬영 및 베이스라인과 비교
+
+2. **storybook-snapshot 도구 호출** (스크린샷 추출용)
+
+   ```
+   storybook-snapshot({
+     storybookUrl: "./storybook-static",
+     components: ["Button", "Input", "Modal", "Card", "NavBar"],
+     states: ["default", "hover", "focus", "disabled"],
+     output: "docs/visual-spec/snapshots"
+   })
+   ```
+
+   → `docs/visual-spec/snapshots/`에 컴포넌트별 스크린샷 PNG 저장
+
+3. **penpot-on-demand 도구 호출 (create-file)**
+
+   ```
+   penpot-on-demand({
+     action: "create-file",
+     projectName: "kakao-mobile-client-presentation",
+     snapshots: ["docs/visual-spec/snapshots/*.png"]
+   })
+   ```
+
+   → Penpot에 새 파일 생성, 스크린샷 기반 컴포넌트 배치
+
+4. **penpot-on-demand 도구 호출 (export-link)**
+   ```
+   penpot-on-demand({
+     action: "export-link",
+     fileId: "<생성된 파일 ID>"
+   })
+   ```
+   → 고객 공유용 Penpot 링크 반환
+
+#### 단계 4: 고객에게 링크 제공
+
+생성된 Penpot 링크를 고객에게 공유한다.
+
+```
+Penpot 시안: https://penpot.example.com/view/<file-id>
+```
+
+고객은 Penpot에서 다음을 할 수 있다:
+
+- 컴포넌트별 상태 확인 (default, hover, focus, disabled)
+- 코멘트 기능으로 피드백 작성
+- 화면 확대/축소로 디테일 확인
+
+#### 단계 5: 피드백 수집 및 반영
+
+```
+@visual-archivist Penpot에서 고객 피드백을 수집해주세요.
+파일 ID: <file-id>
+피드백 URL: https://penpot.example.com/webhook/<file-id>
+```
+
+`visual-archivist`가 다음을 수행:
+
+1. **penpot-on-demand 도구 호출 (sync-feedback)**
+
+   ```
+   penpot-on-demand({
+     action: "sync-feedback",
+     fileId: "<file-id>",
+     feedbackUrl: "https://penpot.example.com/webhook/<file-id>"
+   })
+   ```
+
+   → Penpot 코멘트 → `docs/visual-spec/feedback.md`로 변환
+
+2. 피드백 분석 후 Code-First 파이프라인으로 반영
+   - 색상 변경 요청 → token-engineer 재호출
+   - 레이아웃 수정 요청 → ui-architect Spec 수정
+   - 컴포넌트 추가 요청 → component-developer 구현
+
+#### Penpot 설정 (최초 1회)
+
+Penpot 연동을 위해 환경변수를 설정한다:
+
+```bash
+# .env 파일 생성 (projects/kakao-mobile/.env)
+PENPOT_API_URL=https://penpot.example.com/api
+PENPOT_ACCESS_TOKEN=<your-access-token>
+PENPOT_PROJECT_ID=<project-id>
+```
+
+Penpot 액세스 토큰은 Penpot 설정 → API Keys에서 생성한다.
+
+---
 
 ---
 
@@ -285,12 +412,11 @@ opencode run ds-release
 Style Dictionary 기반 토큰 변환 도구.
 
 ```typescript
-token -
-  gen({
-    source: "packages/tokens/tokens.json",
-    platforms: ["css", "scss", "js"],
-    output: "packages/tokens/dist",
-  });
+token-gen({
+  source: "packages/tokens/tokens.json",
+  platforms: ["css", "scss", "js"],
+  output: "packages/tokens/dist"
+})
 ```
 
 ### storybook-snapshot.ts
@@ -298,13 +424,12 @@ token -
 Storybook 컴포넌트 스크린샷 수집. 시각 Spec 문서화 및 Penpot 시안 생성용.
 
 ```typescript
-storybook -
-  snapshot({
-    storybookUrl: "http://localhost:6006",
-    components: ["Button", "Input", "Modal"],
-    states: ["default", "hover", "focus", "disabled"],
-    output: "docs/visual-spec/snapshots",
-  });
+storybook-snapshot({
+  storybookUrl: "http://localhost:6006",
+  components: ["Button", "Input", "Modal"],
+  states: ["default", "hover", "focus", "disabled"],
+  output: "docs/visual-spec/snapshots"
+})
 ```
 
 ### penpot-on-demand.ts
@@ -313,30 +438,24 @@ Penpot 시안 자동 생성 (On-Demand). 고객 미팅용.
 
 ```typescript
 // 새 Penpot 시안 파일 생성
-penpot -
-  on -
-  demand({
-    action: "create-file",
-    projectName: "kakao-mobile",
-    snapshots: ["docs/visual-spec/snapshots/Button.png"],
-  });
+penpot-on-demand({
+  action: "create-file",
+  projectName: "kakao-mobile",
+  snapshots: ["docs/visual-spec/snapshots/Button.png"]
+})
 
 // 고객 공유 링크 생성
-penpot -
-  on -
-  demand({
-    action: "export-link",
-    fileId: "penpot-file-id",
-  });
+penpot-on-demand({
+  action: "export-link",
+  fileId: "penpot-file-id"
+})
 
 // Penpot 코멘트 → 피드백 동기화
-penpot -
-  on -
-  demand({
-    action: "sync-feedback",
-    fileId: "penpot-file-id",
-    feedbackUrl: "https://penpot.example.com/webhook",
-  });
+penpot-on-demand({
+  action: "sync-feedback",
+  fileId: "penpot-file-id",
+  feedbackUrl: "https://penpot.example.com/webhook"
+})
 ```
 
 ### a11y-check.ts
@@ -344,23 +463,42 @@ penpot -
 axe-core 기반 접근성 검사 도구.
 
 ```typescript
-a11y -
-  check({
-    target: "http://localhost:6006",
-    level: "AA",
-  });
+a11y-check({
+  target: "http://localhost:6006",
+  level: "AA"
+})
 ```
 
-### visual-regression.ts
+### playwright-visual-test.ts
 
-Chromatic/Percy 시각 회귀 테스트 도구.
+Playwright 기반 시각 회귀 테스트 도구. 로컬 실행, 외부 전송 없음, 오픈소스 무료.
 
 ```typescript
-visual -
-  regression({
-    provider: "chromatic",
-    projectToken: process.env.CHROMATIC_PROJECT_TOKEN,
-  });
+// 회귀 테스트 실행
+playwright-visual-test({
+  storybookUrl: "http://localhost:6006",
+  components: ["Button", "Input", "Modal"],
+  threshold: 0.02,
+  viewports: ["desktop"]
+})
+
+// 베이스라인 업데이트 (신규 컴포넌트 등록 시)
+playwright-visual-test({
+  storybookUrl: "http://localhost:6006",
+  update: true,
+  viewports: ["mobile", "tablet", "desktop"]
+})
+```
+
+### test-config.ts
+
+Playwright 시각 테스트 설정. 뷰포트 프리셋, 브라우저, 임계치 정의.
+
+```typescript
+import { viewports, browsers, defaultThreshold } from "./test-config"
+// viewports: mobile(375×812), tablet(768×1024), desktop(1280×720)
+// browsers: ["chromium"]
+// defaultThreshold: 0.02
 ```
 
 ---
