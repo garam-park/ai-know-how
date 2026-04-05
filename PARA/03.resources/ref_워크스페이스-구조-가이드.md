@@ -59,8 +59,9 @@ repos/          실제 코드 (독립 git repo)
 │       │   └── done/
 │       ├── logs/                         # 작업 기록
 │       │   └── YYYY-MM-DD.md
-│       ├── frontend/    ──submodule──▶  repos/frontend # like repos/jeju-frontend
-│       └── backend/     ──submodule──▶  repos/backend # like repos/jeju-backend
+│       └── repos/                    # submodules ──▶ repos/{project-name}-*
+│           ├── frontend/             #   ──▶ repos/jeju-frontend
+│           └── backend/              #   ──▶ repos/jeju-backend
 │
 └── repos/                               # 독립 git repos
     ├── jeju-frontend/
@@ -130,8 +131,9 @@ project-name/
 │   └── done/            # 완료된 작업
 ├── logs/                # 날짜별 작업 기록
 │   └── YYYY-MM-DD.md
-├── frontend/            # submodule
-└── backend/             # submodule
+└── repos/               # submodules ──▶ repos/{project-name}-*
+    ├── frontend/
+    └── backend/
 ```
 
 ---
@@ -190,11 +192,11 @@ project-name/
     },
     {
       "name": "🖥 frontend",
-      "path": "./frontend"
+      "path": "./repos/frontend"
     },
     {
       "name": "⚙️ backend",
-      "path": "./backend"
+      "path": "./repos/backend"
     }
   ],
   "settings": {
@@ -246,8 +248,8 @@ tasks/
 ```bash
 # project workspace에 추가
 cd workspaces/jeju-smartcity
-git submodule add https://github.com/org/jeju-frontend frontend
-git submodule add https://github.com/org/jeju-backend  backend
+git submodule add https://github.com/org/jeju-frontend repos/frontend
+git submodule add https://github.com/org/jeju-backend  repos/backend
 git commit -m "add submodules: frontend, backend"
 
 # private workspace에 PoC 추가
@@ -268,7 +270,7 @@ git submodule update --init --recursive
 
 ```bash
 # 특정 submodule 업데이트
-git submodule update --remote frontend
+git submodule update --remote repos/frontend
 
 # 전체 submodule 업데이트
 git submodule update --remote --merge
@@ -307,7 +309,7 @@ repos/poc-iot-sensor → repos/jeju-iot-sensor
 
 # project workspace에 submodule 추가
 cd ~/workspaces/jeju-smartcity
-git submodule add https://github.com/org/jeju-iot-sensor iot-sensor
+git submodule add https://github.com/org/jeju-iot-sensor repos/iot-sensor
 
 # private submodule 제거
 cd ~/private
@@ -343,7 +345,7 @@ git submodule status
 # docs/audit/2025-Q1-감리보고서.md 작성
 
 # 3. 해당 시점 submodule commit 고정
-git add frontend backend docs/audit/
+git add repos/frontend repos/backend docs/audit/
 git commit -m "감리 2025-Q1: frontend v1.2.3, backend v2.0.1"
 
 # 4. tag로 납품 버전 표시
@@ -388,7 +390,7 @@ claude --add-dir PARA/Projects/build_poc-iot-sensor/poc-iot-sensor
 
 - DO: 감리 관련 변경 시 반드시 docs/audit/ 업데이트
 - DO: 작업 기록은 logs/YYYY-MM-DD.md 에 추가
-- DO NOT: frontend/, backend/ 에 직접 커밋 — 각 submodule repo에서 작업
+- DO NOT: repos/ 하위에 직접 커밋 — 각 submodule repo에서 작업
 
 ## DO NOT
 
