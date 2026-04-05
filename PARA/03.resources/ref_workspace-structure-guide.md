@@ -214,6 +214,8 @@ project-name/
 
 ## Tasks 디렉토리 운영 (칸반식 작업 관리)
 
+> 상세 규칙: `.claude/rules/rule_task-management.md` 참조
+
 **목적:** 프로젝트별 작업을 상태 기반으로 추적하고 관리
 
 ### 구조
@@ -225,71 +227,6 @@ tasks/
 ├── review-ready/    # 검토 대기 중인 작업
 ├── reviewed/        # 검토 완료된 작업
 └── done/            # 완료된 작업
-```
-
-### 파일 네이밍 규칙
-
-```
-{type}-{short-description}.md
-
-예) feat-user-auth.md
-    fix-login-bug.md
-    refactor-api-response.md
-    docs-setup-guide.md
-```
-
-| Type       | 용도           |
-| ---------- | -------------- |
-| `feat`     | 신규 기능      |
-| `fix`      | 버그 수정      |
-| `refactor` | 리팩토링       |
-| `docs`     | 문서 작업      |
-| `chore`    | 기타 잡무      |
-| `spike`    | 조사/실험 작업 |
-
-### 작업 파일 형식
-
-```markdown
-# {작업 제목}
-
-- Status: in-progress
-- Created: YYYY-MM-DD
-- Updated: YYYY-MM-DD
-- Assignee: {이름}
-
-## 개요
-
-작업에 대한 간단한 설명
-
-## 체크리스트
-
-- [ ] TODO 1
-- [ ] TODO 2
-- [ ] TODO 3
-
-## 참고 사항
-
-- 관련 문서 링크
-- 특이 사항
-```
-
-### 작업 상태 이동
-
-```bash
-# backlog → in-progress
-mv tasks/backlog/feat-user-auth.md tasks/in-progress/
-
-# in-progress → review-ready
-mv tasks/in-progress/feat-user-auth.md tasks/review-ready/
-
-# review-ready → reviewed (검토 통과)
-mv tasks/review-ready/feat-user-auth.md tasks/reviewed/
-
-# review-ready → in-progress (검토 반려, 수정 필요)
-mv tasks/review-ready/feat-user-auth.md tasks/in-progress/
-
-# reviewed → done
-mv tasks/reviewed/feat-user-auth.md tasks/done/
 ```
 
 ### private vs project workspace 차이
