@@ -1,0 +1,171 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "ds-orchestrator": {
+      "description": "디자인 시스템 구축 파이프라인 오케스트레이터 — 각 Phase 완료 시 승인 게이트 실행, Back Propagation 재라우팅",
+      "mode": "primary",
+      "model": "opencode/qwen3.6-plus-free",
+      "permission": {
+        "task": {
+          "auditor": "allow",
+          "planner": "allow",
+          "token-engineer": "allow",
+          "brand-designer": "allow",
+          "ui-architect": "allow",
+          "a11y-engineer": "allow",
+          "figma-builder": "allow",
+          "component-developer": "allow",
+          "doc-engineer": "allow",
+          "release-engineer": "allow",
+          "governance-manager": "allow"
+        },
+        "write": "docs/**/*"
+      }
+    },
+    "auditor": {
+      "description": "기존 UI 현황 감사 — 중복·불일치 수치화, 기술 부채 시각화, 컴포넌트 사용 빈도 분석",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 15,
+      "permission": {
+        "edit": "deny",
+        "read": "*",
+        "write": "docs/audit/**/*"
+      }
+    },
+    "planner": {
+      "description": "Design System Charter, MVP 범위, RACI, Roadmap 초안 작성",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": ["docs/audit/**/*"],
+        "write": "docs/charter/**/*"
+      }
+    },
+    "token-engineer": {
+      "description": "디자인 토큰 3계층(Primitive/Semantic/Component) 정의, JSON/YAML 명세서 출력, Style Dictionary 빌드",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": ["docs/charter/**/*", "docs/brand/**/*"],
+        "write": ["docs/tokens/**/*", "packages/tokens/**/*"]
+      }
+    },
+    "brand-designer": {
+      "description": "브랜드 가이드라인 문서화 — 색상 팔레트, 타이포 스케일, 아이콘 원칙, 모션 원칙, UX Writing 가이드",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": "docs/charter/**/*",
+        "write": "docs/brand/**/*"
+      }
+    },
+    "ui-architect": {
+      "description": "Atomic Design 기반 컴포넌트 설계 — Anatomy, Props, 상태 매트릭스, Do/Don't 예시, Spec 문서화",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 15,
+      "permission": {
+        "edit": "deny",
+        "read": ["docs/tokens/**/*", "docs/brand/**/*"],
+        "write": "docs/components/**/*"
+      }
+    },
+    "a11y-engineer": {
+      "description": "WCAG 2.1 접근성 검증, 반응형 브레이크포인트 정의, a11y 체크리스트 작성",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": "docs/components/**/*",
+        "write": "docs/a11y/**/*"
+      }
+    },
+    "figma-builder": {
+      "description": "Figma 라이브러리 구축 — Variants, Auto-layout, Component Properties, Annotation Kit, Handoff Spec",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 15,
+      "permission": {
+        "edit": "deny",
+        "read": ["docs/components/**/*", "docs/a11y/**/*", "docs/tokens/**/*"],
+        "write": "docs/figma-spec/**/*"
+      }
+    },
+    "component-developer": {
+      "description": "React/Vue 컴포넌트 개발, 토큰 연동, 단위 테스트, peer dependency 정의",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 20,
+      "permission": {
+        "read": [
+          "docs/components/**/*",
+          "docs/figma-spec/**/*",
+          "docs/a11y/**/*"
+        ],
+        "write": ["packages/components/**/*", "packages/tokens/**/*"]
+      }
+    },
+    "doc-engineer": {
+      "description": "Storybook 스토리 작성, 디자인 시스템 포털, Migration 가이드, Contribution Guide 문서화",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": ["packages/components/**/*", "docs/**/*"],
+        "write": ["packages/components/**/*.stories.tsx", "docs/portal/**/*"]
+      }
+    },
+    "release-engineer": {
+      "description": "SemVer 버전 관리, CI/CD 파이프라인, 시각 회귀 테스트, Changelog 작성, npm 배포 준비",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "read": ["packages/**/*"],
+        "write": [".github/**/*", "CHANGELOG.md", "package.json"]
+      }
+    },
+    "governance-manager": {
+      "description": "RFC 프로세스 운영, 채택률 측정, 분기 Health Check, Deprecation 정책 관리",
+      "mode": "subagent",
+      "model": "opencode/qwen3.6-plus-free",
+      "steps": 10,
+      "permission": {
+        "edit": "deny",
+        "read": ["packages/**/*", "docs/**/*"],
+        "write": "docs/governance/**/*"
+      }
+    }
+  },
+  "command": {
+    "ds-build": {
+      "template": "디자인 시스템 구축 파이프라인을 실행하라.\n\n1. Greenfield/Brownfield 판단: 기존 코드베이스에 UI가 존재하는가?\n   - Yes → Phase 1 Step① 현황 감사부터\n   - No → Phase 1 Step② 목표·범위 정의부터\n\n2. 각 Phase 완료 시 승인 게이트 실행:\n   - 자동 검증: 체크리스트 기준 충족 확인\n   - 인간 승인: question 도구로 검토 요청\n   - 승인 → 다음 Phase 인계\n   - 반려 → 사유 기록 후 Back Propagation\n\n3. Back Propagation 발생 시:\n   - 트리거 조건에 따라 해당 Step으로 역행\n   - 최대 3회 재시도, 초과 시 에스컬레이션\n\n4. Phase 5 완료 시 Completed Outputs 확인",
+      "agent": "ds-orchestrator"
+    },
+    "ds-audit": {
+      "template": "기존 UI 현황 감사를 실행하라.\n\n1. src/ 디렉토리의 모든 CSS/컴포넌트/디자인 파일 수집\n2. 중복·불일치 수치화 (색상 N종, 버튼 변형 N개 등)\n3. 기술 부채 시각화\n4. 컴포넌트 사용 빈도 분석 → 우선순위 도출\n5. 결과를 docs/audit/에 UI 인벤토리 스프레드시트, 불일치 리포트, 우선순위 목록으로 출력",
+      "agent": "auditor"
+    },
+    "ds-tokens": {
+      "template": "디자인 토큰을 3계층으로 정의하라.\n\n1. Primitive Token: 절대값 (#5C4EE5, 16px, 8px 등)\n2. Semantic Token: 의미 부여 (color-primary, spacing-md)\n3. Component Token: 역할 특정 (button-bg, input-border)\n\ndocs/tokens/에 JSON/YAML 명세서 출력\npackages/tokens/에 Style Dictionary 소스 파일 생성\n다크모드·멀티브랜드 확장 시 Primitive만 교체하면 자동 대응 가능한 구조로 설계",
+      "agent": "token-engineer"
+    },
+    "ds-components": {
+      "template": "Atomic Design 기반으로 컴포넌트를 설계하고 코드로 구현하라.\n\n1. @ui-architect: Atoms → Molecules → Organisms → Templates 설계, Spec 문서 작성\n2. @a11y-engineer: WCAG 2.1 AA 검증, 반응형 브레이크포인트 정의\n3. @figma-builder: Figma 라이브러리 Spec 문서화\n4. @component-developer: React 컴포넌트 개발, 토큰 연동, 단위 테스트\n5. @doc-engineer: Storybook 스토리 작성\n\n각 단계 완료 시 게이트 검증 실행",
+      "agent": "ui-architect"
+    },
+    "ds-release": {
+      "template": "컴포넌트 패키지를 배포 준비하라.\n\n1. 단위 테스트 100% 통과 확인\n2. 시각 회귀 테스트 (Chromatic)\n3. SemVer 버전 결정 (Breaking Change 시 Major)\n4. CI/CD 파이프라인 구성\n5. Changelog 작성\n6. Breaking Change 영향 분석 및 Migration 가이드 확인\n7. 배포 승인 요청",
+      "agent": "release-engineer"
+    }
+  }
+}
