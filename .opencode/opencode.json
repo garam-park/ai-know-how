@@ -1,7 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    ".claude/CLAUDE.md",
-    ".claude/rules/rule_para-convention.md"
+    ".claude/rules/*.md"
   ]
 }
