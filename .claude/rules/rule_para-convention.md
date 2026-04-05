@@ -37,6 +37,13 @@
 | `snippet_`  | 재사용 코드 조각    |
 | `template_` | 템플릿              |
 
+### 파일명 규칙
+
+- Prefix는 영어로 사용 (예: `ref_`, `note_`, `snippet_`, `template_`)
+- Prefix를 제외한 파일명은 한국어로 작성 (예: `ref_git-lfs-가이드.md`)
+- 단어 구분은 하이픈(-)으로 연결
+- 기술 용어, 라이브러리명, 도구명은 영문 유지 가능 (예: `git`, `husky`, `qiankun`)
+
 ### 규칙
 
 - DO: 위에 정의된 prefix만 사용
