@@ -1,8 +1,9 @@
 import { tool } from "@opencode-ai/plugin";
+import { execSync } from "child_process";
 
 export default tool({
   description:
-    "Penpot 시안 자동 생성 (On-Demand) — Storybook 스냅샷 기반 Penpot 파일 생성, 고객 미팅용",
+    "Penpot 시안 자동 생성 (On-Demand) — Storybook 스냅샷 기반, 고객 미팅용",
   args: {
     action: tool.schema.enum([
       "create-file",
@@ -15,30 +16,25 @@ export default tool({
       .optional(),
     projectName: tool.schema.string("Penpot 프로젝트 이름").optional(),
     snapshots: tool.schema
-      .array(tool.schema.string("Storybook 스냅샷 이미지 경로 목록"))
+      .array(tool.schema.string("스냅샷 디렉토리 경로"))
       .optional(),
     feedbackUrl: tool.schema
       .string("Penpot 피드백 웹훅 URL (sync-feedback 시)")
       .optional(),
   },
-  async execute(args, context) {
+  async execute(args) {
     const { action, fileId, projectName, snapshots, feedbackUrl } = args;
 
-    // Penpot MCP API 연동
-    // create-file: 새 Penpot 파일 생성 + 스냅샷 기반 컴포넌트 배치
-    // update-file: 기존 파일 업데이트
-    // export-link: 공유 링크 생성 (고객 제공용)
-    // sync-feedback: Penpot 코멘트 → 로컬 피드백 파일 변환
+    const opts: string[] = [];
+    if (fileId) opts.push("--file-id", fileId);
+    if (projectName) opts.push("--project", projectName);
+    if (snapshots?.length) opts.push("--snapshots", snapshots[0]);
+    if (feedbackUrl) opts.push("--feedback-url", feedbackUrl);
 
-    const actions = {
-      "create-file": "새 Penpot 시안 파일 생성",
-      "update-file": "기존 Penpot 파일 업데이트",
-      "export-link": "고객 공유 링크 생성",
-      "sync-feedback": "Penpot 코멘트 → 피드백 파일 변환",
-    };
-
-    return {
-      content: `Penpot On-Demand 완료: ${action}\n${actions[action]}\n${fileId ? `파일 ID: ${fileId}` : ""}\n${projectName ? `프로젝트: ${projectName}` : ""}\n${snapshots ? `스냅샷: ${snapshots.length}건` : ""}`,
-    };
+    const result = execSync(
+      `bash scripts/tools/penpot-on-demand.sh "${action}" ${opts.join(" ")}`,
+      { encoding: "utf-8" },
+    );
+    return { content: result };
   },
 });

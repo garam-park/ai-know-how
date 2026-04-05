@@ -1,4 +1,5 @@
 import { tool } from "@opencode-ai/plugin";
+import { execSync } from "child_process";
 
 export default tool({
   description:
@@ -12,48 +13,12 @@ export default tool({
     ),
     output: tool.schema.string("출력 디렉토리"),
   },
-  async execute(args, context) {
+  async execute(args) {
     const { source, platforms, output } = args;
-
-    // Style Dictionary 설정 생성
-    const config = {
-      source: [source],
-      platforms: Object.fromEntries(
-        platforms.map((p) => [
-          p,
-          {
-            css: {
-              transformGroup: "css",
-              buildPath: `${output}/${p}/`,
-              files: [{ destination: "tokens.css", format: "css/variables" }],
-            },
-            scss: {
-              transformGroup: "scss",
-              buildPath: `${output}/${p}/`,
-              files: [
-                { destination: "_tokens.scss", format: "scss/variables" },
-              ],
-            },
-            js: {
-              transformGroup: "js",
-              buildPath: `${output}/${p}/`,
-              files: [{ destination: "tokens.js", format: "javascript/es6" }],
-            },
-          }[p] || {
-            transformGroup: "css",
-            buildPath: `${output}/${p}/`,
-            files: [],
-          },
-        ]),
-      ),
-    };
-
-    // Style Dictionary 빌드 실행
-    // 실제 구현 시: const StyleDictionary = require("style-dictionary")
-    // new StyleDictionary(config).buildAllPlatforms()
-
-    return {
-      content: `토큰 변환 완료: ${platforms.join(", ")}\n출력 경로: ${output}\n플랫폼: ${platforms.join(", ")}`,
-    };
+    const result = execSync(
+      `bash scripts/tools/token-gen.sh "${source}" "${platforms.join(",")}" "${output}"`,
+      { encoding: "utf-8" },
+    );
+    return { content: result };
   },
 });

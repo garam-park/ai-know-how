@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# both 템플릿의 동기화 상태 검증
+# 사용법: ./ds-sync-check [project-dir]
+# 예시:   ./ds-sync-check
+#         ./ds-sync-check projects/kakao-mobile
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TARGET="${1:-$SCRIPT_DIR/templates/both}"
+
+if [ ! -d "$TARGET" ]; then
+  echo "오류: 디렉토리를 찾을 수 없습니다: $TARGET"
+  exit 1
+fi
+
+ERRORS=0
+
+echo "=== Dual-Harness 동기화 검증 ==="
+echo "대상: $TARGET"
+echo ""
+
+# 1. 에이전트 목록 비교
+echo "[1/4] 에이전트 목록 비교"
+OC_AGENTS=$(ls "$TARGET/.opencode/agents/" 2>/dev/null | sort)
+CC_AGENTS=$(ls "$TARGET/.claude/agents/" 2>/dev/null | sort)
+
+if [ "$OC_AGENTS" = "$CC_AGENTS" ]; then
+  echo "  ✓ 에이전트 파일 목록 일치 ($(echo "$OC_AGENTS" | wc -l | tr -d ' ')개)"
+else
+  echo "  ✗ 에이전트 파일 목록 불일치"
+  echo "    opencode에만 존재:"
+  comm -23 <(echo "$OC_AGENTS") <(echo "$CC_AGENTS") | sed 's/^/      /'
+  echo "    claude-code에만 존재:"
+  comm -13 <(echo "$OC_AGENTS") <(echo "$CC_AGENTS") | sed 's/^/      /'
+  ERRORS=$((ERRORS + 1))
+fi
+
+# 2. 도구 목록 비교 (.ts 래퍼 vs .sh 원본)
+echo ""
+echo "[2/4] 도구 목록 비교"
+TS_TOOLS=$(ls "$TARGET/.opencode/tools/"*.ts 2>/dev/null | xargs -I{} basename {} .ts | sort)
+SH_TOOLS=$(ls "$TARGET/scripts/tools/"*.sh 2>/dev/null | xargs -I{} basename {} .sh | sort)
+
+if [ "$TS_TOOLS" = "$SH_TOOLS" ]; then
+  echo "  ✓ 도구 목록 일치 ($(echo "$TS_TOOLS" | wc -l | tr -d ' ')개)"
+else
+  echo "  ✗ 도구 목록 불일치"
+  echo "    .ts 래퍼만 존재 (.sh 원본 없음):"
+  comm -23 <(echo "$TS_TOOLS") <(echo "$SH_TOOLS") | sed 's/^/      /'
+  echo "    .sh만 존재 (.ts 래퍼 없음):"
+  comm -13 <(echo "$TS_TOOLS") <(echo "$SH_TOOLS") | sed 's/^/      /'
+  ERRORS=$((ERRORS + 1))
+fi
+
+# 3. .ts 래퍼가 실제로 .sh를 호출하는지 확인
+echo ""
+echo "[3/4] .ts 래퍼 → .sh 위임 확인"
+for TS_FILE in "$TARGET/.opencode/tools/"*.ts; do
+  BASENAME=$(basename "$TS_FILE" .ts)
+  if grep -q "scripts/tools/${BASENAME}.sh" "$TS_FILE" 2>/dev/null; then
+    echo "  ✓ $BASENAME.ts → scripts/tools/$BASENAME.sh"
+  else
+    echo "  ✗ $BASENAME.ts 가 scripts/tools/$BASENAME.sh 를 호출하지 않음"
+    ERRORS=$((ERRORS + 1))
+  fi
+done
+
+# 4. opencode.json agent 키 vs .opencode/agents/ 파일 비교
+echo ""
+echo "[4/4] opencode.json 에이전트 등록 확인"
+if [ -f "$TARGET/.opencode/opencode.json" ]; then
+  JSON_AGENTS=$(node -e "
+    const cfg = JSON.parse(require('fs').readFileSync('$TARGET/.opencode/opencode.json','utf8'));
+    console.log(Object.keys(cfg.agent || {}).sort().join('\n'));
+  " 2>/dev/null || echo "")
+  FILE_AGENTS=$(ls "$TARGET/.opencode/agents/" 2>/dev/null | sed 's/\.md$//' | sort)
+
+  if [ "$JSON_AGENTS" = "$FILE_AGENTS" ]; then
+    echo "  ✓ opencode.json agent 키 = agents/ 파일 목록"
+  else
+    echo "  ✗ 불일치"
+    echo "    JSON에만 등록:"
+    comm -23 <(echo "$JSON_AGENTS") <(echo "$FILE_AGENTS") | sed 's/^/      /'
+    echo "    파일만 존재:"
+    comm -13 <(echo "$JSON_AGENTS") <(echo "$FILE_AGENTS") | sed 's/^/      /'
+    ERRORS=$((ERRORS + 1))
+  fi
+else
+  echo "  - opencode.json 없음 (단일 하네스 프로젝트)"
+fi
+
+# 결과
+echo ""
+echo "========================"
+if [ "$ERRORS" -eq 0 ]; then
+  echo "결과: 동기화 정상"
+else
+  echo "결과: $ERRORS 건의 불일치 발견"
+fi
+exit "$ERRORS"
