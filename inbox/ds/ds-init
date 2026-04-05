@@ -2,21 +2,67 @@
 set -euo pipefail
 
 # 디자인 시스템 프로젝트 생성 스크립트
-# 사용법: ./ds-init <프로젝트명>
-# 예시:  ./ds-init kakao-mobile
+# 사용법: ./ds-init <프로젝트명> [--harness opencode|claude-code]
+# 예시:  ./ds-init kakao-mobile --harness claude-code
+#        ./ds-init toss                    # 인터랙티브 선택
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TEMPLATE_DIR="$SCRIPT_DIR/template"
 PROJECTS_DIR="$SCRIPT_DIR/projects"
 
-# 인수 검증
-if [ $# -lt 1 ]; then
-  echo "사용법: $0 <프로젝트명>"
-  echo "예시:  $0 kakao-mobile"
+# --- 인수 파싱 ---
+HARNESS=""
+PROJECT_NAME=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --harness)
+      HARNESS="$2"
+      shift 2
+      ;;
+    -*)
+      echo "오류: 알 수 없는 옵션: $1"
+      echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code]"
+      exit 1
+      ;;
+    *)
+      PROJECT_NAME="$1"
+      shift
+      ;;
+  esac
+done
+
+# 프로젝트명 검증
+if [ -z "$PROJECT_NAME" ]; then
+  echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code]"
+  echo ""
+  echo "예시:"
+  echo "  $0 kakao-mobile --harness opencode"
+  echo "  $0 toss --harness claude-code"
+  echo "  $0 naver-cloud              # 인터랙티브 선택"
   exit 1
 fi
 
-PROJECT_NAME="$1"
+# 인터랙티브 하네스 선택
+if [ -z "$HARNESS" ]; then
+  echo "하네스를 선택하세요:"
+  echo "  1) opencode"
+  echo "  2) claude-code"
+  echo ""
+  read -rp "선택 (1/2): " choice
+  case "$choice" in
+    1) HARNESS="opencode" ;;
+    2) HARNESS="claude-code" ;;
+    *) echo "오류: 잘못된 선택입니다. 1 또는 2를 입력하세요."; exit 1 ;;
+  esac
+fi
+
+# 하네스 검증
+if [[ "$HARNESS" != "opencode" && "$HARNESS" != "claude-code" ]]; then
+  echo "오류: 하네스는 'opencode' 또는 'claude-code'만 가능합니다."
+  exit 1
+fi
+
+TEMPLATE_DIR="$SCRIPT_DIR/templates/$HARNESS"
 PROJECT_DIR="$PROJECTS_DIR/$PROJECT_NAME"
 
 # 중복 검사
@@ -28,41 +74,78 @@ fi
 
 # 템플릿 존재 확인
 if [ ! -d "$TEMPLATE_DIR" ]; then
-  echo "오류: 템플릿 디렉토리를 찾을 수 없습니다."
+  echo "오류: 템플릿 '$HARNESS'을(를) 찾을 수 없습니다."
   echo "경로: $TEMPLATE_DIR"
   exit 1
 fi
 
-echo "=== 디자인 시스템 프로젝트 생성: $PROJECT_NAME ==="
+echo "=== 디자인 시스템 프로젝트 생성 ==="
+echo "  프로젝트: $PROJECT_NAME"
+echo "  하네스:   $HARNESS"
 echo ""
 
 # 프로젝트 디렉토리 생성
 mkdir -p "$PROJECT_DIR"
 
-# 템플릿 복사 (.opencode/)
-echo "[1/4] 템플릿 복사 중..."
-cp -R "$TEMPLATE_DIR/.opencode" "$PROJECT_DIR/.opencode"
+# --- 공통: docs/, packages/ 디렉토리 생성 ---
+create_docs_structure() {
+  mkdir -p "$PROJECT_DIR/docs"/{audit,charter,tokens,brand,components,a11y,visual-spec,portal,governance,gate-reviews}
+  mkdir -p "$PROJECT_DIR/packages"/{tokens,components}
+}
 
-# docs/, packages/ 디렉토리 생성
-echo "[2/4] 디렉토리 구조 생성 중..."
-mkdir -p "$PROJECT_DIR/docs"/{audit,charter,tokens,brand,components,a11y,visual-spec,portal,governance,gate-reviews}
-mkdir -p "$PROJECT_DIR/packages"/{tokens,components}
+# --- 하네스별 스캐폴딩 ---
+if [ "$HARNESS" = "opencode" ]; then
+  echo "[1/4] 템플릿 복사 중..."
+  cp -R "$TEMPLATE_DIR/.opencode" "$PROJECT_DIR/.opencode"
 
-# 프로젝트별 README 생성
-echo "[3/4] README 생성 중..."
-sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
+  echo "[2/4] 디렉토리 구조 생성 중..."
+  create_docs_structure
 
-# 완료 메시지
-echo "[4/4] 완료!"
+  echo "[3/4] README 생성 중..."
+  sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
+
+  echo "[4/4] 완료!"
+  echo ""
+  echo "실행 방법:"
+  echo "  cd $PROJECT_DIR"
+  echo "  opencode run ds-build"
+  echo ""
+  echo "개별 작업:"
+  echo "  opencode run ds-audit        # 현황 감사"
+  echo "  opencode run ds-tokens       # 토큰 정의"
+  echo "  opencode run ds-components   # 컴포넌트 설계→구현"
+  echo "  opencode run ds-release      # 배포 준비"
+
+elif [ "$HARNESS" = "claude-code" ]; then
+  echo "[1/6] CLAUDE.md 생성 중..."
+  sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/CLAUDE.md" > "$PROJECT_DIR/CLAUDE.md"
+
+  echo "[2/6] .claude/ 디렉토리 복사 중..."
+  cp -R "$TEMPLATE_DIR/.claude" "$PROJECT_DIR/.claude"
+
+  echo "[3/6] scripts/tools/ 복사 중..."
+  cp -R "$TEMPLATE_DIR/scripts" "$PROJECT_DIR/scripts"
+  chmod +x "$PROJECT_DIR/scripts/tools/"*.sh
+
+  echo "[4/6] 디렉토리 구조 생성 중..."
+  create_docs_structure
+
+  echo "[5/6] README 생성 중..."
+  sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
+
+  echo "[6/6] 완료!"
+  echo ""
+  echo "실행 방법:"
+  echo "  cd $PROJECT_DIR"
+  echo "  claude"
+  echo ""
+  echo "슬래시 커맨드:"
+  echo "  /ds-build          # 전체 파이프라인"
+  echo "  /ds-audit          # 현황 감사"
+  echo "  /ds-tokens         # 토큰 정의"
+  echo "  /ds-components     # 컴포넌트 설계→구현"
+  echo "  /ds-release        # 배포 준비"
+fi
+
 echo ""
-echo "프로젝트 생성 완료: $PROJECT_DIR"
-echo ""
-echo "실행 방법:"
-echo "  cd $PROJECT_DIR"
-echo "  opencode run ds-build"
-echo ""
-echo "개별 작업:"
-echo "  opencode run ds-audit        # 현황 감사"
-echo "  opencode run ds-tokens       # 토큰 정의"
-echo "  opencode run ds-components   # 컴포넌트 설계→구현"
-echo "  opencode run ds-release      # 배포 준비"
+echo "프로젝트 경로: $PROJECT_DIR"

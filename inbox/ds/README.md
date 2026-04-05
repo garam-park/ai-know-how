@@ -1,6 +1,8 @@
 # 디자인 시스템 AI 하네스
 
-OpenCode 기반 멀티 에이전트 오케스트레이션으로 디자인 시스템 구축 프로세스를 자동화한다.
+멀티 에이전트 오케스트레이션으로 디자인 시스템 구축 프로세스를 자동화한다.
+
+**OpenCode** 또는 **Claude Code** 중 선택하여 프로젝트를 생성할 수 있다.
 
 **Code-First**를 기본으로 하며, 고객 요청 시 **Penpot 시안을 On-Demand로 생성**한다. 여러 디자인 시스템을 **동시에** 진행할 수 있다.
 
@@ -33,27 +35,24 @@ Phase 1: Discovery  →  Phase 2: Foundation  →  Phase 3: Build  →  Phase 4:
 ```
 inbox/ds/
 ├── README.md                         # 이 파일
-├── ds-init                           # 프로젝트 생성 스크립트
-├── template/                         # 공통 템플릿 (에이전트, 스킬, 도구)
-│   ├── .opencode/
-│   │   ├── opencode.json             # 프로젝트 설정 템플릿
-│   │   ├── agents/                   # 12개 에이전트 정의
-│   │   ├── skills/
-│   │   │   └── design-system-build/
-│   │   │       └── SKILL.md          # 파이프라인 워크플로 + 승인 기준
-│   │   └── tools/                    # 6개 커스텀 도구
-│   └── _README.md                    # 프로젝트별 README 템플릿
-└── projects/                         # 실제 디자인 시스템 프로젝트들
-    ├── kakao-mobile/                 # 카카오 모바일 디자인 시스템
-    │   ├── README.md
-    │   ├── .opencode/
-    │   ├── docs/
-    │   └── packages/
-    └── toss/                         # 토스 디자인 시스템
-        ├── README.md
-        ├── .opencode/
-        ├── docs/
-        └── packages/
+├── ds-init                           # 프로젝트 생성 스크립트 (하네스 선택)
+├── templates/
+│   ├── opencode/                     # OpenCode 템플릿
+│   │   ├── .opencode/
+│   │   │   ├── opencode.json
+│   │   │   ├── agents/               # 12개 에이전트
+│   │   │   ├── skills/               # 파이프라인 워크플로
+│   │   │   └── tools/                # 6개 커스텀 도구 (.ts)
+│   │   └── _README.md
+│   └── claude-code/                  # Claude Code 템플릿
+│       ├── CLAUDE.md                 # 프로젝트 지침 + 레지스트리
+│       ├── .claude/
+│       │   ├── settings.json
+│       │   ├── commands/             # 5개 슬래시 커맨드
+│       │   └── agents/              # 12개 에이전트
+│       ├── scripts/tools/            # 6개 도구 스크립트 (.sh)
+│       └── _README.md
+└── projects/                         # 생성된 프로젝트들
 ```
 
 ---
@@ -63,42 +62,52 @@ inbox/ds/
 ### 1. 새 프로젝트 생성
 
 ```bash
+# 하네스 지정
+./ds-init <프로젝트명> --harness opencode
+./ds-init <프로젝트명> --harness claude-code
+
+# 인터랙티브 선택 (플래그 생략 시)
 ./ds-init <프로젝트명>
 ```
 
 예시:
 
 ```bash
-./ds-init kakao-mobile
-./ds-init toss
-./ds-init naver-cloud
+./ds-init kakao-mobile --harness opencode
+./ds-init toss --harness claude-code
+./ds-init naver-cloud                      # 인터랙티브 선택
 ```
 
 각 프로젝트는 완전히 격리된 환경에서 동작한다.
 
 ### 2. 프로젝트 실행
 
-```bash
-# 카카오 모바일 DS 실행
-cd projects/kakao-mobile && opencode run ds-build
+#### OpenCode
 
-# 토스 DS 실행 (별도 터미널에서)
-cd projects/toss && opencode run ds-build
+```bash
+cd projects/kakao-mobile && opencode run ds-build
+```
+
+#### Claude Code
+
+```bash
+cd projects/toss && claude
+# 세션에서: /ds-build
 ```
 
 ### 3. 동시 실행
 
-각 프로젝트 디렉토리에서 별도 터미널로 실행하면 충돌 없이 병렬 진행한다.
+각 프로젝트 디렉토리에서 별도 터미널로 실행하면 충돌 없이 병렬 진행한다. 하네스 혼용도 가능하다.
 
 ```bash
-# 터미널 1
+# 터미널 1 (OpenCode)
 cd inbox/ds/projects/kakao-mobile && opencode
 
-# 터미널 2
-cd inbox/ds/projects/toss && opencode
+# 터미널 2 (Claude Code)
+cd inbox/ds/projects/toss && claude
 
 # 터미널 3
-cd inbox/ds/projects/naver-cloud && opencode
+cd inbox/ds/projects/naver-cloud && claude
 ```
 
 ---
@@ -107,13 +116,13 @@ cd inbox/ds/projects/naver-cloud && opencode
 
 각 프로젝트 디렉토리에서 실행한다.
 
-| 커맨드          | 설명                                                                  | 대상 에이전트    |
-| --------------- | --------------------------------------------------------------------- | ---------------- |
-| `ds-build`      | 전체 파이프라인 실행 (감사 → 기획 → 토큰 → 설계 → 구현 → 배포 → 운영) | ds-orchestrator  |
-| `ds-audit`      | 기존 UI 현황 감사, 중복·불일치 수치화                                 | auditor          |
-| `ds-tokens`     | 디자인 토큰 3계층 정의 (Primitive → Semantic → Component)             | token-engineer   |
-| `ds-components` | Atomic Design 설계 → a11y 검증 → 코드 구현 → Storybook 문서화         | ui-architect     |
-| `ds-release`    | SemVer 버전 관리, CI/CD, 시각 회귀 테스트, npm 배포 준비              | release-engineer |
+| 커맨드        | OpenCode                       | Claude Code      | 설명               | 대상 에이전트    |
+| ------------- | ------------------------------ | ---------------- | ------------------ | ---------------- |
+| ds-build      | `opencode run ds-build`        | `/ds-build`      | 전체 파이프라인     | ds-orchestrator  |
+| ds-audit      | `opencode run ds-audit`        | `/ds-audit`      | UI 현황 감사       | auditor          |
+| ds-tokens     | `opencode run ds-tokens`       | `/ds-tokens`     | 토큰 3계층 정의    | token-engineer   |
+| ds-components | `opencode run ds-components`   | `/ds-components` | 컴포넌트 설계→구현 | ui-architect     |
+| ds-release    | `opencode run ds-release`      | `/ds-release`    | 배포 준비          | release-engineer |
 
 ---
 
