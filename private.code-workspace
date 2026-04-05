@@ -2,28 +2,32 @@
   "folders": [
     {
       "name": "🏠 Home",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "📂 Projects",
-      "path": "./PARA/01.projects"
+      "path": "./PARA/01.projects",
+    },
+    {
+      "name": "📂 Workspaces",
+      "path": "../workspaces",
     },
     {
       "name": "📂 Areas",
-      "path": "./PARA/02.areas"
+      "path": "./PARA/02.areas",
     },
     {
       "name": "📂 Resources",
-      "path": "./PARA/03.resources"
+      "path": "./PARA/03.resources",
     },
     {
       "name": "📝 Tasks",
-      "path": "./tasks"
+      "path": "./tasks",
     },
     {
       "name": "📥 Inbox",
-      "path": "./inbox"
-    }
+      "path": "./inbox",
+    },
   ],
   "settings": {
     "files.exclude": {
