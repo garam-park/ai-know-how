@@ -17,6 +17,135 @@ Phase 1: Discovery  →  Phase 2: Foundation  →  Phase 3: Build  →  Phase 4:
    (감사·기획)           (토큰·브랜드)           (설계·검증)          (구현·배포)          (운영·거버넌스)
 ```
 
+### 전체 파이프라인 흐름도
+
+```mermaid
+flowchart LR
+    subgraph P1["Phase 1: Discovery"]
+        direction TB
+        A1["🔍 auditor<br/>UI 현황 감사"]
+        A2["📋 planner<br/>Charter · MVP · Roadmap"]
+        A1 --> A2
+    end
+
+    G1{{"⛩ Gate 1<br/>인벤토리 100%<br/>Charter 필수 요소"}}
+
+    subgraph P2["Phase 2: Foundation"]
+        direction TB
+        B1["🎨 token-engineer<br/>토큰 3계층 정의"]
+        B2["🖌 brand-designer<br/>색상·타이포·모션"]
+        B1 --> B2
+    end
+
+    G2{{"⛩ Gate 2<br/>토큰 무결성<br/>Style Dictionary 빌드<br/>색상 대비 AA"}}
+
+    subgraph P3["Phase 3: Build"]
+        direction TB
+        C1["🧩 ui-architect<br/>Atomic Design Spec"]
+        C2["♿ a11y-engineer<br/>WCAG 2.1 검증"]
+        C3["📸 visual-archivist<br/>Storybook 시각 Spec"]
+        C1 --> C2 --> C3
+    end
+
+    G3{{"⛩ Gate 3<br/>Spec 완성도<br/>WCAG AA 통과<br/>Storybook 전체 조합"}}
+
+    subgraph P4["Phase 4: Ship"]
+        direction TB
+        D1["⚙️ component-developer<br/>React/Vue 구현"]
+        D2["📖 doc-engineer<br/>Storybook · 포털"]
+        D3["🚀 release-engineer<br/>SemVer · CI/CD"]
+        D1 --> D2 --> D3
+    end
+
+    G4{{"⛩ Gate 4<br/>테스트 100%<br/>시각 회귀 통과<br/>SemVer 준수"}}
+
+    subgraph P5["Phase 5: Evolve"]
+        direction TB
+        E1["🏛 governance-manager<br/>RFC · 채택률 · Health Check"]
+    end
+
+    G5{{"⛩ Gate 5<br/>채택률 70%↑<br/>P0/P1 이슈 0건<br/>버전 편차 0"}}
+
+    P1 --> G1 --> P2 --> G2 --> P3 --> G3 --> P4 --> G4 --> P5 --> G5
+
+    style P1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    style P2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    style P3 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    style P4 fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c
+    style P5 fill:#fce4ec,stroke:#c62828,stroke-width:2px,color:#b71c1c
+
+    style G1 fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+    style G2 fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+    style G3 fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+    style G4 fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+    style G5 fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+```
+
+### 승인 게이트 상세 흐름
+
+```mermaid
+flowchart TD
+    PHASE["Phase 완료"] --> AUTO["자동 검증<br/>(커버리지·빌드·테스트)"]
+    AUTO -->|통과| HUMAN["인간 승인<br/>(스테이크홀더 검토)"]
+    AUTO -->|실패| BP["Back Propagation<br/>해당 Step으로 역행"]
+
+    HUMAN -->|approved| NEXT(["✅ 다음 Phase 진행"])
+    HUMAN -->|conditional| COND["⚠️ 이슈 티켓 생성<br/>병행 수정 후 진행"]
+    HUMAN -->|rejected| REJ["❌ 재검토 필요"]
+    REJ -->|1~2회| BP
+    REJ -->|3회 연속| STOP(["🛑 작업 중단<br/>인간 개입 필요"])
+
+    BP --> FIX["에이전트 자동 수정"] --> PHASE
+
+    style PHASE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style AUTO fill:#e8eaf6,stroke:#283593,stroke-width:2px
+    style HUMAN fill:#ffeb3b,stroke:#f57f17,stroke-width:3px,color:#000
+    style NEXT fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style COND fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style REJ fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style STOP fill:#ef5350,stroke:#b71c1c,stroke-width:2px,color:#fff
+    style BP fill:#ede7f6,stroke:#4527a0,stroke-width:2px
+    style FIX fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+### Back Propagation 역행 경로
+
+```mermaid
+flowchart RL
+    subgraph TRIGGERS["트리거"]
+        T1["브랜드 방향 변경"]
+        T2["a11y 구조 문제"]
+        T3["시각 회귀 실패"]
+        T4["RFC 승인"]
+        T5["토큰 확장 요청"]
+    end
+
+    subgraph TARGETS["역행 대상"]
+        S3["Step③ 토큰<br/>token-engineer"]
+        S5["Step⑤ Spec<br/>ui-architect"]
+        S7["Step⑦ Visual Spec<br/>visual-archivist"]
+        S8["Step⑧ 코드<br/>component-developer"]
+    end
+
+    T1 -->|토큰 재정의| S3
+    T2 -->|Spec 재설계| S5
+    T3 -->|코드 수정| S8
+    T4 -->|컴포넌트 추가 설계| S5
+    T5 -->|토큰 명세서 업데이트| S3
+
+    style TRIGGERS fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style TARGETS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style T1 fill:#ef9a9a,stroke:#c62828
+    style T2 fill:#ef9a9a,stroke:#c62828
+    style T3 fill:#ef9a9a,stroke:#c62828
+    style T4 fill:#ef9a9a,stroke:#c62828
+    style T5 fill:#ef9a9a,stroke:#c62828
+    style S3 fill:#a5d6a7,stroke:#2e7d32
+    style S5 fill:#a5d6a7,stroke:#2e7d32
+    style S7 fill:#a5d6a7,stroke:#2e7d32
+    style S8 fill:#a5d6a7,stroke:#2e7d32
+```
+
 ### 아키텍처: Code-First + Penpot On-Demand
 
 ```
