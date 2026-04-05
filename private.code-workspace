@@ -1,0 +1,28 @@
+{
+  "folders": [
+    {
+      "name": "🔒 Private",
+      "path": "."
+    },
+    {
+      "name": "📂 PARA",
+      "path": "./PARA"
+    },
+    {
+      "name": "📥 Inbox",
+      "path": "./inbox"
+    },
+    {
+      "name": "📝 Tasks",
+      "path": "./tasks"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.git": true,
+      "**/dist": true,
+      "**/__pycache__": true
+    }
+  }
+}
