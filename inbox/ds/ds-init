@@ -2,9 +2,10 @@
 set -euo pipefail
 
 # 디자인 시스템 프로젝트 생성 스크립트
-# 사용법: ./ds-init <프로젝트명> [--harness opencode|claude-code]
+# 사용법: ./ds-init <프로젝트명> [--harness opencode|claude-code|both]
 # 예시:  ./ds-init kakao-mobile --harness claude-code
-#        ./ds-init toss                    # 인터랙티브 선택
+#        ./ds-init toss --harness both
+#        ./ds-init naver-cloud                    # 인터랙티브 선택
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECTS_DIR="$SCRIPT_DIR/projects"
@@ -21,7 +22,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -*)
       echo "오류: 알 수 없는 옵션: $1"
-      echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code]"
+      echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code|both]"
       exit 1
       ;;
     *)
@@ -33,12 +34,13 @@ done
 
 # 프로젝트명 검증
 if [ -z "$PROJECT_NAME" ]; then
-  echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code]"
+  echo "사용법: $0 <프로젝트명> [--harness opencode|claude-code|both]"
   echo ""
   echo "예시:"
   echo "  $0 kakao-mobile --harness opencode"
   echo "  $0 toss --harness claude-code"
-  echo "  $0 naver-cloud              # 인터랙티브 선택"
+  echo "  $0 naver-cloud --harness both"
+  echo "  $0 line                         # 인터랙티브 선택"
   exit 1
 fi
 
@@ -47,18 +49,20 @@ if [ -z "$HARNESS" ]; then
   echo "하네스를 선택하세요:"
   echo "  1) opencode"
   echo "  2) claude-code"
+  echo "  3) both (OpenCode + Claude Code 동시 사용)"
   echo ""
-  read -rp "선택 (1/2): " choice
+  read -rp "선택 (1/2/3): " choice
   case "$choice" in
     1) HARNESS="opencode" ;;
     2) HARNESS="claude-code" ;;
-    *) echo "오류: 잘못된 선택입니다. 1 또는 2를 입력하세요."; exit 1 ;;
+    3) HARNESS="both" ;;
+    *) echo "오류: 잘못된 선택입니다. 1, 2, 3 중 하나를 입력하세요."; exit 1 ;;
   esac
 fi
 
 # 하네스 검증
-if [[ "$HARNESS" != "opencode" && "$HARNESS" != "claude-code" ]]; then
-  echo "오류: 하네스는 'opencode' 또는 'claude-code'만 가능합니다."
+if [[ "$HARNESS" != "opencode" && "$HARNESS" != "claude-code" && "$HARNESS" != "both" ]]; then
+  echo "오류: 하네스는 'opencode', 'claude-code', 'both' 중 하나만 가능합니다."
   exit 1
 fi
 
@@ -145,6 +149,45 @@ elif [ "$HARNESS" = "claude-code" ]; then
   echo "  /ds-tokens         # 토큰 정의"
   echo "  /ds-components     # 컴포넌트 설계→구현"
   echo "  /ds-release        # 배포 준비"
+
+elif [ "$HARNESS" = "both" ]; then
+  echo "[1/8] CLAUDE.md 생성 중..."
+  sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/CLAUDE.md" > "$PROJECT_DIR/CLAUDE.md"
+
+  echo "[2/8] .claude/ 디렉토리 복사 중..."
+  cp -R "$TEMPLATE_DIR/.claude" "$PROJECT_DIR/.claude"
+
+  echo "[3/8] .opencode/ 디렉토리 복사 중..."
+  cp -R "$TEMPLATE_DIR/.opencode" "$PROJECT_DIR/.opencode"
+
+  echo "[4/8] scripts/tools/ 복사 중..."
+  cp -R "$TEMPLATE_DIR/scripts" "$PROJECT_DIR/scripts"
+  chmod +x "$PROJECT_DIR/scripts/tools/"*.sh
+
+  echo "[5/8] 디렉토리 구조 생성 중..."
+  create_docs_structure
+
+  echo "[6/8] README 생성 중..."
+  sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
+
+  echo "[7/8] .gitignore 생성 중..."
+  # .opencode와 .claude 모두 추적되도록 별도 설정 없음
+
+  echo "[8/8] 완료!"
+  echo ""
+  echo "실행 방법 (둘 중 택1 또는 병행):"
+  echo ""
+  echo "  [OpenCode]"
+  echo "  cd $PROJECT_DIR"
+  echo "  opencode run ds-build"
+  echo ""
+  echo "  [Claude Code]"
+  echo "  cd $PROJECT_DIR"
+  echo "  claude"
+  echo "  /ds-build"
+  echo ""
+  echo "두 하네스가 같은 docs/, packages/를 공유하므로"
+  echo "어느 쪽으로 실행해도 산출물이 동일 위치에 생성됩니다."
 fi
 
 echo ""

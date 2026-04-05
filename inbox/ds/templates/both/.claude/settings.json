@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(scripts/tools/*)",
+      "Read",
+      "Write(docs/**)",
+      "Write(packages/**)",
+      "Write(CHANGELOG.md)",
+      "Write(.github/**)"
+    ]
+  }
+}

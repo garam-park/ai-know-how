@@ -2,7 +2,7 @@
 
 멀티 에이전트 오케스트레이션으로 디자인 시스템 구축 프로세스를 자동화한다.
 
-**OpenCode** 또는 **Claude Code** 중 선택하여 프로젝트를 생성할 수 있다.
+**OpenCode**, **Claude Code**, 또는 **Both**(동시 사용) 중 선택하여 프로젝트를 생성할 수 있다.
 
 **Code-First**를 기본으로 하며, 고객 요청 시 **Penpot 시안을 On-Demand로 생성**한다. 여러 디자인 시스템을 **동시에** 진행할 수 있다.
 
@@ -173,12 +173,18 @@ inbox/ds/
 │   │   │   ├── skills/               # 파이프라인 워크플로
 │   │   │   └── tools/                # 6개 커스텀 도구 (.ts)
 │   │   └── _README.md
-│   └── claude-code/                  # Claude Code 템플릿
-│       ├── CLAUDE.md                 # 프로젝트 지침 + 레지스트리
-│       ├── .claude/
-│       │   ├── settings.json
-│       │   ├── commands/             # 5개 슬래시 커맨드
-│       │   └── agents/              # 12개 에이전트
+│   ├── claude-code/                  # Claude Code 템플릿
+│   │   ├── CLAUDE.md                 # 프로젝트 지침 + 레지스트리
+│   │   ├── .claude/
+│   │   │   ├── settings.json
+│   │   │   ├── commands/             # 5개 슬래시 커맨드
+│   │   │   └── agents/              # 12개 에이전트
+│   │   ├── scripts/tools/            # 6개 도구 스크립트 (.sh)
+│   │   └── _README.md
+│   └── both/                         # Dual-Harness 템플릿
+│       ├── .opencode/                # OpenCode 설정 일체
+│       ├── .claude/                  # Claude Code 설정 일체
+│       ├── CLAUDE.md
 │       ├── scripts/tools/            # 6개 도구 스크립트 (.sh)
 │       └── _README.md
 └── projects/                         # 생성된 프로젝트들
@@ -194,6 +200,7 @@ inbox/ds/
 # 하네스 지정
 ./ds-init <프로젝트명> --harness opencode
 ./ds-init <프로젝트명> --harness claude-code
+./ds-init <프로젝트명> --harness both
 
 # 인터랙티브 선택 (플래그 생략 시)
 ./ds-init <프로젝트명>
@@ -204,7 +211,8 @@ inbox/ds/
 ```bash
 ./ds-init kakao-mobile --harness opencode
 ./ds-init toss --harness claude-code
-./ds-init naver-cloud                      # 인터랙티브 선택
+./ds-init naver-cloud --harness both       # 두 하네스 동시 사용
+./ds-init line                             # 인터랙티브 선택
 ```
 
 각 프로젝트는 완전히 격리된 환경에서 동작한다.
@@ -224,6 +232,21 @@ cd projects/toss && claude
 # 세션에서: /ds-build
 ```
 
+#### Both (Dual-Harness)
+
+같은 프로젝트에서 두 하네스를 선택적으로 사용한다. 산출물(docs/, packages/)은 공유된다.
+
+```bash
+cd projects/naver-cloud
+
+# OpenCode로 실행
+opencode run ds-build
+
+# 또는 Claude Code로 실행
+claude
+/ds-build
+```
+
 ### 3. 동시 실행
 
 각 프로젝트 디렉토리에서 별도 터미널로 실행하면 충돌 없이 병렬 진행한다. 하네스 혼용도 가능하다.
@@ -235,7 +258,7 @@ cd inbox/ds/projects/kakao-mobile && opencode
 # 터미널 2 (Claude Code)
 cd inbox/ds/projects/toss && claude
 
-# 터미널 3
+# 터미널 3 (Dual-Harness — 어느 하네스든 사용 가능)
 cd inbox/ds/projects/naver-cloud && claude
 ```
 
