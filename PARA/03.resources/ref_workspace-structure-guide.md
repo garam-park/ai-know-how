@@ -432,6 +432,8 @@ claude --add-dir PARA/Projects/build_poc-iot-sensor/poc-iot-sensor
 
 ### project workspace CLAUDE.md 예시
 
+> 템플릿 정의는 `.claude/rules/rule_para-convention.md` 참조
+
 ```markdown
 # jeju-smartcity
 
