@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate 3: Build Review — {{PROJECT_NAME}}</title>
+<style>{{SHARED_CSS}}</style>
+</head>
+<body>
+
+<header class="review-header">
+  <h1>Gate 3: Build Review</h1>
+  <p>컴포넌트 Spec · 접근성 · 시각 Spec 검토</p>
+  <div class="review-meta">
+    <span class="badge badge-attempt">Attempt {{ATTEMPT}} / 3</span>
+    <span class="badge badge-date">{{DATE}}</span>
+    <span>프로젝트: {{PROJECT_NAME}}</span>
+  </div>
+  <div class="version-nav">{{VERSION_NAV}}</div>
+</header>
+
+<!-- 검증 항목 -->
+<section class="review-section">
+  <h2>Gate 3 검증 항목</h2>
+  <table class="review-table">
+    <thead><tr><th>항목</th><th>기준</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>Spec 완성도</td><td>Anatomy, Props, 6-State, Do/Don't 포함</td><td>—</td></tr>
+      <tr><td>WCAG 2.1 AA</td><td>키보드, ARIA, 포커스, 대비 통과</td><td>—</td></tr>
+      <tr><td>Storybook 전체 조합</td><td>모든 상태×사이즈 스토리 존재</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 컴포넌트 상태 매트릭스 -->
+<section class="review-section">
+  <h2>Component State Matrix</h2>
+  <div id="state-matrix"></div>
+</section>
+
+<!-- Props 테이블 -->
+<section class="review-section">
+  <h2>Props API</h2>
+  <div id="props-tables"></div>
+</section>
+
+<!-- Do / Don't -->
+<section class="review-section">
+  <h2>Do / Don't</h2>
+  <div id="do-dont"></div>
+</section>
+
+<!-- 접근성 리포트 -->
+<section class="review-section">
+  <h2>접근성 검증 결과</h2>
+  <div id="a11y-report"></div>
+</section>
+
+<!-- 스냅샷 갤러리 -->
+<section class="review-section">
+  <h2>Visual Spec 스냅샷</h2>
+  <div id="snapshots" class="swatch-grid"></div>
+</section>
+
+<script>
+const DATA = {{GATE_DATA_JSON}};
+</script>
+
+<script>
+const STATES = ['default','hover','focus','active','disabled','error'];
+
+// 상태 매트릭스
+function renderStateMatrix() {
+  const el = document.getElementById('state-matrix');
+  const components = DATA.components || [];
+  if (!components.length) { el.innerHTML = '<p style="color:#757575">컴포넌트 데이터 없음</p>'; return; }
+
+  let html = '<table class="review-table"><thead><tr><th>컴포넌트</th>';
+  STATES.forEach(s => html += `<th>${s}</th>`);
+  html += '</tr></thead><tbody>';
+
+  components.forEach(comp => {
+    html += `<tr><td><strong>${comp.name}</strong></td>`;
+    STATES.forEach(state => {
+      const snapshot = comp.snapshots?.[state];
+      if (snapshot) {
+        html += `<td><img src="${snapshot}" alt="${comp.name} ${state}" style="max-width:120px;max-height:80px"></td>`;
+      } else {
+        const defined = comp.states?.includes(state);
+        html += `<td style="text-align:center;color:${defined ? '#2e7d32' : '#bdbdbd'}">${defined ? '●' : '○'}</td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// Props 테이블
+function renderProps() {
+  const el = document.getElementById('props-tables');
+  const components = DATA.components || [];
+  if (!components.length) { el.innerHTML = '<p style="color:#757575">Props 데이터 없음</p>'; return; }
+
+  el.innerHTML = components.filter(c => c.props?.length).map(comp => {
+    let html = `<h3>${comp.name}</h3><table class="review-table"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Required</th><th>설명</th></tr></thead><tbody>`;
+    comp.props.forEach(p => {
+      html += `<tr><td><code>${p.name}</code></td><td>${p.type||''}</td><td>${p.default||'—'}</td><td>${p.required ? '✓' : ''}</td><td>${p.description||''}</td></tr>`;
+    });
+    return html + '</tbody></table>';
+  }).join('');
+}
+
+// Do / Don't
+function renderDoDont() {
+  const el = document.getElementById('do-dont');
+  const items = DATA.doDont || [];
+  if (!items.length) { el.innerHTML = '<p style="color:#757575">Do/Don\'t 데이터 없음</p>'; return; }
+
+  el.innerHTML = items.map(item =>
+    `<div class="do-dont-row">
+      <div class="do-card">${item.do || ''}</div>
+      <div class="dont-card">${item.dont || ''}</div>
+    </div>`
+  ).join('');
+}
+
+// 접근성 리포트
+function renderA11y() {
+  const el = document.getElementById('a11y-report');
+  const a11y = DATA.a11y || {};
+  const checks = a11y.checks || [];
+  if (!checks.length) { el.innerHTML = '<p style="color:#757575">접근성 데이터 없음</p>'; return; }
+
+  let html = '<table class="review-table"><thead><tr><th>항목</th><th>결과</th><th>세부</th></tr></thead><tbody>';
+  checks.forEach(c => {
+    const color = c.pass ? '#2e7d32' : '#c62828';
+    html += `<tr><td>${c.rule||''}</td><td style="color:${color};font-weight:700">${c.pass ? 'PASS' : 'FAIL'}</td><td>${c.detail||''}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// 스냅샷 갤러리
+function renderSnapshots() {
+  const el = document.getElementById('snapshots');
+  const snaps = DATA.snapshots || [];
+  if (!snaps.length) { el.innerHTML = '<p style="color:#757575">스냅샷 없음 (Storybook 빌드 후 생성됨)</p>'; return; }
+
+  el.innerHTML = snaps.map(s =>
+    `<div class="swatch">
+      <img src="${s.path}" alt="${s.name}" style="width:100%">
+      <div class="swatch-info"><span class="swatch-name">${s.name}</span></div>
+    </div>`
+  ).join('');
+}
+
+renderStateMatrix();
+renderProps();
+renderDoDont();
+renderA11y();
+renderSnapshots();
+</script>
+</body>
+</html>

@@ -46,3 +46,7 @@ permission:
 - Charter 필수 요소 존재: 목적, 범위, 비범위, 성공 지표, 일정
 - MVP 범위 명확성: 포함/제외 항목 명시
 - 우선순위 컴포넌트 Top 5 정의
+
+## Gate 리뷰 HTML 생성
+
+산출물 완성 후 `bash scripts/tools/gate-review-gen.sh 1` 을 실행하여 시각적 리뷰 HTML을 생성한다.

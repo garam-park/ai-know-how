@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate 1: Discovery Review — {{PROJECT_NAME}}</title>
+<style>{{SHARED_CSS}}</style>
+</head>
+<body>
+
+<header class="review-header">
+  <h1>Gate 1: Discovery Review</h1>
+  <p>UI 현황 감사 · Charter · MVP 범위 시각 검토</p>
+  <div class="review-meta">
+    <span class="badge badge-attempt">Attempt {{ATTEMPT}} / 3</span>
+    <span class="badge badge-date">{{DATE}}</span>
+    <span>프로젝트: {{PROJECT_NAME}}</span>
+  </div>
+  <div class="version-nav">{{VERSION_NAV}}</div>
+</header>
+
+<!-- 검증 항목 -->
+<section class="review-section">
+  <h2>Gate 1 검증 항목</h2>
+  <table class="review-table">
+    <thead><tr><th>항목</th><th>기준</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>UI 인벤토리 커버리지</td><td>100% 수집 완료</td><td>—</td></tr>
+      <tr><td>Charter 필수 요소</td><td>목적, 범위, 성공지표, 타임라인 존재</td><td>—</td></tr>
+      <tr><td>MVP 범위 정의</td><td>포함/제외 컴포넌트 명시</td><td>—</td></tr>
+      <tr><td>Top 5 우선순위</td><td>정의됨</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- UI 인벤토리 -->
+<section class="review-section">
+  <h2>UI 인벤토리</h2>
+  <div id="inventory-table"></div>
+</section>
+
+<!-- 중복 분석 차트 -->
+<section class="review-section">
+  <h2>중복 분석</h2>
+  <div id="duplication-chart" class="bar-chart"></div>
+</section>
+
+<!-- 우선순위 매트릭스 -->
+<section class="review-section">
+  <h2>우선순위 컴포넌트 (Top 5)</h2>
+  <div id="priority-list"></div>
+</section>
+
+<!-- RACI 매트릭스 -->
+<section class="review-section">
+  <h2>RACI 매트릭스</h2>
+  <div id="raci-matrix"></div>
+</section>
+
+<script>
+const DATA = {{GATE_DATA_JSON}};
+</script>
+
+<script>
+// 인벤토리 테이블
+function renderInventory() {
+  const el = document.getElementById('inventory-table');
+  const items = DATA.inventory || [];
+  if (!items.length) { el.innerHTML = '<p style="color:#757575">인벤토리 데이터 없음</p>'; return; }
+
+  let html = '<table class="review-table"><thead><tr><th>컴포넌트</th><th>위치</th><th>변형 수</th><th>사용 빈도</th></tr></thead><tbody>';
+  items.forEach(item => {
+    html += `<tr><td>${item.name||''}</td><td>${item.location||''}</td><td>${item.variants||0}</td><td>${item.frequency||0}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// 중복 분석 바 차트
+function renderDuplication() {
+  const el = document.getElementById('duplication-chart');
+  const dup = DATA.duplication || {};
+  const entries = Object.entries(dup);
+  if (!entries.length) { el.innerHTML = '<p style="color:#757575">중복 분석 데이터 없음</p>'; return; }
+
+  const maxVal = Math.max(...entries.map(([,v]) => v), 1);
+  el.innerHTML = entries.map(([label, count]) => {
+    const pct = (count / maxVal * 100).toFixed(0);
+    return `<div class="bar-row">
+      <span class="bar-label">${label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%">${count}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// 우선순위
+function renderPriority() {
+  const el = document.getElementById('priority-list');
+  const items = DATA.priority || [];
+  if (!items.length) { el.innerHTML = '<p style="color:#757575">우선순위 데이터 없음</p>'; return; }
+
+  let html = '<table class="review-table"><thead><tr><th>#</th><th>컴포넌트</th><th>사유</th></tr></thead><tbody>';
+  items.forEach((item, i) => {
+    html += `<tr><td>${i+1}</td><td>${item.name||''}</td><td>${item.reason||''}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// RACI
+function renderRaci() {
+  const el = document.getElementById('raci-matrix');
+  const raci = DATA.raci || {};
+  const roles = Object.keys(raci);
+  if (!roles.length) { el.innerHTML = '<p style="color:#757575">RACI 데이터 없음</p>'; return; }
+
+  const tasks = [...new Set(roles.flatMap(r => Object.keys(raci[r])))];
+  const colorMap = { R: '#ef5350', A: '#66bb6a', C: '#42a5f5', I: '#ffd54f' };
+
+  let html = '<table class="review-table"><thead><tr><th></th>';
+  tasks.forEach(t => html += `<th>${t}</th>`);
+  html += '</tr></thead><tbody>';
+  roles.forEach(role => {
+    html += `<tr><td><strong>${role}</strong></td>`;
+    tasks.forEach(task => {
+      const val = raci[role]?.[task] || '';
+      const bg = colorMap[val] || 'transparent';
+      html += `<td style="background:${bg};color:#fff;text-align:center;font-weight:700">${val}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+renderInventory();
+renderDuplication();
+renderPriority();
+renderRaci();
+</script>
+</body>
+</html>

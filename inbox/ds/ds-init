@@ -151,29 +151,32 @@ elif [ "$HARNESS" = "claude-code" ]; then
   echo "  /ds-release        # 배포 준비"
 
 elif [ "$HARNESS" = "both" ]; then
-  echo "[1/8] CLAUDE.md 생성 중..."
+  echo "[1/9] CLAUDE.md 생성 중..."
   sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/CLAUDE.md" > "$PROJECT_DIR/CLAUDE.md"
 
-  echo "[2/8] .claude/ 디렉토리 복사 중..."
+  echo "[2/9] .claude/ 디렉토리 복사 중..."
   cp -R "$TEMPLATE_DIR/.claude" "$PROJECT_DIR/.claude"
 
-  echo "[3/8] .opencode/ 디렉토리 복사 중..."
+  echo "[3/9] .opencode/ 디렉토리 복사 중..."
   cp -R "$TEMPLATE_DIR/.opencode" "$PROJECT_DIR/.opencode"
 
-  echo "[4/8] scripts/tools/ 복사 중..."
+  echo "[4/9] scripts/ 복사 중 (tools + gate-templates)..."
   cp -R "$TEMPLATE_DIR/scripts" "$PROJECT_DIR/scripts"
   chmod +x "$PROJECT_DIR/scripts/tools/"*.sh
 
-  echo "[5/8] 디렉토리 구조 생성 중..."
+  echo "[5/9] 디렉토리 구조 생성 중..."
   create_docs_structure
 
-  echo "[6/8] README 생성 중..."
+  echo "[6/9] README 생성 중..."
   sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$TEMPLATE_DIR/_README.md" > "$PROJECT_DIR/README.md"
 
-  echo "[7/8] .gitignore 생성 중..."
+  echo "[7/9] gate-reviews 디렉토리 생성 중..."
+  mkdir -p "$PROJECT_DIR/docs/gate-reviews"
+
+  echo "[8/9] .gitignore 생성 중..."
   # .opencode와 .claude 모두 추적되도록 별도 설정 없음
 
-  echo "[8/8] 완료!"
+  echo "[9/9] 완료!"
   echo ""
   echo "실행 방법 (둘 중 택1 또는 병행):"
   echo ""

@@ -48,6 +48,7 @@ Phase 1: Discovery  →  Phase 2: Foundation  →  Phase 3: Build  →  Phase 4:
 | storybook-snapshot | `bash scripts/tools/storybook-snapshot.sh <url> <output> [components]` | Storybook 스크린샷 수집 |
 | penpot-on-demand | `bash scripts/tools/penpot-on-demand.sh <action> [options]` | Penpot 시안 On-Demand 생성 |
 | test-config | `bash scripts/tools/test-config.sh` | 테스트 설정값 JSON 출력 |
+| gate-review-gen | `bash scripts/tools/gate-review-gen.sh <gate-number> [--data <json>]` | Gate 시각적 리뷰 HTML 생성 (버전 자동 증가) |
 
 ## 승인 게이트
 

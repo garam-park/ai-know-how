@@ -66,9 +66,50 @@ for TS_FILE in "$TARGET/.opencode/tools/"*.ts; do
   fi
 done
 
-# 4. opencode.json agent 키 vs .opencode/agents/ 파일 비교
+# 4. gate-templates 존재 확인
 echo ""
-echo "[4/4] opencode.json 에이전트 등록 확인"
+echo "[4/5] Gate HTML 템플릿 확인"
+if [ -d "$TARGET/scripts/gate-templates" ]; then
+  EXPECTED_GATES=5
+  ACTUAL_GATES=$(ls "$TARGET/scripts/gate-templates/"gate-*-review.html 2>/dev/null | wc -l | tr -d ' ')
+  SHARED_CSS="$TARGET/scripts/gate-templates/_shared.css"
+  GEN_TOOL="$TARGET/scripts/tools/gate-review-gen.sh"
+  TS_WRAPPER="$TARGET/.opencode/tools/gate-review-gen.ts"
+
+  if [ "$ACTUAL_GATES" -eq "$EXPECTED_GATES" ]; then
+    echo "  ✓ Gate HTML 템플릿 ${ACTUAL_GATES}개"
+  else
+    echo "  ✗ Gate HTML 템플릿 ${ACTUAL_GATES}/${EXPECTED_GATES}개"
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  if [ -f "$SHARED_CSS" ]; then
+    echo "  ✓ _shared.css 존재"
+  else
+    echo "  ✗ _shared.css 없음"
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  if [ -f "$GEN_TOOL" ]; then
+    echo "  ✓ gate-review-gen.sh 존재"
+  else
+    echo "  ✗ gate-review-gen.sh 없음"
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  if [ -f "$TS_WRAPPER" ] && grep -q "gate-review-gen.sh" "$TS_WRAPPER" 2>/dev/null; then
+    echo "  ✓ gate-review-gen.ts → .sh 래퍼"
+  else
+    echo "  ✗ gate-review-gen.ts 래퍼 누락 또는 .sh 미호출"
+    ERRORS=$((ERRORS + 1))
+  fi
+else
+  echo "  - scripts/gate-templates/ 없음 (gate-review 미사용)"
+fi
+
+# 5. opencode.json agent 키 vs .opencode/agents/ 파일 비교
+echo ""
+echo "[5/5] opencode.json 에이전트 등록 확인"
 if [ -f "$TARGET/.opencode/opencode.json" ]; then
   JSON_AGENTS=$(node -e "
     const cfg = JSON.parse(require('fs').readFileSync('$TARGET/.opencode/opencode.json','utf8'));

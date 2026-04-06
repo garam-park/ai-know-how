@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate 2: Foundation Review — {{PROJECT_NAME}}</title>
+<style>{{SHARED_CSS}}</style>
+</head>
+<body>
+
+<header class="review-header">
+  <h1>Gate 2: Foundation Review</h1>
+  <p>토큰·브랜드 가이드라인 시각 검토</p>
+  <div class="review-meta">
+    <span class="badge badge-attempt">Attempt {{ATTEMPT}} / 3</span>
+    <span class="badge badge-date">{{DATE}}</span>
+    <span>프로젝트: {{PROJECT_NAME}}</span>
+  </div>
+  <div class="version-nav">{{VERSION_NAV}}</div>
+</header>
+
+<!-- 검증 항목 요약 -->
+<section class="review-section">
+  <h2>Gate 2 검증 항목</h2>
+  <table class="review-table">
+    <thead><tr><th>항목</th><th>기준</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>토큰 참조 무결성</td><td>순환 참조 없음, 3계층 구조</td><td id="check-integrity">—</td></tr>
+      <tr><td>Style Dictionary 빌드</td><td>CSS/SCSS/JS 출력 성공</td><td id="check-build">—</td></tr>
+      <tr><td>색상 대비 AA</td><td>텍스트 4.5:1, 대형텍스트 3:1</td><td id="check-contrast">—</td></tr>
+      <tr><td>다크모드 대응</td><td>Primitive 교체만으로 전환 가능</td><td id="check-darkmode">—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 1. Color Palette -->
+<section class="review-section">
+  <h2>Color Palette</h2>
+  <button class="theme-toggle" onclick="toggleDarkMode()">Light / Dark 전환</button>
+
+  <h3>Primitive Tokens</h3>
+  <div id="primitive-colors" class="swatch-grid"></div>
+
+  <h3>Semantic Tokens</h3>
+  <div id="semantic-colors" class="swatch-grid"></div>
+
+  <h3>Component Tokens</h3>
+  <div id="component-colors" class="swatch-grid"></div>
+</section>
+
+<!-- 2. Typography Scale -->
+<section class="review-section">
+  <h2>Typography Scale</h2>
+  <div id="type-scale"></div>
+</section>
+
+<!-- 3. Spacing Scale -->
+<section class="review-section">
+  <h2>Spacing Scale</h2>
+  <div id="spacing-scale"></div>
+</section>
+
+<!-- 4. Border Radius -->
+<section class="review-section">
+  <h2>Border Radius</h2>
+  <div id="radius-scale" class="radius-grid"></div>
+</section>
+
+<!-- 5. Motion Easing -->
+<section class="review-section">
+  <h2>Motion Easing</h2>
+  <div id="easing-demo" class="easing-demo"></div>
+</section>
+
+<!-- 데이터 주입 영역 -->
+<script>
+const TOKENS = {{TOKENS_JSON}};
+</script>
+
+<script>
+// --- 유틸리티 ---
+function luminance(hex) {
+  const rgb = hex.replace('#','').match(/.{2}/g).map(x => {
+    const c = parseInt(x, 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+function contrastRatio(hex1, hex2) {
+  const l1 = luminance(hex1), l2 = luminance(hex2);
+  const lighter = Math.max(l1, l2), darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function isLightColor(hex) {
+  return luminance(hex) > 0.5;
+}
+
+// --- 색상 팔레트 렌더링 ---
+function renderSwatches(containerId, colorObj) {
+  const container = document.getElementById(containerId);
+  if (!colorObj || typeof colorObj !== 'object') {
+    container.innerHTML = '<p style="color:#757575">데이터 없음</p>';
+    return;
+  }
+  container.innerHTML = '';
+  flattenTokens(colorObj, '').forEach(([name, value]) => {
+    if (typeof value !== 'string' || !value.startsWith('#')) return;
+    const ratio = contrastRatio(value, '#ffffff');
+    const passAA = ratio >= 4.5;
+    const textColor = isLightColor(value) ? '#212121' : '#ffffff';
+
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch';
+    swatch.innerHTML = `
+      <div class="swatch-color" style="background:${value}">
+        <span class="contrast-badge ${passAA ? 'contrast-pass' : 'contrast-fail'}">
+          ${ratio.toFixed(1)}:1 ${passAA ? 'AA' : 'FAIL'}
+        </span>
+      </div>
+      <div class="swatch-info">
+        <span class="swatch-name">${name}</span>
+        <span class="swatch-value">${value}</span>
+      </div>`;
+    container.appendChild(swatch);
+  });
+}
+
+function flattenTokens(obj, prefix) {
+  const result = [];
+  for (const [key, val] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (val && typeof val === 'object' && val.value !== undefined) {
+      result.push([path, val.value]);
+    } else if (val && typeof val === 'object') {
+      result.push(...flattenTokens(val, path));
+    } else {
+      result.push([path, val]);
+    }
+  }
+  return result;
+}
+
+// --- 타이포그래피 렌더링 ---
+function renderTypeScale(containerId) {
+  const container = document.getElementById(containerId);
+  const typo = TOKENS.typography || TOKENS.font || TOKENS.type || {};
+  const items = flattenTokens(typo, '');
+
+  if (items.length === 0) {
+    container.innerHTML = '<p style="color:#757575">typography 토큰 데이터 없음</p>';
+    return;
+  }
+
+  const sizeItems = items.filter(([, v]) => typeof v === 'string' && /\d/.test(v));
+  container.innerHTML = sizeItems.map(([name, value]) => {
+    const size = parseFloat(value) || 16;
+    return `<div class="type-scale-item">
+      <div class="type-scale-meta">
+        <strong>${name}</strong><br>${value}
+      </div>
+      <div class="type-scale-preview" style="font-size:${size}px">
+        가나다라마바사 The quick brown fox
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- 스페이싱 렌더링 ---
+function renderSpacing(containerId) {
+  const container = document.getElementById(containerId);
+  const spacing = TOKENS.spacing || TOKENS.space || {};
+  const items = flattenTokens(spacing, '');
+
+  if (items.length === 0) {
+    container.innerHTML = '<p style="color:#757575">spacing 토큰 데이터 없음</p>';
+    return;
+  }
+
+  container.innerHTML = items.map(([name, value]) => {
+    const px = parseFloat(value) || 0;
+    return `<div class="spacing-row">
+      <span class="spacing-label"><strong>${name}</strong></span>
+      <div class="spacing-box" style="width:${px}px;height:${px}px;min-width:4px;min-height:4px"></div>
+      <span class="spacing-value">${value}</span>
+    </div>`;
+  }).join('');
+}
+
+// --- 라디우스 렌더링 ---
+function renderRadius(containerId) {
+  const container = document.getElementById(containerId);
+  const radius = TOKENS.borderRadius || TOKENS.radius || TOKENS.radii || {};
+  const items = flattenTokens(radius, '');
+
+  if (items.length === 0) {
+    container.innerHTML = '<p style="color:#757575">borderRadius 토큰 데이터 없음</p>';
+    return;
+  }
+
+  container.innerHTML = items.map(([name, value]) => {
+    return `<div class="radius-item">
+      <div class="radius-box" style="border-radius:${value}"></div>
+      <div class="label">${name}</div>
+      <div class="value">${value}</div>
+    </div>`;
+  }).join('');
+}
+
+// --- 이징 렌더링 ---
+function renderEasing(containerId) {
+  const container = document.getElementById(containerId);
+  const motion = TOKENS.motion || TOKENS.easing || TOKENS.animation || {};
+  const items = flattenTokens(motion, '');
+
+  const defaults = items.length > 0 ? items : [
+    ['ease-out', 'cubic-bezier(0.0, 0, 0.2, 1)'],
+    ['ease-in', 'cubic-bezier(0.4, 0, 1, 1)'],
+    ['ease-in-out', 'cubic-bezier(0.4, 0, 0.2, 1)'],
+    ['linear', 'linear']
+  ];
+
+  container.innerHTML = defaults.map(([name, value], i) => {
+    const isEasing = typeof value === 'string' && (value.includes('cubic-bezier') || value === 'linear' || value.includes('ease'));
+    const isDuration = typeof value === 'string' && /\d+ms/.test(value);
+
+    if (!isEasing && !isDuration) return '';
+
+    const easing = isEasing ? value : 'ease-out';
+    const duration = isDuration ? value : '300ms';
+
+    return `<div class="easing-row">
+      <span class="easing-label"><strong>${name}</strong><br><small>${value}</small></span>
+      <div class="easing-track">
+        <div class="easing-ball" id="ball-${i}" style="animation-timing-function:${easing};--duration:${duration}"></div>
+      </div>
+      <button class="easing-btn" onclick="playEasing(${i})">재생</button>
+    </div>`;
+  }).join('');
+}
+
+function playEasing(index) {
+  const ball = document.getElementById('ball-' + index);
+  ball.classList.remove('animate');
+  ball.offsetHeight; // reflow
+  ball.classList.add('animate');
+}
+
+// --- 다크모드 토글 ---
+let darkMode = false;
+function toggleDarkMode() {
+  darkMode = !darkMode;
+  document.body.style.background = darkMode ? '#121212' : '';
+  document.body.style.color = darkMode ? '#e0e0e0' : '';
+  // 다크모드 토큰이 있으면 교체 렌더링
+  const darkTokens = TOKENS.dark || TOKENS.darkMode || {};
+  if (darkMode && Object.keys(darkTokens).length > 0) {
+    renderSwatches('primitive-colors', darkTokens.primitive || darkTokens.color?.primitive || {});
+    renderSwatches('semantic-colors', darkTokens.semantic || darkTokens.color?.semantic || {});
+  } else {
+    initColors();
+  }
+}
+
+// --- 초기화 ---
+function initColors() {
+  const color = TOKENS.color || TOKENS.colors || TOKENS;
+  renderSwatches('primitive-colors', color.primitive || color.base || color.global || {});
+  renderSwatches('semantic-colors', color.semantic || color.alias || {});
+  renderSwatches('component-colors', color.component || {});
+}
+
+initColors();
+renderTypeScale('type-scale');
+renderSpacing('spacing-scale');
+renderRadius('radius-scale');
+renderEasing('easing-demo');
+</script>
+
+</body>
+</html>

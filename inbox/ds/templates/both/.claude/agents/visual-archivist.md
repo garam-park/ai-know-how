@@ -51,3 +51,7 @@
 - 시각 품질: Storybook 렌더링이 디자인 의도와 일치하는가?
 - Handoff Spec: 개발자가 Spec만 보고 구현 가능한가?
 - (고객 미팅 시) Penpot 시안이 고객 요구를 충족하는가?
+
+## Gate 리뷰 HTML 생성
+
+산출물 완성 후 `bash scripts/tools/gate-review-gen.sh 3` 을 실행하여 컴포넌트 상태 매트릭스, Props API, 접근성 결과 등의 시각적 리뷰 HTML을 생성한다.

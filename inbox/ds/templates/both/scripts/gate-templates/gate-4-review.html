@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate 4: Ship Review — {{PROJECT_NAME}}</title>
+<style>{{SHARED_CSS}}</style>
+</head>
+<body>
+
+<header class="review-header">
+  <h1>Gate 4: Ship Review</h1>
+  <p>구현 · 문서화 · 배포 준비 검토</p>
+  <div class="review-meta">
+    <span class="badge badge-attempt">Attempt {{ATTEMPT}} / 3</span>
+    <span class="badge badge-date">{{DATE}}</span>
+    <span>프로젝트: {{PROJECT_NAME}}</span>
+  </div>
+  <div class="version-nav">{{VERSION_NAV}}</div>
+</header>
+
+<!-- 검증 항목 -->
+<section class="review-section">
+  <h2>Gate 4 검증 항목</h2>
+  <table class="review-table">
+    <thead><tr><th>항목</th><th>기준</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>단위 테스트</td><td>100% 통과</td><td>—</td></tr>
+      <tr><td>시각 회귀 테스트</td><td>통과 또는 변경 승인</td><td>—</td></tr>
+      <tr><td>SemVer 준수</td><td>Breaking Change 시 Major bump</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 테스트 결과 -->
+<section class="review-section">
+  <h2>테스트 결과</h2>
+  <div id="test-cards" class="traffic-cards"></div>
+</section>
+
+<!-- 번들 사이즈 -->
+<section class="review-section">
+  <h2>번들 사이즈</h2>
+  <div id="bundle-chart" class="bar-chart"></div>
+</section>
+
+<!-- 마이그레이션 매핑 -->
+<section class="review-section">
+  <h2>Migration Mapping</h2>
+  <div id="migration-table"></div>
+</section>
+
+<!-- Changelog -->
+<section class="review-section">
+  <h2>Changelog</h2>
+  <div id="changelog"></div>
+</section>
+
+<script>
+const DATA = {{GATE_DATA_JSON}};
+</script>
+
+<script>
+// 테스트 카드
+function renderTestCards() {
+  const el = document.getElementById('test-cards');
+  const tests = DATA.tests || {};
+  const cards = [
+    { label: '단위 테스트 통과', count: tests.passed || 0, cls: (tests.failed || 0) === 0 ? 'traffic-green' : 'traffic-red' },
+    { label: '단위 테스트 실패', count: tests.failed || 0, cls: (tests.failed || 0) === 0 ? 'traffic-green' : 'traffic-red' },
+    { label: '시각 회귀 변경', count: tests.visualChanges || 0, cls: (tests.visualChanges || 0) === 0 ? 'traffic-green' : 'traffic-yellow' },
+    { label: '테스트 커버리지', count: (tests.coverage || 0) + '%', cls: (tests.coverage || 0) >= 80 ? 'traffic-green' : 'traffic-yellow' },
+  ];
+  el.innerHTML = cards.map(c =>
+    `<div class="traffic-card ${c.cls}"><div class="count">${c.count}</div><div class="label">${c.label}</div></div>`
+  ).join('');
+}
+
+// 번들 사이즈
+function renderBundle() {
+  const el = document.getElementById('bundle-chart');
+  const bundles = DATA.bundles || [];
+  if (!bundles.length) { el.innerHTML = '<p style="color:#757575">번들 데이터 없음</p>'; return; }
+
+  const maxVal = Math.max(...bundles.map(b => b.size), 1);
+  el.innerHTML = bundles.map(b => {
+    const pct = (b.size / maxVal * 100).toFixed(0);
+    return `<div class="bar-row">
+      <span class="bar-label">${b.name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%">${b.size}KB</div></div>
+    </div>`;
+  }).join('');
+}
+
+// 마이그레이션
+function renderMigration() {
+  const el = document.getElementById('migration-table');
+  const items = DATA.migration || [];
+  if (!items.length) { el.innerHTML = '<p style="color:#757575">마이그레이션 데이터 없음</p>'; return; }
+
+  let html = '<table class="review-table"><thead><tr><th>이전</th><th></th><th>이후</th><th>Breaking</th></tr></thead><tbody>';
+  items.forEach(m => {
+    const breaking = m.breaking ? '<span style="color:#c62828;font-weight:700">YES</span>' : 'No';
+    html += `<tr><td><code>${m.old}</code></td><td>→</td><td><code>${m.new}</code></td><td>${breaking}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// Changelog
+function renderChangelog() {
+  const el = document.getElementById('changelog');
+  const entries = DATA.changelog || [];
+  if (!entries.length) { el.innerHTML = '<p style="color:#757575">Changelog 데이터 없음</p>'; return; }
+
+  el.innerHTML = entries.map(e =>
+    `<div style="margin-bottom:1rem;padding-left:1rem;border-left:3px solid var(--review-primary)">
+      <strong>${e.version || ''}</strong> <small style="color:#757575">${e.date || ''}</small>
+      <ul style="margin:0.25rem 0 0 1rem">${(e.changes || []).map(c => `<li>${c}</li>`).join('')}</ul>
+    </div>`
+  ).join('');
+}
+
+renderTestCards();
+renderBundle();
+renderMigration();
+renderChangelog();
+</script>
+</body>
+</html>

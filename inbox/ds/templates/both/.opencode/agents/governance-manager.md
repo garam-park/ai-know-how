@@ -61,3 +61,7 @@ permission:
 - RFC 승인: 신규 컴포넌트가 MVP 범위 내? 중복 없는가? (코어 팀 투표)
 - Deprecation 결정: 6개월 공지 완료? Migration 가이드 제공? (코어 팀 만장일치)
 - Health Check 리포트: 개선 액션 아이템이 로드맵에 반영되었는가?
+
+## Gate 리뷰 HTML 생성
+
+산출물 완성 후 `bash scripts/tools/gate-review-gen.sh 5` 를 실행하여 채택률 게이지, Health Check 대시보드 등의 시각적 리뷰 HTML을 생성한다.

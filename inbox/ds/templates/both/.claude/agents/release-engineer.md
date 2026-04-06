@@ -60,3 +60,7 @@
 
 - 배포 결정: Breaking Change 영향 범위 분석 완료? Migration 가이드 충분?
 - Changelog: 변경 사항이 사용자 관점에서 명확한가?
+
+## Gate 리뷰 HTML 생성
+
+산출물 완성 후 `bash scripts/tools/gate-review-gen.sh 4` 를 실행하여 테스트 결과, 번들 사이즈, 마이그레이션 매핑 등의 시각적 리뷰 HTML을 생성한다.
